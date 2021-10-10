@@ -1,0 +1,92 @@
+services:
+  # frontend:
+  #   image: alfred-frontend
+  #   ports:
+  #     # - "443:8043"
+  #     - "80:8043"
+  #   networks:
+  #     - front-tier
+  #     - back-tier
+  #   # configs:
+  #   #   - httpd-config
+  #   # secrets:
+  #   #   - server-certificate
+
+  # backend:
+  #   image: alfred-backend
+  #   networks:
+  #     - back-tier
+  #     - database-tier
+  #     - controller-tier
+
+  redis:
+    image: docker.io/bitnami/redis:6.2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    networks:
+      - database-tier
+    volumes:
+      - ./database/redis-data:/bitnami/redis/data
+
+  mongodb:
+    image: mongo:5
+    restart: always
+    ports:
+      - "27017:27017"
+    # env_file:
+    #   - .env
+    environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+    #   - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    #   - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=commands
+    networks:
+      - database-tier
+    volumes:
+      - ./database/mongodb-data/mongod.conf:/etc/mongod.conf
+      - ./database/mongodb-data/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./database/mongodb-data/data/db/:/data/db/
+      - ./database/mongodb-data/data/log/:/var/log/mongodb/
+
+  redis-listener:
+    image: alfred-redis-listener
+    build: database/redis-listener
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=root
+      - MONGODB_DATABASE=commands
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    networks:
+      - database-tier
+    volumes:
+      - ./database/redis-data:/etc/data:rw
+
+  # controller:
+  #   image: alfred-controller
+
+# configs:
+#   httpd-config:
+#     external: true
+
+# secrets:
+#   server-certificate:
+#     external: true
+
+networks:
+  front-tier: {}
+  back-tier: {}
+  database-tier: {}
+  controller-tier: {}
