@@ -1,23 +1,16 @@
 services:
-  # frontend:
-  #   image: alfred-frontend:v1
-  #   ports:
-  #     # - "443:8043"
-  #     - "80:8043"
-  #   networks:
-  #     - front-tier
-  #     - back-tier
-  #   # configs:
-  #   #   - httpd-config
-  #   # secrets:
-  #   #   - server-certificate
-
-  # backend:
-  #   image: alfred-backend:v1
-  #   networks:
-  #     - back-tier
-  #     - database-tier
-  #     - controller-tier
+  backend:
+    image: alfred-backend:dev
+    ports:
+      - 80:8000
+    networks:
+      - server-tier
+      - database-tier
+      - controller-tier
+    # configs:
+    #   - httpd-config
+    # secrets:
+    #   - server-certificate
 
   # controller:
   #   image: alfred-controller:v1
@@ -27,8 +20,8 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
-    ports:
-      - '6379:6379'
+    # ports:
+    #   - '6379:6379'
     networks:
       - database-tier
     volumes:
@@ -57,7 +50,7 @@ services:
       - ./database/mongodb-data/data/log/:/var/log/mongodb/
 
   redis-listener:
-    image: alfred-redis-listener:v1
+    image: alfred-redis-listener:dev
     depends_on:
       - mongodb
       - redis
@@ -85,7 +78,6 @@ services:
 #     external: true
 
 networks:
-  front-tier: {}
-  back-tier: {}
-  database-tier: {}
-  controller-tier: {}
+  server-tier: {} # server network
+  database-tier: {} # communication between databases
+  controller-tier: {} # network with controller

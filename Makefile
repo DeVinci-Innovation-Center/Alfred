@@ -15,7 +15,7 @@ run: create-volumes
 stop:
 	cd src && docker-compose down
 
-show_logs:
+show-logs:
 	cd src && docker-compose logs -f
 
 up: run
@@ -25,13 +25,13 @@ down: stop
 build-all-images: build-frontend build-backend build-controller build-redis-listener
 
 build-frontend:
-	cd ${FRONTEND_PATH} && docker build -t ${FRONTEND_IM_NAME}:${FRONTEND_IM_TAG} .
+	cd ${FRONTEND_PATH} && docker build -t ${FRONTEND_IM_NAME}:${FRONTEND_RELEASE_TAG} .
 
 build-backend:
-	cd ${BACKEND_PATH} && docker build -t ${BACKEND_IM_NAME}:${BACKEND_IM_TAG} .
+	cd ${BACKEND_PATH} && docker build -t ${BACKEND_IM_NAME}:${BACKEND_RELEASE_TAG} .
 
 build-controller:
-	cd ${CONTROLLER_PATH} && docker build -t ${CONTROLLER_IM_NAME}:${CONTROLLER_IM_TAG} .
+	cd ${CONTROLLER_PATH} && docker build -t ${CONTROLLER_IM_NAME}:${CONTROLLER_RELEASE_TAG} .
 
 build-redis-listener:
-	cd ${REDIS_LISTENER_PATH} && docker build -t ${REDIS_LISTENER_IM_NAME}:${REDIS_LISTENER_IM_TAG} .
+	cd ${REDIS_LISTENER_PATH} && docker build -t ${REDIS_LISTENER_IM_NAME}:${REDIS_RELEASE_TAG} .
