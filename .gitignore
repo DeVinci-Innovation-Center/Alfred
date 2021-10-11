@@ -1,3 +1,4 @@
 mongodb-data
 redis-data
 .venv
+.env
