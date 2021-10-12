@@ -1,5 +1,8 @@
 include .env
 
+generate-example-dotenv:
+	sed 's/=.*/=/' .env > .env.example
+
 create-volumes:
 	mkdir -p src/database/redis-data src/database/mongodb-data
 	chmod 777 src/database/mongodb-data
@@ -23,15 +26,7 @@ up: run
 down: stop
 
 build-all-images: build-frontend build-backend build-controller build-redis-listener
-
-build-frontend:
-	cd ${FRONTEND_PATH} && docker build -t ${FRONTEND_IM_NAME}:${FRONTEND_RELEASE_TAG} .
-
-build-backend:
-	cd ${BACKEND_PATH} && docker build -t ${BACKEND_IM_NAME}:${BACKEND_RELEASE_TAG} .
-
-build-controller:
-	cd ${CONTROLLER_PATH} && docker build -t ${CONTROLLER_IM_NAME}:${CONTROLLER_RELEASE_TAG} .
-
-build-redis-listener:
-	cd ${REDIS_LISTENER_PATH} && docker build -t ${REDIS_LISTENER_IM_NAME}:${REDIS_RELEASE_TAG} .
+	cd backend && make build
+	cd controller && make build
+	cd database/redis-listener && make build
+	cd frontend && make build

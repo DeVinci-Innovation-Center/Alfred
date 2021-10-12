@@ -1,8 +1,15 @@
 services:
+  frontenv:
+    image: alfred-dashboard:dev
+    ports:
+      - 80:3000
+    networks:
+      - server-tier
+
   backend:
     image: alfred-backend:dev
     ports:
-      - 80:8000
+      - 8000:8000
     networks:
       - server-tier
       - database-tier
@@ -30,8 +37,8 @@ services:
   mongodb:
     image: mongo:5
     restart: always
-    ports:
-      - "27017:27017"
+    # ports:
+    #   - "27017:27017"
     # env_file:
     #   - .env
     environment:

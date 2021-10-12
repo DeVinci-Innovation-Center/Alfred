@@ -1,0 +1,16 @@
+
+
+:root {
+  --highlight: rgb(31, 50, 71); 
+  --highlight-transp: rgba(31, 50, 71, 0.5); 
+  --background: rgb(243, 244, 246); 
+  --background-transp: rgba(243, 244, 246, 0.9); 
+  --text: black;
+  --link:rgb(0, 113, 241);
+
+  --title-size: 66px;
+}
+
+body {
+  background: var(--background);
+}
