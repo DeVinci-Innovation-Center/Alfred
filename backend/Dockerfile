@@ -1,5 +1,9 @@
 FROM python:3.8
 
+RUN apt update \
+    && apt install -y -qq --no-install-recommends \
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6
+
 # create a non-root user
 RUN useradd -m --no-log-init --system --uid 1000 appuser -g sudo \
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers

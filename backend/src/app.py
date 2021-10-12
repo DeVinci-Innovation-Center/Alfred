@@ -2,6 +2,9 @@ import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from src import routers
+from src.utils import ContextManager
+
 
 app = FastAPI(debug=True)
 app.add_middleware(
@@ -16,6 +19,8 @@ sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 sio_asgi_app = socketio.ASGIApp(sio, app, socketio_path="/socket.io")
 
 app.mount("/socket.io", sio_asgi_app)
+
+app.include_router(routers.router)
 
 
 @sio.on("disconnect")

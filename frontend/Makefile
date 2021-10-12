@@ -1,7 +1,5 @@
-# IM_NAME=alfred-dashboard
-# IM_TAG=dev
-
-include ../.env
+IM_NAME=alfred-frontend
+IM_TAG=dev
 
 build:
 	docker build -t ${IM_NAME}:${IM_TAG} .

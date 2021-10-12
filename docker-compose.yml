@@ -1,6 +1,7 @@
 services:
-  frontenv:
-    image: alfred-dashboard:dev
+
+  frontend:
+    image: alfred-frontend:dev
     ports:
       - 80:3000
     networks:
