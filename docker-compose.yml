@@ -1,0 +1,90 @@
+services:
+  frontenv:
+    image: alfred-dashboard:dev
+    ports:
+      - 80:3000
+    networks:
+      - server-tier
+
+  backend:
+    image: alfred-backend:dev
+    ports:
+      - 8000:8000
+    networks:
+      - server-tier
+      - database-tier
+      - controller-tier
+    # configs:
+    #   - httpd-config
+    # secrets:
+    #   - server-certificate
+
+  # controller:
+  #   image: alfred-controller:v1
+
+  redis:
+    image: docker.io/bitnami/redis:6.2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    # ports:
+    #   - '6379:6379'
+    networks:
+      - database-tier
+    volumes:
+      - ./database/redis-data:/bitnami/redis/data
+
+  mongodb:
+    image: mongo:5
+    restart: always
+    # ports:
+    #   - "27017:27017"
+    # env_file:
+    #   - .env
+    environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+    #   - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    #   - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=commands
+    networks:
+      - database-tier
+    volumes:
+      - ./database/mongodb-data/mongod.conf:/etc/mongod.conf
+      - ./database/mongodb-data/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./database/mongodb-data/data/db/:/data/db/
+      - ./database/mongodb-data/data/log/:/var/log/mongodb/
+
+  redis-listener:
+    image: alfred-redis-listener:dev
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=root
+      - MONGODB_DATABASE=commands
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    networks:
+      - database-tier
+    volumes:
+      - ./database/redis-data:/etc/data:rw
+
+# configs:
+#   httpd-config:
+#     external: true
+
+# secrets:
+#   server-certificate:
+#     external: true
+
+networks:
+  server-tier: {} # server network
+  database-tier: {} # communication between databases
+  controller-tier: {} # network with controller
