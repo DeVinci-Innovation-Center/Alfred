@@ -8,13 +8,21 @@ services:
       - server-tier
 
   backend:
+    privileged: true
     image: alfred-backend:dev
+    build: ./backend
+    environment:
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
     ports:
       - 8000:8000
     networks:
       - server-tier
       - database-tier
       - controller-tier
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/video0:/dev/video0
     # configs:
     #   - httpd-config
     # secrets:
