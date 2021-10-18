@@ -19,4 +19,4 @@ RUN pip3 install --user -r requirements.txt
 COPY src /home/appuser/app/src
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["uvicorn", "src.app:app", "--host=0.0.0.0"]
+CMD ["uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]

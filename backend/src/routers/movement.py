@@ -32,7 +32,7 @@ async def open_webcam():
 
     try:
         app = App(
-            use_sockets=True,
+            use_sockets=False,
             socket=backend_sio_server,
             target=utils.open_webcam,
             f_args=("/dev/video0",)

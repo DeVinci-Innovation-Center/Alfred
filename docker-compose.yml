@@ -2,6 +2,7 @@ services:
 
   frontend:
     image: alfred-frontend:dev
+    build: ./frontend
     ports:
       - 80:3000
     networks:
@@ -11,7 +12,9 @@ services:
     privileged: true
     image: alfred-backend:dev
     build: ./backend
+    restart: always
     # command: "tail -f /dev/null"
+    # command: "uvicorn src.app:app --host=0.0.0.0"
     # command: "uvicorn src.app:app --reload --host=0.0.0.0"
     environment:
       - DISPLAY=$DISPLAY

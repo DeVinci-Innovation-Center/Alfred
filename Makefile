@@ -25,7 +25,13 @@ up: run
 
 down: stop
 
-build-all-images:
+build-all-images: build-backend build-database build-frontend
+
+build-backend:
 	cd backend && make build
+
+build-database:
 	cd database/redis-listener && make build
+
+build-frontend:
 	cd frontend && make build

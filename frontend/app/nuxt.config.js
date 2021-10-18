@@ -1,6 +1,6 @@
 export default {
   env: {
-    socketTarget: 'http://172.21.72.107:8000',
+    socketTarget: 'http://172.21.72.106:8000',
     socketEventName: 'dashboard-newsletter'
   },
   server: {

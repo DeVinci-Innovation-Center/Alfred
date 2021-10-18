@@ -26,15 +26,17 @@ class App(multiprocessing.Process):
 
     def run(self):
         try:
+            print("starting")
             self._target(*self._f_args, **self._f_kwargs)
+            print("finished")
             if self.use_sockets:
                 self.socket.emit("app_watcher", "done")
 
         except Exception:  # pylint: disable = broad-except
             tb = traceback.format_exc()
-        if self.use_sockets:
-            self.socket.emit("app_watcher", {"exception": tb})
-        # raise e  # You can still rise this exception if you need to
+            if self.use_sockets:
+                self.socket.emit("app_watcher", {"exception": tb})
+            # raise e  # You can still rise this exception if you need to
 
 
 class AppRunningException(Exception):
@@ -105,7 +107,6 @@ class ContextManager:
             raise AppRunningException()
 
         self.current_app = app  # type: ignore
-        self.current_app.daemon = True
 
         self.current_app.start()
         self.is_app_running = True
