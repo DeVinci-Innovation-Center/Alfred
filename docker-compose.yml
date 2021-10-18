@@ -93,6 +93,7 @@ services:
 
   redis-listener:
     image: alfred-redis-listener:dev
+    build: ./database/redis-listener
     depends_on:
       - mongodb
       - redis

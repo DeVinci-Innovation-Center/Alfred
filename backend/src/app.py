@@ -1,9 +1,15 @@
+from typing import Optional
 import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src import routers
 from src.socketio_server import sio
+import src.env_getset
+
+DUMMY_VAR: Optional[str]
+
+src.env_getset.set_envs()
 
 app = FastAPI(debug=True)
 app.add_middleware(
