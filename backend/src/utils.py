@@ -1,5 +1,40 @@
 import multiprocessing
+import traceback
 from typing import Callable
+
+import socketio
+
+
+class App(multiprocessing.Process):
+    """App to run as sub-process, which doesn't exit program when it encounters an exception."""
+
+    def __init__(
+        self,
+        *args,
+        use_sockets: bool = False,
+        socket: socketio.Server = None,
+        f_args: tuple = None,
+        f_kwargs: dict = None,
+        **kwargs,
+    ):
+
+        multiprocessing.Process.__init__(self, *args, **kwargs)
+        self._f_args = f_args if f_args is not None else []
+        self._f_kwargs = f_kwargs if f_kwargs is not None else {}
+        self.use_sockets = use_sockets
+        self.socket = socket
+
+    def run(self):
+        try:
+            self._target(*self._f_args, **self._f_kwargs)
+            if self.use_sockets:
+                self.socket.emit("app_watcher", "done")
+
+        except Exception:  # pylint: disable = broad-except
+            tb = traceback.format_exc()
+        if self.use_sockets:
+            self.socket.emit("app_watcher", {"exception": tb})
+        # raise e  # You can still rise this exception if you need to
 
 
 class AppRunningException(Exception):
@@ -41,10 +76,7 @@ class ContextManager:
     _instance = None
 
     is_app_running: bool
-    current_process: multiprocessing.Process
-    current_app: Callable
-    current_app_args: tuple
-    current_app_kwargs: dict
+    current_app: App
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -54,43 +86,38 @@ class ContextManager:
 
     def __init__(self):
         self.is_app_running = False
-        self.current_process = None
+        self.current_app = None
 
     def __bool__(self):
         """Returns True if a process is running, else False."""
 
-        if self.current_process is None:
+        if self.current_app is None:
             return False
 
-        self.current_process.join(0)
-        thread_status = self.current_process.is_alive()
+        self.current_app.join(0)
+        thread_status = self.current_app.is_alive()
         return thread_status
 
-    def run_app(self, app: Callable, *args, **kwargs):
+    def run_app(self, app: App):
         """Spawn a thread running provided app."""
 
         if self.__bool__():
             raise AppRunningException()
 
         self.current_app = app  # type: ignore
-        self.current_app_args = args
-        self.current_app_kwargs = kwargs
+        self.current_app.daemon = True
 
-        self.current_process = multiprocessing.Process(
-            target=app, args=args, kwargs=kwargs
-        )
-
-        self.current_process.start()
+        self.current_app.start()
         self.is_app_running = True
 
     def stop_app(self):
         """Stop current running app."""
 
-        if self.__bool__():
+        if not self.__bool__():
             raise NoAppRunningException()
 
-        self.current_process.terminate()
-        self.current_process = None
+        self.current_app.terminate()
+        self.current_app = None
         self.is_app_running = False
 
 

@@ -1,9 +1,8 @@
-import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src import routers
-from src.utils import ContextManager
+from src.socketio_server import sio, sio_asgi_app
 
 
 app = FastAPI(debug=True)
@@ -14,9 +13,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-sio_asgi_app = socketio.ASGIApp(sio, app, socketio_path="/socket.io")
 
 app.mount("/socket.io", sio_asgi_app)
 
@@ -35,6 +31,10 @@ def test_connect(*_):
 
 @sio.on("connect_error")
 def print_err(*args):
+    print(args)
+
+@sio.on("app_watcher")
+def get_app_event(*args):
     print(args)
 
 

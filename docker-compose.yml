@@ -11,6 +11,8 @@ services:
     privileged: true
     image: alfred-backend:dev
     build: ./backend
+    # command: "tail -f /dev/null"
+    # command: "uvicorn src.app:app --reload --host=0.0.0.0"
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
@@ -23,6 +25,8 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /dev/video0:/dev/video0
+
+      # - ./backend/src:/home/appuser/app/src
     # configs:
     #   - httpd-config
     # secrets:
