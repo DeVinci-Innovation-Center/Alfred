@@ -6,8 +6,8 @@ import numpy as np
 import pybullet as p
 import pybullet_data as pd
 
-from ..command import Command
-from ..controller import Controller
+from src.command import Command
+from src.controller import Controller # type: ignore
 
 
 class XArmSim(threading.Thread):
@@ -21,7 +21,7 @@ class XArmSim(threading.Thread):
         controller: Controller,
         time_step: float = 1.0 / 60.0
     ):
-        super().__init__()
+        super().__init__(daemon=True)
 
         p.connect(p.GUI)
         p.setAdditionalSearchPath(pd.getDataPath())

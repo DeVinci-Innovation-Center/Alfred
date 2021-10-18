@@ -12,11 +12,10 @@ ENV PATH=/home/appuser/.local/bin:${PATH}
 RUN mkdir /home/appuser/app
 WORKDIR /home/appuser/app
 
-# setup backend
 RUN python3 -m pip install --upgrade pip
 COPY requirements.txt requirements.txt
 RUN pip3 install --user -r requirements.txt
 COPY src /home/appuser/app/src
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["python3", "src/main.py"]
+CMD ["python3", "-m", "src"]

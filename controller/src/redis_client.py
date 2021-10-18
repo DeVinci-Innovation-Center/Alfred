@@ -2,8 +2,6 @@ from typing import List, Union
 
 import redis  # type: ignore
 
-from .event import post_event
-
 
 class RedisClient:
     """Client class for the controller Redis interface."""
@@ -19,11 +17,11 @@ class RedisClient:
         self.port = port
         self.password = password
 
-        self.redis_instance = self.connect_redis()
+        self.redis_instance = self._connect_redis()
 
         self.subscribers = []
 
-    def connect_redis(self) -> redis.Redis:
+    def _connect_redis(self) -> redis.Redis:
         """Connect to Redis database"""
 
         r = redis.Redis(host=self.host, port=self.port, password=self.password)
@@ -50,16 +48,5 @@ class RedisClient:
 
         if message["data"] == b"stop":
             raise Exception("Stop thread.")
-
-        return message
-
-    @classmethod
-    def trigger_event(cls, message: dict) -> dict:
-        """Message handler that triggers events with data.
-        Message format must be event_type: data (note space between : and data)."""
-
-        event_type, data = message["data"].split(": ")
-
-        post_event(event_type, data)
 
         return message

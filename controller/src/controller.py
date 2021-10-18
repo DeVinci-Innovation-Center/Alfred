@@ -7,8 +7,8 @@ import numpy as np
 import roboticstoolbox as rtb
 from roboticstoolbox.tools.trajectory import Trajectory
 
-from .command import Command, Position
-from .real.robot_real import XArmReal
+from src.command import Command, Position
+from src.real.robot_real import XArmReal
 
 # * -----------------------------------------------------------------
 # * GLOBAL VARIABLES
