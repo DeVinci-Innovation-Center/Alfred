@@ -2,3 +2,4 @@ fastapi==0.70.0
 uvicorn[standard]==0.15.0
 python-socketio==5.4.0
 opencv-python==4.5.3.56
+# git+https://github.com/DVIC-ALFRED/xarm-hand-control.git@v1.1

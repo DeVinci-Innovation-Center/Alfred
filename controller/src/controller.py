@@ -1,13 +1,14 @@
+# type: ignore[no-redef]
 import queue
+from functools import singledispatchmethod
 from typing import List, Optional
 
 import numpy as np
 import roboticstoolbox as rtb
 from roboticstoolbox.tools.trajectory import Trajectory
 
+from .command import Command, Position
 from .real.robot_real import XArmReal
-from .command import Position, Command
-from .event import subscribe, post_event
 
 # * -----------------------------------------------------------------
 # * GLOBAL VARIABLES
@@ -73,11 +74,10 @@ class Controller:
 
         self.decomposed_command_queue = queue.Queue()
 
-        subscribe("new_command_str", decompose_commands)
-        subscribe("new_command", self.decompose_command)
-
+    @singledispatchmethod
     def decompose_command(self, command: Command):
         """Create intermediate points from a Command to generate a path."""
+
         # print(command)
 
         goal_xyzrpy = Position(*command.xyzrpy)
@@ -108,13 +108,12 @@ class Controller:
 
         self.future_cartesian_pos = command
 
+    @decompose_command.register
+    def _(self, command: str):
+        """Create intermediate points from a string representing a Command to generate a path."""
 
-def decompose_commands(command_str: str):
-    """Loop for getting commands and decomposing them."""
-
-    new_command = Command.from_string(command_str)
-
-    post_event("decompose_new_command", new_command)
+        new_command = Command.from_string(command)
+        self.decompose_command(new_command)
 
 
 def compute_trajectory(

@@ -19,5 +19,4 @@ RUN pip3 install --user -r requirements.txt
 COPY src /home/appuser/app/src
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
-# reload flag required because of python multiprocessing for some reason
+CMD ["python3", "src/main.py"]
