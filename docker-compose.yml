@@ -20,9 +20,16 @@ services:
       - PYTHONUNBUFFERED=1
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
+
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
+
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=root
+      - MONGODB_DATABASE=commands
     ports:
       - 8000:8000
     networks:
@@ -47,10 +54,12 @@ services:
       - PYTHONUNBUFFERED=1
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
+
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_CHANNELS=commands
+
       - MOVE_ARM=False
       - ARM_IP=
     networks:
