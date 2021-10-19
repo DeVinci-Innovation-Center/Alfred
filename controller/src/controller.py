@@ -2,6 +2,7 @@
 import queue
 from functools import singledispatchmethod
 from typing import List, Optional
+from operator import add
 
 import numpy as np
 import roboticstoolbox as rtb
@@ -80,9 +81,13 @@ class Controller:
 
         # print(command)
 
-        goal_xyzrpy = Position(*command.xyzrpy)
-        # goal_xyzrpy = list(map(lambda x: round(x, 4), goal_xyzrpy))
-        # print(goal_xyzrpy)
+        if command.is_relative:
+            non_relative_xyzrpy = [self.future_cartesian_pos[i] + command.xyzrpy[i] for i in range(6)]
+            goal_xyzrpy = Position(*non_relative_xyzrpy)
+        else:
+            goal_xyzrpy = Position(*command.xyzrpy)
+
+        print(goal_xyzrpy)
 
         if command.is_cartesian:
             traj_type = "lspb"
@@ -106,7 +111,7 @@ class Controller:
         for point in points:
             self.decomposed_command_queue.put(point)
 
-        self.future_cartesian_pos = command
+        self.future_cartesian_pos = goal_xyzrpy
 
     @decompose_command.register
     def _(self, command: str):

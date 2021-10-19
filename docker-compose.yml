@@ -17,8 +17,12 @@ services:
     # command: "uvicorn src.app:app --log-level=trace --host=0.0.0.0"
     # command: "uvicorn src.app:app --reload --host=0.0.0.0"
     environment:
+      - PYTHONUNBUFFERED=1
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
     ports:
       - 8000:8000
     networks:
@@ -29,7 +33,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /dev/video0:/dev/video0
 
-      # - ./backend/src:/home/appuser/app/src
+      - ./backend/src:/home/appuser/app/src
     # configs:
     #   - httpd-config
     # secrets:
@@ -40,12 +44,13 @@ services:
     image: alfred-controller:dev
     build: ./controller
     environment:
+      - PYTHONUNBUFFERED=1
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
-      - REDIS_CHANNELS=commands,
+      - REDIS_CHANNELS=commands
       - MOVE_ARM=False
       - ARM_IP=
     networks:
@@ -72,8 +77,8 @@ services:
   mongodb:
     image: mongo:5
     restart: always
-    # ports:
-    #   - "27017:27017"
+    ports:
+      - "27017:27017"
     # env_file:
     #   - .env
     environment:

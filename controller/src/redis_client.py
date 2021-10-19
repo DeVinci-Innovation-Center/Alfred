@@ -6,6 +6,8 @@ import redis  # type: ignore
 class RedisClient:
     """Client class for the controller Redis interface."""
 
+
+
     host: str
     port: int
     password: Union[str, None]

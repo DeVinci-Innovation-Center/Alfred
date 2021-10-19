@@ -1,3 +1,4 @@
+import json
 import os
 import time
 import traceback
@@ -8,6 +9,7 @@ import src.sim.robot_sim as xarm_sim
 from src.controller import Controller  # type: ignore
 from src.real.robot_real import XArmReal
 from src.redis_client import RedisClient
+from src.command import Command
 
 REDIS_HOST = os.getenv("REDIS_HOST", "0.0.0.0")
 REDIS_PORT = os.getenv("REDIS_PORT")
@@ -41,12 +43,24 @@ def main():
         print(traceback.format_exc())
         return
 
-    for channel in REDIS_CHANNELS.split(","):
-        rc.add_subscriber({channel: RedisClient.print_message})
+    channels = REDIS_CHANNELS.split(",")
+    rp = rc.redis_instance.pubsub()
+    rp.subscribe(*channels)
 
     while True:
-        time.sleep(10)
+        message = rp.get_message(ignore_subscribe_messages=True)
+        if message:
+            try:
+                decoded_msg = message["data"].decode("utf-8")
+                json_msg = json.loads(decoded_msg)
+                command = Command.from_string(json_msg["command"])
+                # print(f"{command=}")
+                controller.decompose_command(command)
 
+            except Exception:
+                print(traceback.format_exc())
+            # do something with the message
+        time.sleep(0.001)  # be nice to the system :)
 
 if __name__ == "__main__":
     main()

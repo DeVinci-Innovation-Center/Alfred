@@ -1,15 +1,17 @@
-from typing import Optional
+import src.prelaunch  # pylint: disable=unused-import
+
+src.prelaunch.prelaunch()
+
+from typing import Optional  # pylint: disable=wrong-import-order
+
 import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src import routers
-from src.socketio_server import sio
-import src.env_getset
+from src.global_instances import sio, rc
 
 DUMMY_VAR: Optional[str]
-
-src.env_getset.set_envs()
 
 app = FastAPI(debug=True)
 app.add_middleware(
@@ -24,6 +26,7 @@ sio_asgi_app = socketio.ASGIApp(sio, app, socketio_path="/socket.io/")
 
 app.mount("/socket.io/", sio_asgi_app)
 
+app.include_router(routers.router)
 app.include_router(routers.router)
 
 
@@ -45,13 +48,3 @@ def print_err(*args):
 @sio.on("app_watcher")
 def get_app_event(*args):
     print(args)
-
-
-@app.get("/")
-async def read_index():
-    return {"message": "Welcome to ALFRED's dashboard."}
-
-
-@app.get("/hello")
-async def hello_world():
-    return {"message": "Hello World"}
