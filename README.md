@@ -1,5 +1,6 @@
 # A.L.F.R.E.D. : an AI-augmented polyvalent robotic assistant
 
+
 ![](https://lh3.googleusercontent.com/JEOWY7b3WMAHVkF5KZLIHeB23qiwjvKzhWhWC9J5-x-8ZxOtSWnrIjf0i0tEbXrPixt26_uIJCs-0_4TrWsS=w1920-h592-rw)
 
 A.L.F.R.E.D. is a cobotics platform. It aims to maximize the interaction between man and machine, and to make it as seamless as possible. Its main purpose is to be used in innovation environments, such as FabLabs or research labs.
@@ -23,12 +24,35 @@ Run
 ```bash
 make up
 ```
-to start the frontend, backend, controller and database processes. Frontend is available at http://<your_local_ip> (ex: http://172.21.72.106), and backend at http://<your_local_ip>:8000 (ex: http://172.21.72.106:8000).
+
+to start the project. Web page is available at http://{host ip}, and backend at http://{host_ip}:8000.
 
 ## Demos
 
-Since there is no visual interface yet, the only way to access the demos is to go to the backend's API docs page at http://<your_local_ip>:8000/docs and do a GET request to the demo you want.
+- Hand control
 
-Currently available demos are: 
+## Requirements
 
-- Hand control at /movement/hand_control
+- docker
+
+- docker-compose
+
+## Install steps for NVIDIA
+
+See (here)[https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html] for a more complete guide.
+
+```bash
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt update
+sudo apt install nvidia-docker2
+sudo systemctl restart docker
+```
+
+Test install with:
+
+```bash
+docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
+```

@@ -6,15 +6,13 @@ import redis  # type: ignore
 class RedisClient:
     """Client class for the controller Redis interface."""
 
-
-
     host: str
     port: int
     password: Union[str, None]
     redis_instance: redis.Redis
     subscribers: List[redis.client.PubSub]
 
-    def __init__(self, host: str, port: int, password: str = None):
+    def __init__(self, host: str = "0.0.0.0", port: int = 6379, password: str = None):
         self.host = host
         self.port = port
         self.password = password

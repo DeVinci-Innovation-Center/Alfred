@@ -1,0 +1,33 @@
+ARG CUDA_VERSION=11.0-base
+FROM nvidia/cudagl:${CUDA_VERSION}
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y -qq --no-install-recommends \
+    # required for opencv
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
+    # required for python
+    python3.8 python3-pip python3-dev git gcc \
+    # required for webcam ?
+    v4l-utils ffmpeg \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# create a non-root user
+RUN useradd -m --no-log-init --system --uid 1000 appuser -g sudo \
+    && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+    adduser appuser video && \
+    usermod -aG video appuser
+USER appuser
+ENV PATH=/home/appuser/.local/bin:${PATH}
+
+RUN mkdir /home/appuser/app
+WORKDIR /home/appuser/app
+
+# setup backend
+RUN python3 -m pip install --upgrade pip
+COPY requirements.txt requirements.txt
+RUN pip3 install --user -r requirements.txt
+COPY src /home/appuser/app/src
+
+# CMD ["tail", "-f", "/dev/null"]
+CMD ["uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
+# reload flag required because of python multiprocessing for some reason

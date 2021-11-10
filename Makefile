@@ -1,32 +1,40 @@
 include .env
 
+expose-x:
+	sudo xhost +local:root
+
 generate-example-dotenv:
 	sed 's/=.*/=/' .env > .env.example
 
 create-volumes:
-	mkdir -p src/database/redis-data src/database/mongodb-data
-	chmod 777 src/database/mongodb-data
-	chmod 777 src/database/redis-data
+	mkdir -p database/redis-data database/mongodb-data
+	chmod 777 database/mongodb-data
+	chmod 777 database/redis-data
 
 clean-volumes:
-	rm -rf src/database/redis-data/**
-	rm -rf src/database/mongodb-data/**
+	rm -rf database/redis-data/**
+	rm -rf database/mongodb-data/**
 
-run: create-volumes
-	cd src && docker-compose up --build -d
+run: create-volumes expose-x
+	docker-compose up --build -d
 
 stop:
-	cd src && docker-compose down
+	docker-compose down
 
 show-logs:
-	cd src && docker-compose logs -f
+	docker-compose logs -f
 
 up: run
 
 down: stop
 
-build-all-images: build-frontend build-backend build-controller build-redis-listener
+build-all-images: build-backend build-database build-frontend
+
+build-backend:
 	cd backend && make build
-	cd controller && make build
+
+build-database:
 	cd database/redis-listener && make build
+
+build-frontend:
 	cd frontend && make build

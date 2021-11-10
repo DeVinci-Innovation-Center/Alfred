@@ -17,6 +17,10 @@ import RenderCanvas from '@/components/RenderCanvas.vue'
 // types
 import { ArmPose } from '@/types/ArmPose'
 
+function watchApp(data: any): void {
+  console.log(data)
+}
+
 @Component({
   components: {
     RenderCanvas,
@@ -53,6 +57,8 @@ export default class Index extends Vue {
         module: -1,
       })
     })
+
+    this.io.on('app_watcher', (data) => watchApp(data))
 
     // document.addEventListener(
     //   'keydown',

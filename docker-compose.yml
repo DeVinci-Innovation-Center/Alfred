@@ -1,26 +1,95 @@
 services:
-  frontenv:
-    image: alfred-dashboard:dev
+
+  frontend:
+    image: alfred-frontend:dev
+    build: ./frontend
     ports:
       - 80:3000
     networks:
       - server-tier
 
   backend:
+    privileged: true
     image: alfred-backend:dev
+    build:
+      context: ./backend
+      # choose between cpu and gpu according to your machine
+      # dockerfile: Dockerfile.cpu
+      dockerfile: Dockerfile.gpu
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=root
+      - MONGODB_DATABASE=commands
     ports:
       - 8000:8000
     networks:
       - server-tier
       - database-tier
       - controller-tier
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # - ./backend/src:/home/appuser/app/src  # for dev
+    # devices:
+    #   - /dev/video0:/dev/video0
+
     # configs:
     #   - httpd-config
     # secrets:
     #   - server-certificate
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
 
-  # controller:
-  #   image: alfred-controller:v1
+  controller:
+    privileged: true
+    image: alfred-controller:dev
+    build:
+      context: ./controller
+      # choose between cpu and gpu according to your machine
+      # dockerfile: Dockerfile.cpu
+      dockerfile: Dockerfile.gpu
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_CHANNELS=commands
+
+      - MOVE_ARM=False
+      - ARM_IP=
+    networks:
+      - server-tier
+      - database-tier
+      - controller-tier
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/video0:/dev/video0
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
 
   redis:
     image: docker.io/bitnami/redis:6.2
@@ -37,8 +106,8 @@ services:
   mongodb:
     image: mongo:5
     restart: always
-    # ports:
-    #   - "27017:27017"
+    ports:
+      - "27017:27017"
     # env_file:
     #   - .env
     environment:
@@ -58,6 +127,7 @@ services:
 
   redis-listener:
     image: alfred-redis-listener:dev
+    build: ./database/redis-listener
     depends_on:
       - mongodb
       - redis
@@ -85,6 +155,18 @@ services:
 #     external: true
 
 networks:
-  server-tier: {} # server network
-  database-tier: {} # communication between databases
-  controller-tier: {} # network with controller
+  server-tier:  # server network
+    ipam:
+        config:
+        - subnet: 172.16.237.0/24
+          gateway: 172.16.237.1
+  database-tier:  # communication between databases
+    ipam:
+        config:
+        - subnet: 172.16.238.0/24
+          gateway: 172.16.238.1
+  controller-tier:  # network with controller
+    ipam:
+        config:
+        - subnet: 172.16.239.0/24
+          gateway: 172.16.239.1

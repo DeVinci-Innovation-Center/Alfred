@@ -138,6 +138,8 @@ class RedisClient:
 
         logger.info("Connected to Redis")
 
+        return self.redis_instance
+
     def subscribe_all(self):
         """Subscribe to all channels and register message handler."""
 
