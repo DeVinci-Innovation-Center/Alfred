@@ -1,4 +1,8 @@
-include .env
+open-frontend:
+	firefox http://$(shell hostname -I | awk '{print $$1}'):80
+
+open-backend:
+	firefox http://$(shell hostname -I | awk '{print $$1}'):8000/docs
 
 expose-x:
 	sudo xhost +local:root
