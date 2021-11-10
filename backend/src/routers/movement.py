@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from src.global_instances import sio as backend_sio_server
+from src.utils.global_instances import sio as backend_sio_server
 # from src.modules import basic_commands, utils
 from src.modules import utils
-from src.utils import (App, AppRunningException, NoAppRunningException,
+from src.utils.apps import (App, AppRunningException, NoAppRunningException,
                        ctx_manager)
 from src.modules.hand_control.hand_control import start_hand_control
 

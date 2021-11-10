@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from src.redis_client import RedisClient
+from src.utils.redis_client import RedisClient
 from src.modules.command import Command
 
 REDIS_HOST = os.getenv("REDIS_HOST", "")

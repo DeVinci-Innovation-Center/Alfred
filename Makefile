@@ -1,5 +1,8 @@
 include .env
 
+expose-x:
+	sudo xhost +local:root
+
 generate-example-dotenv:
 	sed 's/=.*/=/' .env > .env.example
 
@@ -12,7 +15,7 @@ clean-volumes:
 	rm -rf database/redis-data/**
 	rm -rf database/mongodb-data/**
 
-run: create-volumes
+run: create-volumes expose-x
 	docker-compose up --build -d
 
 stop:

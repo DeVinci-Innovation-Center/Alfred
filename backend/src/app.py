@@ -1,7 +1,3 @@
-import src.prelaunch  # pylint: disable=unused-import
-
-src.prelaunch.prelaunch()
-
 from typing import Optional  # pylint: disable=wrong-import-order
 
 import socketio
@@ -9,7 +5,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src import routers
-from src.global_instances import sio, rc
+from src.utils.global_instances import rc, sio
 
 DUMMY_VAR: Optional[str]
 

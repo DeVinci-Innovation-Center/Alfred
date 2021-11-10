@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import xarm_hand_control.processing.process as xhcpp
 from src.modules.command import Command
-from src.redis_client import RedisClient
+from src.utils.redis_client import RedisClient
 
 REDIS_HOST = os.getenv("REDIS_HOST", "")
 try:

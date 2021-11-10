@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.global_instances import md
+from src.utils.global_instances import md
 
 router = APIRouter()
 
