@@ -1,4 +1,9 @@
+import time
+import traceback
+
 import cv2
+import numpy as np
+
 
 def open_webcam(video_path: str):
     """Simple webcam program with opencv"""
@@ -7,6 +12,7 @@ def open_webcam(video_path: str):
 
     # Check if the webcam is opened correctly
     if not cap.isOpened():
+        print("cannot open webcam!")
         raise IOError("Cannot open webcam")
     while True:
         _, frame = cap.read()

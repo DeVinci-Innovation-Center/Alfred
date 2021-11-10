@@ -17,9 +17,6 @@ services:
       # dockerfile: Dockerfile.cpu
       dockerfile: Dockerfile.gpu
     restart: always
-    # command: "tail -f /dev/null"
-    # command: "uvicorn src.app:app --log-level=trace --host=0.0.0.0"
-    # command: "uvicorn src.app:app --reload --host=0.0.0.0"
     environment:
       - PYTHONUNBUFFERED=1
       - DISPLAY=$DISPLAY
@@ -42,9 +39,10 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - /dev/video0:/dev/video0
+      # - ./backend/src:/home/appuser/app/src  # for dev
+    # devices:
+    #   - /dev/video0:/dev/video0
 
-      - ./backend/src:/home/appuser/app/src
     # configs:
     #   - httpd-config
     # secrets:

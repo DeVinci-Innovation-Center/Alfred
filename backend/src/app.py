@@ -7,8 +7,6 @@ from starlette.middleware.cors import CORSMiddleware
 from src import routers
 from src.utils.global_instances import rc, sio
 
-DUMMY_VAR: Optional[str]
-
 app = FastAPI(debug=True)
 app.add_middleware(
     CORSMiddleware,

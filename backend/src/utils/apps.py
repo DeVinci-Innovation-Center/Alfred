@@ -26,9 +26,15 @@ class App(multiprocessing.Process):
 
     def run(self):
         try:
-            print("starting")
-            self._target(*self._f_args, **self._f_kwargs)
-            print("finished")
+            print(f"starting app with target: {self._target}")
+
+            try:
+                self._target(*self._f_args, **self._f_kwargs)
+            except Exception:
+                print(traceback.format_exc())
+
+            print(f"finished app with target: {self._target}")
+
             if self.use_sockets:
                 self.socket.emit("app_watcher", "done")
 
