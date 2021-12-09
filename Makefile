@@ -1,17 +1,19 @@
-open-frontend:
-	firefox http://$(shell hostname -I | awk '{print $$1}'):80
+# open-frontend:
+# 	firefox http://$(shell hostname -I | awk '{print $$1}'):80
 
-open-backend:
-	firefox http://$(shell hostname -I | awk '{print $$1}'):8000/docs
+# open-backend:
+# 	firefox http://$(shell hostname -I | awk '{print $$1}'):8000/docs
 
 expose-x:
 	sudo xhost +local:root
 
-generate-example-dotenv:
-	sed 's/=.*/=/' .env > .env.example
-
 create-volumes:
-	mkdir -p database/redis-data database/mongodb-data
+	mkdir -p ./database/redis-data \
+		./database/mongodb-data \
+		./database/mongodb-data/initdb.d/ \
+		./database/mongodb-data/data/db/ \
+		./database/mongodb-data/data/log/
+
 	chmod 777 database/mongodb-data
 	chmod 777 database/redis-data
 
@@ -32,13 +34,13 @@ up: run
 
 down: stop
 
-build-all-images: build-backend build-database build-frontend
+# build-all-images: build-backend build-database build-frontend
 
-build-backend:
-	cd backend && make build
+# build-backend:
+# 	cd backend && make build
 
-build-database:
-	cd database/redis-listener && make build
+# build-database:
+# 	cd database/redis-listener && make build
 
-build-frontend:
-	cd frontend && make build
+# build-frontend:
+# 	cd frontend && make build
