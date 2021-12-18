@@ -22,7 +22,7 @@ class DataProducer:
     def get_data(self):
         """Get data from device."""
 
-        data = str(uuid.uuid4())
+        data = str(uuid.uuid4())  # dummy data
 
         return data
 

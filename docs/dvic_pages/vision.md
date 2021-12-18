@@ -1,4 +1,4 @@
-# ALFRED : General Purpose Middleware for Personal Robotic Arm Assistant
+# ALFRED : General Purpose Middleware for Personal Robotic Arm Assistants
 
 # Abstract
 
