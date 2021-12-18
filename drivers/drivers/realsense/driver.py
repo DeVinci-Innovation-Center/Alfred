@@ -2,8 +2,8 @@ from redis import Redis
 
 from threading import Thread
 
-from example import config as cfg
-from example import command_getter, data_producer
+from realsense import config as cfg
+from realsense import command_getter, data_producer
 
 
 def main():

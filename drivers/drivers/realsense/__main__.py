@@ -1,4 +1,4 @@
-from example import driver
+from realsense import driver
 
 if __name__ == "__main__":
     driver.main()
