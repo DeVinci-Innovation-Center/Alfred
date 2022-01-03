@@ -25,3 +25,5 @@ else:
     credentials = f"{MONGODB_USERNAME}:{MONGODB_PASSWORD}@"
 
 MONGO_CONN_STRING = f"mongodb://{credentials}{MONGODB_HOST}:{MONGODB_PORT}"
+
+APPLICATIONS_PATH = os.getenv("APPLICATIONS_PATH")

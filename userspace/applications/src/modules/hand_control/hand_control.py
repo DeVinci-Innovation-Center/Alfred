@@ -1,22 +1,12 @@
 import json
-import os
 from typing import Any
 
 import cv2
 import numpy as np
 import xarm_hand_control.processing.process as xhcpp
 from src.modules.command import Command
-from src.utils.redis_client import RedisClient
+from src.utils.global_instances import rc
 
-REDIS_HOST = os.getenv("REDIS_HOST", "")
-try:
-    REDIS_PORT = int(os.getenv("REDIS_PORT", ""))
-except ValueError:
-    REDIS_PORT = 6379
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
-
-
-rc = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 
 def send_command(command: Command):
     redis_command = {"function": "move_line", "command": repr(command)}
@@ -24,6 +14,7 @@ def send_command(command: Command):
 
     res = rc.redis_instance.publish("commands", json.dumps(redis_command))
     # print(res)
+
 
 def coords_extracter():
     """Exctract coords to send command to robot.
@@ -70,6 +61,7 @@ def coords_extracter():
         send_command(command)
 
     return coords_to_command
+
 
 def start_hand_control(video_path):
     cap = cv2.VideoCapture(video_path)  # pylint: disable=no-member

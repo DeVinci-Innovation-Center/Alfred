@@ -8,18 +8,15 @@ expose-x:
 	sudo xhost +local:root
 
 create-volumes:
-	mkdir -p ./database/redis-data \
-		./database/mongodb-data \
-		./database/mongodb-data/initdb.d/ \
-		./database/mongodb-data/data/db/ \
-		./database/mongodb-data/data/log/
-
-	chmod 777 database/mongodb-data
-	chmod 777 database/redis-data
+	mkdir -p ./kernel/database-files/redis-data \
+		./kernel/database-files/mongodb-data \
+		./kernel/database-files/mongodb-data/initdb.d/ \
+		./kernel/database-files/mongodb-data/data/db/ \
+		./kernel/database-files/mongodb-data/data/log/
 
 clean-volumes:
-	rm -rf database/redis-data/**
-	rm -rf database/mongodb-data/**
+	rm -rf ./kernel/database-files/redis-data/**
+	rm -rf ./kernel/database-files/mongodb-data/**
 
 run: create-volumes expose-x
 	docker-compose up --build -d
@@ -33,14 +30,3 @@ show-logs:
 up: run
 
 down: stop
-
-# build-all-images: build-backend build-database build-frontend
-
-# build-backend:
-# 	cd backend && make build
-
-# build-database:
-# 	cd database/redis-listener && make build
-
-# build-frontend:
-# 	cd frontend && make build

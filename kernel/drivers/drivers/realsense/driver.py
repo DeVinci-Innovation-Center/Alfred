@@ -12,11 +12,12 @@ def main():
 
     getter = command_getter.CommandGetter(
         redis_instance,
-        channel="device-command-example",
+        channel="device-command-realsense",
     )
     producer = data_producer.DataProducer(
         redis_instance,
-        channel="device-data-example",
+        channel="device-data-realsense",
+        video_path="/dev/video1"
     )
 
     getter_thread = Thread(target=getter.loop)

@@ -1,10 +1,16 @@
 """Gets data from a device, treats them, and sends them to Redis."""
 
+import logging
+import pickle
 import time
-import uuid
 from typing import Any
 
+import cv2
 from redis import Redis
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__file__)
 
 
 class DataProducer:
@@ -13,18 +19,27 @@ class DataProducer:
     redis_instance: Redis
     channel: str
 
-    def __init__(self, redis_instance: Redis, channel: str):
+    cap: cv2.VideoCapture
+
+    def __init__(self, redis_instance: Redis, channel: str, video_path: str):
         self.redis_instance = redis_instance
         self.channel = channel
 
+        self.cap = cv2.VideoCapture(video_path)
+
         self.last_update = time.time()
+
+        logger.info("initialized data producer")
 
     def get_data(self):
         """Get data from device."""
 
-        data = str(uuid.uuid4())
+        _, frame = self.cap.read()
+        if frame is not None:
+            frame_serialized = pickle.dumps(frame)
+            return frame_serialized
 
-        return data
+        return None
 
     def produce_data(self, data: Any):
         """Produce data to Redis."""
@@ -36,5 +51,5 @@ class DataProducer:
 
         while True:
             data = self.get_data()
-            self.produce_data(data)
-            time.sleep(1)
+            if data is not None:
+                self.produce_data(data)

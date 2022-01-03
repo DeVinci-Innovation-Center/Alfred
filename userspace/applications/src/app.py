@@ -1,5 +1,3 @@
-from typing import Optional  # pylint: disable=wrong-import-order
-
 import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware

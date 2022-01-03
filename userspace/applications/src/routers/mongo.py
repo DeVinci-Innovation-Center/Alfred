@@ -4,6 +4,7 @@ from src.utils.global_instances import md
 
 router = APIRouter()
 
+
 @router.get("/mongo/all")
 def get_all():
     ret = {}

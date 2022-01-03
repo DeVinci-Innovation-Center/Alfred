@@ -3,17 +3,9 @@ import os
 
 import numpy as np
 
-from src.utils.redis_client import RedisClient
 from src.modules.command import Command
+from src.utils.global_instances import rc
 
-REDIS_HOST = os.getenv("REDIS_HOST", "")
-try:
-    REDIS_PORT = int(os.getenv("REDIS_PORT", ""))
-except ValueError:
-    REDIS_PORT = 6379
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
-
-rc = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
 
 def move_random():
     """Sends random command to robot."""
