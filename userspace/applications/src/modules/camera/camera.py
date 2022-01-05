@@ -5,11 +5,9 @@ import cv2
 from src.utils.global_instances import rc
 
 
-def open_webcam():
-    """Simple webcam program with opencv"""
-
+def show_camera(camera_feed: str):
     p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
-    p.subscribe("device-data-realsense")
+    p.subscribe(camera_feed)
 
     while True:
         message = p.get_message()
@@ -19,13 +17,9 @@ def open_webcam():
 
         frame = pickle.loads(message["data"])
 
-        cv2.imshow("Input", frame)
+        cv2.imshow("Camera feed", frame)
 
         c = cv2.waitKey(1)
         if c == 27:
             cv2.destroyAllWindows()
             break
-
-
-if __name__ == "__main__":
-    open_webcam("/dev/video1")

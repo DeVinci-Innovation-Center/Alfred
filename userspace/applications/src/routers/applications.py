@@ -1,21 +1,27 @@
 from fastapi import APIRouter, HTTPException
-from src.modules import utils
+from src.modules.camera import camera
+
 # from src.modules.hand_control.hand_control import start_hand_control
 from src.modules import basic_commands
-from src.utils.apps import App, AppRunningException, NoAppRunningException, ctx_manager
+from src.utils.apps import (
+    App,
+    AppRunningException,
+    NoAppRunningException,
+    ctx_manager,
+)
 from src.utils.global_instances import sio as backend_sio_server
 
-router = APIRouter()
+router = APIRouter(prefix="/applications", tags=["Applications"])
 
 
-@router.get("/movement/")
+@router.get("/")
 async def read_movements():
-    """Returns all possible movements."""
+    """Get all possible applications."""
 
-    return [{"username": "Rick"}, {"username": "Morty"}]
+    return ["Open Webcam"]
 
 
-@router.post("/movement/stop")
+@router.post("/stop")
 async def stop_running_app():
     """Stop the running app."""
 
@@ -27,15 +33,16 @@ async def stop_running_app():
     return {"message": "App stopped."}
 
 
-@router.post("/movement/open_webcam")
-async def open_webcam():
-    """Simple open webcam function."""
+@router.post("/show-camera")
+async def show_camera():
+    """Simple show camera function."""
 
     try:
         app = App(
             use_sockets=False,
             socket=backend_sio_server,
-            target=utils.open_webcam,
+            target=camera.show_camera,
+            f_args=("device-data-realsense",),
         )
         ctx_manager.run_app(app)
     except AppRunningException as e:
@@ -62,11 +69,7 @@ async def random_move():
     """Make robot move to random location."""
 
     try:
-        app = App(
-            use_sockets=False,
-            socket=None,
-            target=basic_commands.move_random
-        )
+        app = App(use_sockets=False, socket=None, target=basic_commands.move_random)
         ctx_manager.run_app(app)
     except AppRunningException as e:
         raise HTTPException(status_code=400, detail=e.message) from None

@@ -17,7 +17,6 @@ def main():
     producer = data_producer.DataProducer(
         redis_instance,
         channel="device-data-realsense",
-        video_path="/dev/video1"
     )
 
     getter_thread = Thread(target=getter.loop)

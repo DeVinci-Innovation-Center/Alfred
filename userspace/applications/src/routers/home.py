@@ -1,13 +1,10 @@
 from fastapi import APIRouter
+from starlette.responses import RedirectResponse
 
-router = APIRouter()
+router = APIRouter(tags=["Home"])
 
 
 @router.get("/")
-async def read_index():
-    return {"message": "Welcome to ALFRED's dashboard."}
-
-
-@router.get("/hello")
-async def hello_world():
-    return {"message": "Hello World"}
+async def redirect():
+    response = RedirectResponse(url="/docs")
+    return response

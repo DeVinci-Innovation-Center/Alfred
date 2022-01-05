@@ -12,11 +12,11 @@ def main():
 
     getter = command_getter.CommandGetter(
         redis_instance,
-        channel="device-command-example",
+        channel="device-command-{{ cookiecutter.device_name }}",
     )
     producer = data_producer.DataProducer(
         redis_instance,
-        channel="device-data-example",
+        channel="device-data-{{ cookiecutter.device_name }}",
     )
 
     getter_thread = Thread(target=getter.loop)

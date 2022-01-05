@@ -58,46 +58,4 @@
 ## Applications
 => Autre pages (Cross reality, ) => tabs
 
-
-
-# Future works
-
-
-
-
-
-
-
-
-
-## Intelligent Robots
-
-- Scan the environment
-
-- Obstacle detection
-
-- Multifunction, Programmable, Modular
-
-## HCI
-
-
-
-## XR-HCI
-
-- Enable remote control
-
-- Control in AR and VR
-
-### Metaverse
-
-- Reflect reality in a simulation
-
-## Misc
-
-- Research project
-
-- For labs
-
-- For experimentation, exploring concepts
-
-- Lots of AI !!!
+## Future works

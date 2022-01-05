@@ -2,10 +2,10 @@ from fastapi import APIRouter
 
 from src.utils.global_instances import md
 
-router = APIRouter()
+router = APIRouter(prefix="/mongo", tags=["MongoDB"])
 
 
-@router.get("/mongo/all")
+@router.get("/all")
 def get_all():
     ret = {}
 
