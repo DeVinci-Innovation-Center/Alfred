@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """Gets data from a device, treats them, and sends them to Redis."""
 
 import time
