@@ -1,0 +1,3 @@
+[submodule "libalfred"]
+	path = libalfred
+	url = https://github.com/dimitrivinet/libalfred
