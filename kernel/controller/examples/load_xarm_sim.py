@@ -6,8 +6,8 @@ import pybullet as p
 import pybullet_data as pd
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-import src.sim.robot_sim as xarm_sim
-from src.controller import Controller
+import src_old.sim.robot_sim as xarm_sim
+from src_old.controller import Controller
 
 p.connect(p.GUI)
 p.setAdditionalSearchPath(pd.getDataPath())

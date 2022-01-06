@@ -1,15 +1,13 @@
-# type: ignore[no-redef]
 import queue
 from functools import singledispatchmethod
 from typing import List, Optional
-from operator import add
 
 import numpy as np
 import roboticstoolbox as rtb
 from roboticstoolbox.tools.trajectory import Trajectory
 
-from src.command import Command, Position
-from src.real.robot_real import XArmReal
+from src_old.command import Command, Position
+from src_old.real.robot_real import XArmReal
 
 # * -----------------------------------------------------------------
 # * GLOBAL VARIABLES
@@ -18,8 +16,6 @@ ROBOT_DOFS = 6
 END_EFFECTOR_INDEX = 6
 MAX_SPEED = 1000
 # * -----------------------------------------------------------------
-
-# pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
 
 
 class Controller:
@@ -82,7 +78,9 @@ class Controller:
         # print(command)
 
         if command.is_relative:
-            non_relative_xyzrpy = [self.future_cartesian_pos[i] + command.xyzrpy[i] for i in range(6)]
+            non_relative_xyzrpy = [
+                self.future_cartesian_pos[i] + command.xyzrpy[i] for i in range(6)
+            ]
             goal_xyzrpy = Position(*non_relative_xyzrpy)
         else:
             goal_xyzrpy = Position(*command.xyzrpy)

@@ -5,11 +5,11 @@ import traceback
 
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-import src.sim.robot_sim as xarm_sim
-from src.controller import Controller  # type: ignore
-from src.real.robot_real import XArmReal
-from src.redis_client import RedisClient
-from src.command import Command
+import src_old.sim.robot_sim as xarm_sim
+from src_old.controller import Controller  # type: ignore
+from src_old.real.robot_real import XArmReal
+from src_old.redis_client import RedisClient
+from src_old.command import Command
 
 REDIS_HOST = os.getenv("REDIS_HOST", "0.0.0.0")
 REDIS_PORT = os.getenv("REDIS_PORT")

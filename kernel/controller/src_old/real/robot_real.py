@@ -3,17 +3,14 @@ import time
 from xarm.wrapper import XArmAPI
 
 
-class RobotReal(XArmAPI):
+class XArmReal(XArmAPI):
     """Class for real xArm, custom to our needs."""
-
-    connected: bool = False
 
     def __init__(self, ip: str):
         super().__init__(port=ip, do_not_open=True)
 
     def connect_loop(self):
-        """Try to connect indefinitely, with a pause of 3 seconds between
-        tries."""
+        """Try to connect indefinitely, with a pause of 3 seconds between tries."""
         connected = False
         while not connected:
             try:

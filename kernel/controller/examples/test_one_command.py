@@ -9,9 +9,9 @@ import pybullet as p
 import pybullet_data as pd
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-import src.sim.robot_sim as xarm_sim
-from src.command import Command
-from src.controller import Controller
+import src_old.sim.robot_sim as xarm_sim
+from src_old.command import Command
+from src_old.controller import Controller
 
 
 def send_command(controller: Controller, command: Command) -> None:

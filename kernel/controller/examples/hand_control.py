@@ -9,10 +9,10 @@ import xarm_hand_control.processing.process as xhcpp
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-import src.sim.robot_sim as xarm_sim
-from src.command import Command
-from src.controller import Controller
-from src.real.robot_real import XArmReal
+import src_old.sim.robot_sim as xarm_sim
+from src_old.command import Command
+from src_old.controller import Controller
+from src_old.real.robot_real import XArmReal
 from src.event import post_event
 
 VIDEO_PATH = "/dev/video0"

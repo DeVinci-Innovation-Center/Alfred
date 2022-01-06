@@ -12,8 +12,8 @@ from xarm.wrapper import XArmAPI
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-import src.sim.robot_sim as xarm_sim
-from src.command import Command
+import src_old.sim.robot_sim as xarm_sim
+from src_old.command import Command
 
 
 ARM_IP = "172.21.72.200"
