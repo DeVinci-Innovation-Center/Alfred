@@ -3,7 +3,7 @@ import time
 import traceback
 
 import redis
-from libalfred.utils import Command
+from libalfred import utils
 
 from src.config import cfg
 from src.controller.controller import Controller
@@ -12,13 +12,15 @@ from src.sim.robot_sim import RobotSim
 
 
 def main():
+    utils.config_logger("controller")
+
     if cfg.MOVE_ARM:
         robot_real = RobotReal(cfg.ARM_IP)
         robot_real.connect_loop()
     else:
         robot_real = None
 
-    robot_sim = RobotSim()
+    robot_sim = RobotSim(cfg.END_EFFECTOR_INDEX, cfg.ROBOT_DOFS)
 
     controller = Controller(robot_real=robot_real, robot_sim=robot_sim)
 
@@ -33,7 +35,7 @@ def main():
             try:
                 decoded_msg = message["data"].decode("utf-8")
                 json_msg = json.loads(decoded_msg)
-                command = Command.from_string(json_msg["command"])
+                command = utils.Command.from_string(json_msg["command"])
                 controller.decompose_command(command)
             except Exception:
                 print(traceback.format_exc())

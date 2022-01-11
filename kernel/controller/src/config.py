@@ -7,6 +7,8 @@ from typing import Optional
 
 def check_config_values(config: dict):
     for conf in config:
+        if conf == "ARM_IP" and config["MOVE_ARM"] is False:
+            continue
         if config[conf] == "":
             sys.exit(f"Value {conf} was not set but is necessary.")
 

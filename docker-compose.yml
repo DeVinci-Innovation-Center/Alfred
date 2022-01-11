@@ -55,14 +55,13 @@ services:
       dockerfile: Dockerfile.cpu
       # dockerfile: Dockerfile.gpu
     environment:
-      - PYTHONUNBUFFERED=1
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
-      - REDIS_CHANNELS=commands
+      - REDIS_CHANNEL=command-robot
 
       - MOVE_ARM=False
       - ARM_IP=
@@ -72,8 +71,6 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-    devices:
-      - /dev/video0:/dev/video0
 
     # uncomment if your machine has gpu capabilities
     # deploy:
@@ -86,6 +83,7 @@ services:
 
 
   drivers:
+    privileged: true
     image: alfred-drivers:dev
     build: ./kernel/drivers
     depends_on:
@@ -96,15 +94,6 @@ services:
       - REDIS_PASSWORD=
     networks:
       - database-tier
-    devices:
-      - /dev/video0:/dev/video0
-      - /dev/video1:/dev/video1
-      - /dev/video2:/dev/video2
-      - /dev/video3:/dev/video3
-      - /dev/video4:/dev/video4
-      - /dev/video5:/dev/video5
-      - /dev/video6:/dev/video6
-      - /dev/video7:/dev/video7
 
 
   redis:

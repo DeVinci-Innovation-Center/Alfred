@@ -1,9 +1,9 @@
 import logging
 import queue
 import threading
+import time
 from functools import singledispatchmethod
 from operator import add
-import time
 from typing import List, Optional
 
 import numpy as np
@@ -84,7 +84,7 @@ class Controller:
         logger.info("Sim thread started.")
 
     def start_sim_thread(self):
-        self.sim_thread = threading.Thread(target=self.robot_sim.run)
+        self.sim_thread = threading.Thread(target=self.run)
         self.sim_thread.daemon = True
         self.sim_thread.start()
 
@@ -136,7 +136,7 @@ class Controller:
     def run(self):
         while 1:
             self.step()
-            self.robot_sim.stepSimulation()
+            self.robot_sim.step_simulation()
             time.sleep(self.robot_sim.time_step)
 
     def run_ik(self, xyzrpy: list):
@@ -145,14 +145,14 @@ class Controller:
 
         rpy_quaternion = self.robot_sim.get_quaternion_from_euler(rpy)
 
-        target_joint_positions = self.robot_sim.calculateInverseKinematics(
+        target_joint_positions = self.robot_sim.calculate_inverse_kinematics(
             xyz, rpy_quaternion,
         )
 
         return target_joint_positions
 
     def move(self, target_joint_positions: list):
-        self.robot_sim.move()
+        self.robot_sim.move(target_joint_positions, self.use_dynamics)
 
         if cfg.MOVE_ARM:
             self.robot_real.set_servo_angle_j(  # type: ignore

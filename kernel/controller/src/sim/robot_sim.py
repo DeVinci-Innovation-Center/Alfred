@@ -2,15 +2,19 @@ import pybullet as p
 import pybullet_data as pd
 from libalfred.utils.position import Position
 
-from src.config import cfg
-
 
 class RobotSim:
     """Simulated xArm class."""
 
-    sim_id: int
+    time_step: float
 
-    def __init__(self, time_step: float = 1.0 / 60.0):
+    sim_id: int
+    end_effector_index: int
+    robot_dofs: int
+
+    def __init__(
+        self, end_effector_index, robot_dofs, time_step: float = 1.0 / 60.0,
+    ):
         p.connect(p.GUI)
         p.setAdditionalSearchPath(pd.getDataPath())
 
@@ -26,10 +30,13 @@ class RobotSim:
             flags=pybullet_flags,
         )
 
+        self.end_effector_index = end_effector_index
+        self.robot_dofs = robot_dofs
+
     def set_base_pose(self, joint_positions):
         """set robot_sim to base position"""
 
-        for joint_num in range(1, cfg.ROBOT_DOFS + 1):
+        for joint_num in range(1, self.robot_dofs + 1):
             p.changeDynamics(
                 self.sim_id, joint_num, linearDamping=0, angularDamping=0,
             )
@@ -53,7 +60,7 @@ class RobotSim:
     def calculate_inverse_kinematics(self, xyz: list, rpy_quaternion: list):
         target_joint_positions = p.calculateInverseKinematics(
             self.sim_id,
-            cfg.END_EFFECTOR_INDEX,
+            self.end_effector_index,
             xyz,
             rpy_quaternion,
             maxNumIterations=50,
@@ -67,7 +74,7 @@ class RobotSim:
     def get_cartesian_pos(self, compute=True):
         end_effector_state = p.getLinkState(
             self.sim_id,
-            cfg.END_EFFECTOR_INDEX,
+            self.end_effector_index,
             computeForwardKinematics=compute,  # noqa: E501
         )
         end_effector_xyz = end_effector_state[4]
@@ -78,7 +85,7 @@ class RobotSim:
 
     def move(self, target_joint_positions: list, use_dynamics: bool):
         if use_dynamics:
-            for i in range(cfg.ROBOT_DOFS):
+            for i in range(self.robot_dofs):
                 p.setJointMotorControl2(
                     self.sim_id,
                     i + 1,
@@ -87,7 +94,7 @@ class RobotSim:
                     force=5 * 240.0,
                 )
         else:
-            for i in range(cfg.ROBOT_DOFS):
+            for i in range(self.robot_dofs):
                 p.resetJointState(
                     self.sim_id, i + 1, target_joint_positions[i],
                 )
