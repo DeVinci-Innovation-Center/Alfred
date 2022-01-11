@@ -1,6 +1,6 @@
 export default {
   env: {
-    socketTarget: process.env.SOCKET_TARGET || 'http://0.0.0.0:8000',
+    socketTarget: 'http://0.0.0.0:8000',
     socketEventName: 'dashboard-newsletter'
   },
   server: {
