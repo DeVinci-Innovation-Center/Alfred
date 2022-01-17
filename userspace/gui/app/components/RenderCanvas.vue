@@ -5,22 +5,20 @@
 <script lang="ts">
 // libs
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 import 'babylonjs-loaders'
-
-// import { gsap } from 'gsap'
-// components
-
 // types
 import { ArmPose } from '@/types/ArmPose'
+import { Equipment } from '@/types/Equipment'
 // miscellaneous
 import BabylonController from '@/utils/BabylonController'
 
 @Component
 export default class RenderCanvas extends Vue {
   @Prop({ type: Object, required: true }) readonly pose!: ArmPose
+  @Prop({ type: Boolean, required: true }) readonly clickedStop!: boolean
+  @Prop({ type: Object, required: false }) readonly equipped?: Equipment
   unpluggedPose: ArmPose = {
     joint_1: 0.017956436942507398,
     joint_2: -0.9737956905041772,
@@ -28,11 +26,14 @@ export default class RenderCanvas extends Vue {
     joint_4: -0.10276360990249185,
     joint_5: 1.6879406729438893,
     joint_6: -0.04612139081680539,
-    module: -1
+    head: {
+      equipment: null
+    }
   }
 
   openingHand = 0.5
   BC!: BabylonController
+  hand!: BABYLON.TransformNode
 
   created() {}
 
@@ -42,14 +43,49 @@ export default class RenderCanvas extends Vue {
 
     this.BC.engine.displayLoadingUI()
     await this.initScene()
-    this.updatePose()
+    this.updateEquipment()
     this.BC.engine.hideLoadingUI()
+
+    /** Watch canvas resize event to adjust the 3D scene **/
+    const resizeWatcher = new ResizeObserver(() => {
+      this.BC.engine.resize()
+    })
+    resizeWatcher.observe(this.$refs.renderCanvas as HTMLElement)
 
     // this.BC.scene.debugLayer.show()
 
     this.BC.engine.runRenderLoop(() => {
       this.BC.scene.render()
     })
+  }
+
+  @Watch('clickedStop')
+  setCameraControl() {
+    if (this.clickedStop) {
+      this.BC.camera.detachControl()
+    } else {
+      this.BC.camera.attachControl(this.BC.canvas)
+    }
+  }
+
+  @Watch('equipment')
+  updateEquipment() {
+    const scene = this.BC.scene
+    // clear any previous equipment
+    this.hand = scene.getTransformNodeByName(
+      'hand_base'
+    )! as BABYLON.TransformNode
+    this.hand.setEnabled(false)
+    if (this.equipped) {
+      // enable appropriate equipment
+      switch (this.equipped.name) {
+        case 'hand':
+          this.hand.setEnabled(true)
+          break
+        default:
+          break
+      }
+    }
   }
 
   async initScene() {
@@ -68,37 +104,7 @@ export default class RenderCanvas extends Vue {
     backgroundMat.reflectionBlur = 0.15
     skybox.material = backgroundMat
 
-    // This creates and positions the camera
-    const camera = new BABYLON.ArcRotateCamera(
-      'camera1',
-      0,
-      0,
-      1,
-      new BABYLON.Vector3(0, 3, -10),
-      scene
-    )
-    camera.setTarget(new BABYLON.Vector3(0, 0.3, 0))
-    camera.alpha = 3
-
-    // Camera parameters
-    camera.attachControl(this.BC.canvas, true)
-    camera.radius = 1
-    camera.wheelPrecision = 50
-    camera.panningSensibility = 1000
-    camera.minZ = 0.1
-    camera.upperBetaLimit = Math.PI * 0.8
-
-    // Creating the light
-    const light1 = new BABYLON.HemisphericLight(
-      'light1',
-      new BABYLON.Vector3(0, 1, 0),
-      scene
-    )
-
-    // light intensity
-    light1.intensity = 1
-
-    await BABYLON.SceneLoader.ImportMeshAsync('', '/', 'xarm-6.glb', scene)
+    await BABYLON.SceneLoader.ImportMeshAsync('', '/', 'xarm-6-new.glb', scene)
     /**
      * Custom metallic material
      */
@@ -110,7 +116,7 @@ export default class RenderCanvas extends Vue {
         mesh.name.includes('Link6_primitive0')
     )
     const nodeMaterial = await BABYLON.NodeMaterial.ParseFromSnippetAsync(
-      'GPY7R7#9',
+      'GPY7R7#10',
       scene
     )
     satinMeshes.forEach((mesh) => {
@@ -128,22 +134,10 @@ export default class RenderCanvas extends Vue {
     const head = scene.getTransformNodeByName('Link6')
     scene.registerBeforeRender(() => {
       if (link1) {
-        // gsap.to(link1.rotation, {
-        //   duration,
-        //   x: 0,
-        //   y: this.pose.joint_1,
-        //   z: 0
-        // })
         link1.rotation = new BABYLON.Vector3(0, this.pose.joint_1, 0)
       }
 
       if (link2) {
-        // gsap.to(link2.rotation, {
-        //   duration,
-        //   x: -this.pose.joint_2 - Math.PI / 2,
-        //   y: -Math.PI / 2,
-        //   z: Math.PI / 2
-        // })
         link2.rotation = new BABYLON.Vector3(
           -this.pose.joint_2 - Math.PI / 2,
           -Math.PI / 2,
@@ -151,21 +145,9 @@ export default class RenderCanvas extends Vue {
         )
       }
       if (link3) {
-        // gsap.to(link3.rotation, {
-        //   duration,
-        //   x: 0,
-        //   y: this.pose.joint_3,
-        //   z: 0
-        // })
         link3.rotation = new BABYLON.Vector3(0, this.pose.joint_3, 0)
       }
       if (link4) {
-        // gsap.to(link4.rotation, {
-        //   duration,
-        //   x: -this.pose.joint_4 - Math.PI / 2,
-        //   y: -Math.PI / 2,
-        //   z: Math.PI / 2
-        // })
         link4.rotation = new BABYLON.Vector3(
           -this.pose.joint_4 - Math.PI / 2,
           -Math.PI / 2,
@@ -173,14 +155,6 @@ export default class RenderCanvas extends Vue {
         )
       }
       if (link5) {
-        // gsap.to(link5, {
-        //   duration,
-        //   rotation: this.pose.joint_5 + Math.PI / 2,
-        //   y: -Math.PI / 2,
-        //   z: -Math.PI / 2
-        // })
-        // console.log(link5.rotation.x)
-        // console.log(link5.rotation)
         link5.rotation = new BABYLON.Vector3(
           this.pose.joint_5 + Math.PI / 2,
           -Math.PI / 2,
@@ -188,12 +162,6 @@ export default class RenderCanvas extends Vue {
         )
       }
       if (head) {
-        // gsap.to(head.rotation, {
-        //   duration,
-        //   x: -this.pose.joint_6 - Math.PI / 2,
-        //   y: -Math.PI / 2,
-        //   z: Math.PI / 2
-        // })
         head.rotation = new BABYLON.Vector3(
           -this.pose.joint_6 - Math.PI / 2,
           -Math.PI / 2,
@@ -207,14 +175,6 @@ export default class RenderCanvas extends Vue {
         anim.pause()
       })
     })
-  }
-
-  @Watch('pose')
-  updatePose() {
-    console.log(this.pose)
-    if (this.pose.module >= 0) {
-      this.openingHand = this.pose.module
-    }
   }
 
   /**
@@ -342,15 +302,6 @@ export default class RenderCanvas extends Vue {
 </script>
 
 <style>
-#renderCanvas {
-  position: fixed;
-  /* z-index: 1; */
-  left: 0px;
-  top: 0px;
-  width: 100vw;
-  height: 100vh;
-}
-
 #inspector-host,
 #scene-explorer-host {
   /* position: absolute !important; */

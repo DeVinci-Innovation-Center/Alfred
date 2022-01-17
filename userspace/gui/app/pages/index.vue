@@ -1,83 +1,393 @@
 <template>
   <main>
-    <header>
-      <h1>ALFRED's DASHBOARD</h1>
-    </header>
-    <RenderCanvas :pose="targetPose" />
+    <div id="canvasHolder" ref="canvasHolder">
+      <div
+        id="currentlyResizing"
+        ref="currentlyResizing"
+        :class="`${
+          (isDragging || clickedStop ? 'show ' : '') +
+          (clickedStop ? 'red ' : '')
+        }`"
+      >
+        {{ clickedStop ? 'STOPPED' : 'Resizing...' }}
+        <img
+          v-if="!clickedStop"
+          src="/resize-icon.svg"
+          alt="horizontal resize icon"
+        />
+      </div>
+      <RenderCanvas
+        :pose="currentPose"
+        :clicked-stop="clickedStop"
+        :style="`filter:grayscale(${status == 'offline' ? 1 : 0})`"
+      />
+    </div>
+    <div id="dashboardWrapper" ref="dashboardWrapper">
+      <!-- OVERLAYED INPUT -->
+      <span id="border" ref="border"></span>
+      <img
+        id="infoIcon"
+        ref="infoIcon"
+        src="/info-icon.svg"
+        alt="information icon"
+        :style="`filter: invert(${infoPanelIsOpen ? 1 : 0})`"
+        @click="
+          () => {
+            infoClick()
+          }
+        "
+      />
+      <div id="infoPanelHolder" :class="`${infoPanelIsOpen ? 'show' : ''}`">
+        <InfoPanel />
+      </div>
+      <!-- RELATIVE ELEMENTS -->
+      <div style="display: flex; flex-grow: 1">
+        <EquipmentBar v-if="equipments" :clicked-stop="clickedStop" :equipments="equipments" :equipped="equipped" />
+        <div id="dashboard">
+          <!-- DASHBOARD HEADER -->
+          <div id="dashboardHeader">
+            <h1>
+              Alfred is <span>{{ status }}</span>
+            </h1>
+          </div>
+
+          <!-- MAIN DASHBOARD CONTENT -->
+          <div id="dashboardBody">
+            <div id="dashboardMain">
+              <JointGauges
+                :current-pose="currentPose"
+                :clicked-stop="clickedStop"
+              />
+              <div id="taskManager">
+                <TaskList :equipped="equipped" />
+                <TaskPanel :equipped="equipped" />
+              </div>
+            </div>
+            <EmergencyStopBtn
+              :clicked-stop="clickedStop"
+              @click="
+                () => {
+                  emergencyStop()
+                }
+              "
+            />
+          </div>
+        </div>
+      </div>
+      <ArmOutline :clicked-stop="clickedStop" />
+      <div id="terminalHolder">
+        <!-- <Terminal /> -->
+      </div>
+    </div>
   </main>
 </template>
 
 <script lang="ts">
-// libs
+// import libs
 import { Component, Vue } from 'vue-property-decorator'
 import { io, Socket } from 'socket.io-client'
 import { gsap } from 'gsap'
-// components
+// import components
 import RenderCanvas from '@/components/RenderCanvas.vue'
-// types
+import InfoPanel from '@/components/InfoPanel.vue'
+import JointGauges from '@/components/JointGauges.vue'
+import EquipmentBar from '@/components/EquipmentBar.vue'
+import TaskList from '@/components/TaskList.vue'
+import TaskPanel from '@/components/TaskPanel.vue'
+import EmergencyStopBtn from '@/components/EmergencyStopBtn.vue'
+import ArmOutline from '@/components/ArmOutline.vue'
+import Terminal from '@/components/Terminal.vue'
+// import types
 import { ArmPose } from '@/types/ArmPose'
-
-function watchApp(data: any): void {
-  console.log(data)
-}
+import { Equipment } from '@/types/Equipment'
+// import misc
+import { EventBus } from '@/utils/EventBus'
 
 @Component({
   components: {
     RenderCanvas,
-  },
+    InfoPanel,
+    JointGauges,
+    EquipmentBar,
+    TaskList,
+    TaskPanel,
+    EmergencyStopBtn,
+    ArmOutline,
+    Terminal
+  }
 })
 export default class Index extends Vue {
   socketTarget = process.env.socketTarget!
   io!: Socket
-  targetPose: ArmPose = {
-    joint_1: 0.017956436942507398,
-    joint_2: -0.9737956905041772,
-    joint_3: -0.7701755099417158,
-    joint_4: -0.10276360990249185,
-    joint_5: 1.6879406729438893,
-    joint_6: -0.04612139081680539,
-    module: -1,
+  currentPose: ArmPose = {
+    joint_1: 0,
+    joint_2: 0,
+    joint_3: 0,
+    joint_4: 0,
+    joint_5: 0,
+    joint_6: 0,
+    head: {equipment: null}
   }
 
+  equipments!: Equipment[]
+  equipped?: Equipment | null= null
+
+  clickedStop = false
+  infoPanelIsOpen = false
+  isDragging = false
+  status = 'offline'
+
   created() {
-    this.io = io(this.socketTarget)
+    // this.io = io(this.socketTarget)
   }
 
   mounted() {
-    this.io.on(process.env.socketEventName!, (data) => {
-      // this.targetPose = data.pose
-      gsap.to(this.targetPose, {
-        duration: 0.5,
-        joint_1: data.pose.joint_1,
-        joint_2: data.pose.joint_2,
-        joint_3: data.pose.joint_3,
-        joint_4: data.pose.joint_4,
-        joint_5: data.pose.joint_5,
-        joint_6: data.pose.joint_6,
-        module: -1,
-      })
+    // this.io.on('arm-pose', (data) => {
+    //   gsap.to(this.currentPose, {
+    //     duration: 0.5,
+    //     joint_1: data.joint_1,
+    //     joint_2: data.joint_2,
+    //     joint_3: data.joint_3,
+    //     joint_4: data.joint_4,
+    //     joint_5: data.joint_5,
+    //     joint_6: data.joint_6,
+    //     head: data.head
+    //   })
+    // })
+    // this.io.on('return-configuration', (data:any)=>{
+    //   this.equipments = data.equipments as Equipment[]
+    // })
+    // this.io.on('status-change', (data:any)=>{
+    //   this.status = data.status
+    // })
+
+    // to erase when io is on
+    setInterval(() => {
+      if (!this.clickedStop) {
+        this.currentPose = {
+          joint_1: (this.currentPose.joint_1 + 0.025) % (Math.PI * 2),
+          joint_2: this.currentPose.joint_2,
+          joint_3: this.currentPose.joint_3,
+          joint_4: this.currentPose.joint_4,
+          joint_5: this.currentPose.joint_5,
+          joint_6: this.currentPose.joint_6,
+          head: {equipment: null}
+        }
+      }
+    }, 20)
+    this.equipments = require('@/assets/fake_equipments.json') as Equipment[]
+
+    this.setDragResizer()
+    
+    EventBus.$on('emergency-stop', () => {
+      // this.io.emit('emergency-stop') 
+      this.clickedStop = true
+      this.status = 'stopping'
+    })
+  }
+
+  setDragResizer() {
+    const border = this.$refs.border as HTMLElement
+    const left = this.$refs.canvasHolder as HTMLElement
+    const right = this.$refs.dashboardWrapper as HTMLElement
+
+    // toggle drag behaviour
+    border.addEventListener('mousedown', () => {
+      this.isDragging = true
+      border.style.background = 'white'
+    })
+    document.body.addEventListener('mouseup', () => {
+      this.isDragging = false
+      border.style.background = 'transparent'
     })
 
-    this.io.on('app_watcher', (data) => watchApp(data))
+    // defining drag behaviour
+    window.addEventListener('mousemove', (e) => {
+      if (this.isDragging) {
+        e.preventDefault()
+        const ratio = e.x / window.innerWidth
+        left.style.flexGrow = ratio.toString()
+        right.style.flexGrow = (1 - ratio).toString()
+        EventBus.$emit('resize')
+      }
+    })
 
-    // document.addEventListener(
-    //   'keydown',
-    //   (_event) => {
+    // safeguard
+    document.addEventListener('mouseenter', () => {
+      this.isDragging = false
+    })
+  }
 
-    //   },
-    //   false
-    // )
+  infoClick() {
+    this.infoPanelIsOpen = !this.infoPanelIsOpen
   }
 }
 </script>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
-body {
-  background: rgb(230, 230, 230);
-  font-family: 'Roboto', sans-serif;
-  font-weight: 100;
-  font-size: 5rem;
-  text-align: center;
+<style scoped>
+#canvasHolder,
+#dashboardWrapper {
+  position: relative;
+  display: flex;
+  width: 0px;
+  flex-grow: 0.5;
 }
+#dashboardWrapper {
+  display: flex;
+  flex-direction: column;
+}
+#currentlyResizing {
+  position: absolute;
+  z-index: 99;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(15, 30, 40, 0.8);
+  font-size: 3rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+#currentlyResizing.show {
+  opacity: 1;
+}
+#currentlyResizing.red {
+  background: rgba(80, 0, 0, 0.75);
+}
+#currentlyResizing img {
+  width: 150px;
+  animation: 2s linear infinite both resizing;
+}
+@keyframes resizing {
+  0% {
+    margin-left: 0px;
+  }
+  25% {
+    margin-left: 50px;
+  }
+  75% {
+    margin-left: -50px;
+  }
+}
+
+/* 
+----------------
+    DASHBOARD
+----------------
+*/
+#dashboard {
+  position: relative;
+  display: flex;
+  /* flex-grow: 1; */
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  /* border: 2px solid red; */
+  overflow: hidden;
+}
+#border {
+  position: absolute;
+  z-index: 99;
+  height: 100%;
+  width: 0.2vw;
+  left: -0.2vw;
+  cursor: col-resize;
+}
+#infoIcon {
+  width: 40px;
+  position: absolute;
+  z-index: 99;
+  top: 10px;
+  right: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+#infoIcon:hover {
+  opacity: 0.5;
+}
+#infoPanelHolder {
+  position: absolute;
+  z-index: 90;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+#infoPanel {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: white;
+  font-family: 'DDINExp';
+  color: black;
+  right: -100%;
+  transition: all 0.3s ease;
+  pointer-events: all;
+}
+#infoPanelHolder.show #infoPanel {
+  right: 0%;
+}
+/* ---------
+    HEADER 
+-----------*/
+#dashboardHeader {
+  margin-top: 20px;
+  width: 100%;
+}
+h1 {
+  font-size: 3.5rem;
+  font-family: 'Roboto', sans-serif;
+  text-align: left;
+}
+#dashboardHeader h1 span {
+  font-family: 'Source Code Pro', monospace;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0px 8px;
+  border-radius: 10px;
+}
+/* ---------
+    BODY 
+-----------*/
+#dashboardBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-grow: 1;
+  /* border: 1px solid green; */
+}
+#dashboardMain {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  /* border: 1px solid white; */
+}
+#taskManager{
+  background: rgba(0, 0, 0, .65);
+  flex-grow: 1;
+  width: 95%;
+  margin: 25px 0px;
+  border-radius: 10px;
+  display: flex;
+}
+#emergencyStopBtn {
+  font-size: 2rem;
+  /* border: 1px solid white; */
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  width: fit-content;
+}
+/* #terminalHolder{
+  display: flex;
+  align-self: flex-end;
+  width: 100vw; 
+}*/
 </style>

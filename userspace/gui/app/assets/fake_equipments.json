@@ -1,0 +1,36 @@
+[
+  {
+    "name": "fake 1",
+    "tasks": [],
+    "description": "first fake item"
+  },
+  {
+    "name": "fake 2",
+    "tasks": [],
+    "description": "second fake item"
+  },
+  {
+    "name": "fake 3",
+    "tasks": [],
+    "description": "third fake item"
+  },
+  {
+    "name": "Hand",
+    "tasks": [
+      {
+        "name": "Open",
+        "description": "Opens the hand as far as possible"
+      },
+      {
+        "name": "Close",
+        "description": "Closes the hand until it meets an object"
+      }
+    ],
+    "description": "A robotic claw that can open and close"
+  },
+  {
+    "name": "fake 4",
+    "tasks": [],
+    "description": "fourth fake item"
+  }
+]

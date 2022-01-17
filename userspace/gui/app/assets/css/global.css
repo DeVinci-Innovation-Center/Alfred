@@ -1,16 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Source+Code+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;1,200;1,300;1,400;1,500;1,600&display=swap');
 
-
-:root {
-  --highlight: rgb(31, 50, 71); 
-  --highlight-transp: rgba(31, 50, 71, 0.5); 
-  --background: rgb(243, 244, 246); 
-  --background-transp: rgba(243, 244, 246, 0.9); 
-  --text: black;
-  --link:rgb(0, 113, 241);
-
-  --title-size: 66px;
+html,
+body,
+#__nuxt,
+#__layout {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
+  background: rgb(230, 230, 230);
+  background: rgb(15, 30, 40);
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 100;
+  text-align: center;
+}
+
+main {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+#canvasHolder {
+  height: 100%;
+}
+
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+}
+#renderCanvas:focus-visible {
+  outline: none;
+}
+
+.disable-select {
+  user-select: none; /* supported by Chrome and Opera */
+ -webkit-user-select: none; /* Safari */
+ -khtml-user-select: none; /* Konqueror HTML */
+ -moz-user-select: none; /* Firefox */
+ -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+/* landscape for tablet and smarpthone */
+@media screen and (max-width: 1024px) and (orientation: landscape) {
+}
+
+/* portrait */
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+}
+
+/* smartphone */
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+}
+
+/* 
+CUSTOM FONTS
+*/
+
+@font-face {
+  font-family: DDINExp;
+  src: url('/fonts/D-DINExp.woff2') format('woff2'),
+    url('/fonts/D-DINExp.woff') format('woff');
 }

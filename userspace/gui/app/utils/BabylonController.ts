@@ -14,13 +14,13 @@ export default class BabylonController {
   GUI!: GUI.AdvancedDynamicTexture
   SM!: BABYLON.SpriteManager
   AM!: BABYLON.AssetsManager
-
+  camera!: BABYLON.ArcRotateCamera
+  light!: BABYLON.HemisphericLight
+  
   settings = {
-    debugLayer: false, // Enable for Babylon scene explorer and inspector
-    freeCam: false, // Enable for easier navigation
+    debugLayer: false,
     fov: 1, // field of view
-    sensitivity: 1.7,
-    inertia: 0.2
+    brightness: 1
   }
 
   constructor(canvas: HTMLCanvasElement) {
@@ -32,6 +32,37 @@ export default class BabylonController {
 
     // set the canvas background to transparent
     this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 0)
+
+    // This creates and positions the camera
+    this.camera = new BABYLON.ArcRotateCamera(
+      'camera1',
+      0,
+      0,
+      1,
+      new BABYLON.Vector3(0, 3, -10),
+      this.scene
+    )
+    this.camera.setTarget(new BABYLON.Vector3(0, 0.3, 0))
+    this.camera.alpha = 3
+
+    // Camera parameters
+    this.camera.attachControl(this.canvas, true)
+    this.camera.radius = 1
+    this.camera.wheelPrecision = 50
+    this.camera.panningSensibility = 1000
+    this.camera.minZ = 0.1
+    this.camera.fov = this.settings.fov
+    this.camera.upperBetaLimit = Math.PI * 0.8
+
+    // Creating the light
+    this.light = new BABYLON.HemisphericLight(
+      'light1',
+      new BABYLON.Vector3(0, 1, 0),
+      this.scene
+    )
+
+    // light intensity
+    this.light.intensity = this.settings.brightness
 
     // Initialize Babylon GUI
     this.GUI = GUI.AdvancedDynamicTexture.CreateFullscreenUI(
