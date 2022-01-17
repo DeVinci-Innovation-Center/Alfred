@@ -18,17 +18,17 @@
         href="https://github.com/DeVinci-Innovation-Center/Alfred"
         target="_blank"
         >Project repository on github</a
-      >
+      ><font-awesome-icon :icon="['fas', 'link']" />
     </p>
     <p>
       <a href="https://dvic.devinci.fr/projects/xarm-bench" target="_blank"
         >Project page at dvic.devinci.fr</a
-      >
+      ><font-awesome-icon :icon="['fas', 'link']" />
     </p>
     <p>
       <a href="https://youtu.be/6KcHh4nWJFI" target="_blank"
         >Project video on youtube</a
-      >
+      ><font-awesome-icon :icon="['fas', 'link']" />
     </p>
     <span id="rights">Owned by the DVIC, made by Faber Smythe, 2022</span>
   </article>
@@ -65,6 +65,7 @@ a {
   cursor: pointer;
   text-decoration: underline;
   transition: all 0.3s ease;
+  margin-right: 15px;
 }
 a:hover {
   opacity: 0.5;
@@ -72,7 +73,7 @@ a:hover {
 b {
   font-weight: 600;
 }
-#rights{
+#rights {
   position: absolute;
   bottom: 0px;
   width: 100%;

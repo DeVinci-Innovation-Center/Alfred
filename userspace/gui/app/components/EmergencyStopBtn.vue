@@ -1,7 +1,12 @@
 <template>
+  <!-- TODO add this to the Wrapper
+    :class="`${status === 'offline' ? 'offline' : ''}`"    
+    :title="`${status === 'offline' ? 'Alfred is offline' : '/!\ EMERGENCY STOP /!\'}`"
+     -->
   <div
     id="EmergencyStopWrapper"
-    :style="`${clickedStop && 'border-color: transparent !important;'}`"
+    :style="`${clickedStop ? 'border-color: transparent !important;' : ''}`"
+    title="/!\ EMERGENCY STOP /!\"
     @mouseenter="
       () => {
         btnEnter()
@@ -25,15 +30,16 @@
 
 <script lang="ts">
 // import libs
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import * as echarts from 'echarts'
 // import misc
 import { EventBus } from '@/utils/EventBus'
 
 @Component
 export default class EmergencyStopBtn extends Vue {
+  @Prop({ type: Boolean, required: true }) readonly clickedStop!: boolean
+  @Prop({ type: String, required: true }) readonly status!: string
   myChart!: echarts.ECharts
-  clickedStop = false
   ringData = [
     {
       value: 0
@@ -405,6 +411,7 @@ export default class EmergencyStopBtn extends Vue {
   }
 
   btnEnter() {
+    // if (!this.clickedStop && this.status.toLowerCase() !== 'offline') { // TODO UNCOMMENT
     if (!this.clickedStop) {
       this.ringData[0].value = 75
       this.ringData[1].value = 100
@@ -467,34 +474,36 @@ export default class EmergencyStopBtn extends Vue {
   }
 
   btnStopClick() {
-    this.sunStyle1 = {
-      color: 'rgba(200, 0, 0, 1)'
-    }
-    this.sunStyle2 = {
-      color: 'rgba(200, 0, 0, .8)'
-    }
-    this.sunStyle3 = {
-      color: 'rgba(200, 0, 0, .3)'
-    }
-    this.myChart.setOption({
-      series: [
-        {
-          progress: {
-            itemStyle: { color: 'rgba(255, 0, 0, .75' }
+    // if (!this.clickedStop && this.status.toLowerCase() !== 'offline') { // TODO Uncomment
+    if (!this.clickedStop) {
+      this.sunStyle1 = {
+        color: 'rgba(200, 0, 0, 1)'
+      }
+      this.sunStyle2 = {
+        color: 'rgba(200, 0, 0, .8)'
+      }
+      this.sunStyle3 = {
+        color: 'rgba(200, 0, 0, .3)'
+      }
+      this.myChart.setOption({
+        series: [
+          {
+            progress: {
+              itemStyle: { color: 'rgba(255, 0, 0, .75' }
+            }
+          },
+          {
+            itemStyle: { color: 'rgba(255, 0, 0, 1)' },
+            data: this.sunDataUnfolded(
+              this.sunStyle1,
+              this.sunStyle2,
+              this.sunStyle3
+            )
           }
-        },
-        {
-          itemStyle: { color: 'rgba(255, 0, 0, 1)' },
-          data: this.sunDataUnfolded(
-            this.sunStyle1,
-            this.sunStyle2,
-            this.sunStyle3
-          )
-        }
-      ]
-    })
-    this.clickedStop = true
-    EventBus.$emit('emergency-stop')
+        ]
+      })
+      EventBus.$emit('emergency-stop')
+    }
   }
 }
 </script>
@@ -504,13 +513,17 @@ export default class EmergencyStopBtn extends Vue {
   position: relative;
   height: 180px;
   width: 180px;
+  margin: 10px;
   border: 2px solid white;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer !important;
+  cursor: pointer;
   transition: all 0.5s ease;
   border-radius: 100px;
+}
+#EmergencyStopWrapper.offline {
+  cursor: auto;
 }
 #EmergencyStopChart {
   height: 100%;
@@ -533,6 +546,9 @@ export default class EmergencyStopBtn extends Vue {
 
 #EmergencyStopWrapper:hover span {
   transform: scale(0.8);
+}
+#EmergencyStopWrapper.offline:hover span {
+  opacity: 0;
 }
 #EmergencyStopWrapper:hover {
   border-color: transparent;

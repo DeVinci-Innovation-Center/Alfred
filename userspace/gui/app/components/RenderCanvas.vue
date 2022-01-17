@@ -17,6 +17,7 @@ import BabylonController from '@/utils/BabylonController'
 @Component
 export default class RenderCanvas extends Vue {
   @Prop({ type: Object, required: true }) readonly pose!: ArmPose
+  @Prop({ type: Boolean, required: true }) readonly watching!: boolean
   @Prop({ type: Boolean, required: true }) readonly clickedStop!: boolean
   @Prop({ type: Object, required: false }) readonly equipped?: Equipment
   unpluggedPose: ArmPose = {
@@ -68,17 +69,17 @@ export default class RenderCanvas extends Vue {
     }
   }
 
-  @Watch('equipment')
+  @Watch('equipped')
   updateEquipment() {
     const scene = this.BC.scene
     // clear any previous equipment
     this.hand = scene.getTransformNodeByName(
       'hand_base'
     )! as BABYLON.TransformNode
-    this.hand.setEnabled(false)
+    if (this.hand) this.hand.setEnabled(false)
     if (this.equipped) {
       // enable appropriate equipment
-      switch (this.equipped.name) {
+      switch (this.equipped.name.toLowerCase()) {
         case 'hand':
           this.hand.setEnabled(true)
           break
@@ -104,7 +105,7 @@ export default class RenderCanvas extends Vue {
     backgroundMat.reflectionBlur = 0.15
     skybox.material = backgroundMat
 
-    await BABYLON.SceneLoader.ImportMeshAsync('', '/', 'xarm-6-new.glb', scene)
+    await BABYLON.SceneLoader.ImportMeshAsync('', '/', 'xarm-6.glb', scene)
     /**
      * Custom metallic material
      */
@@ -132,43 +133,49 @@ export default class RenderCanvas extends Vue {
     const link4 = scene.getTransformNodeByName('Link4')
     const link5 = scene.getTransformNodeByName('Link5')
     const head = scene.getTransformNodeByName('Link6')
+
+    scene.animationGroups.forEach((anim) => {
+      console.log(anim)
+    })
+
     scene.registerBeforeRender(() => {
-      if (link1) {
-        link1.rotation = new BABYLON.Vector3(0, this.pose.joint_1, 0)
-      }
+      if (this.watching) {
+        if (link1) {
+          link1.rotation = new BABYLON.Vector3(0, this.pose.joint_1, 0)
+        }
 
-      if (link2) {
-        link2.rotation = new BABYLON.Vector3(
-          -this.pose.joint_2 - Math.PI / 2,
-          -Math.PI / 2,
-          Math.PI / 2
-        )
+        if (link2) {
+          link2.rotation = new BABYLON.Vector3(
+            -this.pose.joint_2 - Math.PI / 2,
+            -Math.PI / 2,
+            Math.PI / 2
+          )
+        }
+        if (link3) {
+          link3.rotation = new BABYLON.Vector3(0, this.pose.joint_3, 0)
+        }
+        if (link4) {
+          link4.rotation = new BABYLON.Vector3(
+            -this.pose.joint_4 - Math.PI / 2,
+            -Math.PI / 2,
+            Math.PI / 2
+          )
+        }
+        if (link5) {
+          link5.rotation = new BABYLON.Vector3(
+            this.pose.joint_5 + Math.PI / 2,
+            -Math.PI / 2,
+            -Math.PI / 2
+          )
+        }
+        if (head) {
+          head.rotation = new BABYLON.Vector3(
+            -this.pose.joint_6 - Math.PI / 2,
+            -Math.PI / 2,
+            Math.PI / 2
+          )
+        }
       }
-      if (link3) {
-        link3.rotation = new BABYLON.Vector3(0, this.pose.joint_3, 0)
-      }
-      if (link4) {
-        link4.rotation = new BABYLON.Vector3(
-          -this.pose.joint_4 - Math.PI / 2,
-          -Math.PI / 2,
-          Math.PI / 2
-        )
-      }
-      if (link5) {
-        link5.rotation = new BABYLON.Vector3(
-          this.pose.joint_5 + Math.PI / 2,
-          -Math.PI / 2,
-          -Math.PI / 2
-        )
-      }
-      if (head) {
-        head.rotation = new BABYLON.Vector3(
-          -this.pose.joint_6 - Math.PI / 2,
-          -Math.PI / 2,
-          Math.PI / 2
-        )
-      }
-
       scene.animationGroups.forEach((anim) => {
         anim.play()
         anim.goToFrame((this.openingHand / 85) * anim.to)
@@ -188,7 +195,7 @@ export default class RenderCanvas extends Vue {
     let rotationLink4 = 180
     let rotationLink5 = -42
     let rotationHead = 12
-    let openingHand = 58.5
+    const openingHand = 58.5
 
     const advancedTexture =
       GUI.AdvancedDynamicTexture.CreateFullscreenUI('Rotations UI')
@@ -291,7 +298,7 @@ export default class RenderCanvas extends Vue {
       'Hand opening',
       openingHand,
       (value) => {
-        openingHand = value
+        this.openingHand = value
       },
       0,
       85,

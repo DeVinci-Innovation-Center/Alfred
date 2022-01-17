@@ -1,7 +1,6 @@
 export default {
   env: {
-    socketTarget: 'http://0.0.0.0:8000',
-    socketEventName: 'dashboard-newsletter'
+    socketTarget: 'http://0.0.0.0:8000'
   },
   server: {
     host: "0.0.0.0"
@@ -50,6 +49,14 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    ['nuxt-fontawesome', {
+      imports: [
+        {
+          set: '@fortawesome/free-solid-svg-icons',
+          icons: ['fas']
+        }
+      ]
+    }]
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

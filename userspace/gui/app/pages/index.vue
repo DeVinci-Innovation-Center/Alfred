@@ -19,6 +19,8 @@
       <RenderCanvas
         :pose="currentPose"
         :clicked-stop="clickedStop"
+        :equipped="equipped"
+        :watching="watching"
         :style="`filter:grayscale(${status == 'offline' ? 1 : 0})`"
       />
     </div>
@@ -41,12 +43,18 @@
         <InfoPanel />
       </div>
       <!-- RELATIVE ELEMENTS -->
-      <div style="display: flex; flex-grow: 1">
-        <EquipmentBar v-if="equipments" :clicked-stop="clickedStop" :equipments="equipments" :equipped="equipped" />
+      <div style="display: flex; flex-grow: 1; overflow-y: hidden">
+        <EquipmentBar
+          v-if="equipments.length"
+          :equipments="equipments"
+          :clicked-stop="clickedStop"
+          :equipped="equipped"
+          :scrolled-equip="scrolledEquip"
+        />
         <div id="dashboard">
           <!-- DASHBOARD HEADER -->
           <div id="dashboardHeader">
-            <h1>
+            <h1 :class="`${clickedStop ? 'stopped' : ''}`">
               Alfred is <span>{{ status }}</span>
             </h1>
           </div>
@@ -57,14 +65,22 @@
               <JointGauges
                 :current-pose="currentPose"
                 :clicked-stop="clickedStop"
+                :watching="watching"
               />
               <div id="taskManager">
-                <TaskList :equipped="equipped" />
-                <TaskPanel :equipped="equipped" />
+                <TaskList
+                  v-if="equipments.length"
+                  :equipments="equipments"
+                  :equipped="equipped"
+                  :scrolled-equip="scrolledEquip"
+                  :clicked-stop="clickedStop"
+                />
+                <TaskPanel :equipped="equipped" :clicked-stop="clickedStop" />
               </div>
             </div>
             <EmergencyStopBtn
               :clicked-stop="clickedStop"
+              :status="status"
               @click="
                 () => {
                   emergencyStop()
@@ -99,7 +115,7 @@ import ArmOutline from '@/components/ArmOutline.vue'
 import Terminal from '@/components/Terminal.vue'
 // import types
 import { ArmPose } from '@/types/ArmPose'
-import { Equipment } from '@/types/Equipment'
+import { Equipment, Task } from '@/types/Equipment'
 // import misc
 import { EventBus } from '@/utils/EventBus'
 
@@ -126,12 +142,14 @@ export default class Index extends Vue {
     joint_4: 0,
     joint_5: 0,
     joint_6: 0,
-    head: {equipment: null}
+    head: { equipment: null }
   }
 
-  equipments!: Equipment[]
-  equipped?: Equipment | null= null
-
+  watching = false
+  equipments: Equipment[] = []
+  equipped?: Equipment | null = null
+  scrolledEquip?: Equipment | null = null
+  currentTask?: Task | null = null
   clickedStop = false
   infoPanelIsOpen = false
   isDragging = false
@@ -141,7 +159,7 @@ export default class Index extends Vue {
     // this.io = io(this.socketTarget)
   }
 
-  mounted() {
+  async mounted() {
     // this.io.on('arm-pose', (data) => {
     //   gsap.to(this.currentPose, {
     //     duration: 0.5,
@@ -171,18 +189,39 @@ export default class Index extends Vue {
           joint_4: this.currentPose.joint_4,
           joint_5: this.currentPose.joint_5,
           joint_6: this.currentPose.joint_6,
-          head: {equipment: null}
+          head: { equipment: null }
         }
       }
     }, 20)
-    this.equipments = require('@/assets/fake_equipments.json') as Equipment[]
+
+    this.equipments =
+      (await require('@/assets/fake_equipments.json')) as Equipment[]
 
     this.setDragResizer()
-    
+
     EventBus.$on('emergency-stop', () => {
-      // this.io.emit('emergency-stop') 
+      // this.io.emit('emergency-stop')
       this.clickedStop = true
       this.status = 'stopping'
+    })
+    EventBus.$on('change-equipment', (i: number) => {
+      if (i < 0) {
+        this.equipped = null
+        // this.io.emit('change-equipment', null)
+      } else {
+        this.equipped = this.equipments[i]
+        // this.io.emit('change-equipment', this.equipments[i].name)
+      }
+    })
+    EventBus.$on('scroll-equipment', (i: number) => {
+      if (i < 0) {
+        this.scrolledEquip = null
+      } else {
+        this.scrolledEquip = this.equipments[i]
+      }
+    })
+    EventBus.$on('toggle-watching', () => {
+      this.watching = !this.watching
     })
   }
 
@@ -281,8 +320,8 @@ export default class Index extends Vue {
 #dashboard {
   position: relative;
   display: flex;
-  /* flex-grow: 1; */
-  width: 100%;
+  flex-grow: 1;
+  /* width: 100%; */
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
@@ -348,6 +387,10 @@ h1 {
   background: rgba(0, 0, 0, 0.4);
   padding: 0px 8px;
   border-radius: 10px;
+  box-shadow: inset 0px 0px 15px 5px rgba(0, 0, 0, 0.5);
+}
+#dashboardHeader h1.stopped span {
+  background: rgba(150, 0, 0, 0.4);
 }
 /* ---------
     BODY 
@@ -369,13 +412,14 @@ h1 {
   align-items: center;
   /* border: 1px solid white; */
 }
-#taskManager{
-  background: rgba(0, 0, 0, .65);
+#taskManager {
+  background: rgba(0, 0, 0, 0.65);
   flex-grow: 1;
   width: 95%;
-  margin: 25px 0px;
+  margin: 10px 0px;
   border-radius: 10px;
   display: flex;
+  overflow: hidden;
 }
 #emergencyStopBtn {
   font-size: 2rem;

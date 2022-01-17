@@ -1,6 +1,17 @@
 <template>
   <div id="jointGauges" ref="jointGauges">
-    <span id="stop">STOP !</span>
+    <div
+      v-if="!clickedStop"
+      id="watchToggler"
+      @click="
+        (e) => {
+          toggleWatcher(e)
+        }
+      "
+    >
+      {{ watching ? 'Stop watching arm-pose' : 'Start watching arm-pose' }}
+    </div>
+    <div id="gaugesHolder" ref="gaugesHolder"></div>
   </div>
 </template>
 
@@ -16,6 +27,7 @@ import { EventBus } from '@/utils/EventBus'
 export default class JointGauges extends Vue {
   @Prop({ type: Object, required: true }) readonly currentPose!: ArmPose
   @Prop({ type: Boolean, required: true }) readonly clickedStop!: boolean
+  @Prop({ type: Boolean, required: true }) readonly watching!: boolean
   myChart!: echarts.ECharts
   gaugeData = [
     [
@@ -81,7 +93,7 @@ export default class JointGauges extends Vue {
   ]
 
   mounted() {
-    const container = this.$refs.jointGauges as HTMLElement
+    const container = this.$refs.gaugesHolder as HTMLElement
     // initialize the echarts instance
     this.myChart = echarts.init(container, undefined, {
       width: container.clientWidth,
@@ -107,6 +119,7 @@ export default class JointGauges extends Vue {
     })
     EventBus.$on('resize', resizeGauges)
     window.addEventListener('resize', resizeGauges)
+    setTimeout(resizeGauges, 10) // ugly but needed for first load
   }
 
   initGaugeSeries() {
@@ -178,40 +191,68 @@ export default class JointGauges extends Vue {
   @Watch('currentPose')
   @Watch('clickedStop')
   updateGaugeSeries() {
-    const series = []
-    for (let i = 0; i < 6; i++) {
-      const rotation = Object.values(this.currentPose)[i]
-      this.gaugeData[i][0].value = (rotation / (Math.PI * 2)) * 100
-      series.push({
-        data: this.gaugeData[i],
-        pointer: {
-          show: false
-        },
-        progress: {
-          itemStyle: {
-            color: this.clickedStop ? 'rgba(255, 0, 0, .4)' : 'white',
-            shadowColor: this.clickedStop ? 'rgba(255, 0, 0, .4)' : 'white'
+    if (this.watching || this.clickedStop) {
+      const series = []
+      for (let i = 0; i < 6; i++) {
+        const rotation = Object.values(this.currentPose)[i]
+        this.gaugeData[i][0].value = (rotation / (Math.PI * 2)) * 100
+        series.push({
+          data: this.gaugeData[i],
+          pointer: {
+            show: false
+          },
+          progress: {
+            itemStyle: {
+              color: this.clickedStop ? 'rgba(255, 0, 0, .4)' : 'white',
+              shadowColor: this.clickedStop ? 'rgba(255, 0, 0, .4)' : 'white'
+            }
           }
-        }
-      })
+        })
+      }
+      this.myChart.setOption({ series })
     }
+  }
 
-    this.myChart.setOption({ series })
+  toggleWatcher(e: MouseEvent) {
+    e.preventDefault()
+    EventBus.$emit('toggle-watching')
   }
 }
 </script>
 
 <style scoped>
 #jointGauges {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 150px;
+  margin: 10px 0px;
   justify-content: space-around;
   /* border: 1px solid blue; */
 }
-#stop {
+#gaugesHolder {
+  height: 100%;
+  width: 100%;
+}
+#watchToggler {
   position: absolute;
+  z-index: 5;
+  height: 100%;
+  width: 100%;
+  font-size: 3rem;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+#watchToggler:hover {
+  opacity: 0.85;
 }
 </style>

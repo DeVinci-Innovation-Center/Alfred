@@ -8,14 +8,15 @@ body,
 }
 
 body {
-  background: rgb(230, 230, 230);
-  background: rgb(15, 30, 40);
+  background: linear-gradient(0deg, rgb(15, 30, 40), rgb(23, 45, 60));
   color: white;
   font-family: 'Roboto', sans-serif;
   font-weight: 100;
   text-align: center;
 }
-
+i {
+  font-style: italic;
+}
 main {
   display: flex;
   width: 100%;
@@ -36,10 +37,10 @@ main {
 
 .disable-select {
   user-select: none; /* supported by Chrome and Opera */
- -webkit-user-select: none; /* Safari */
- -khtml-user-select: none; /* Konqueror HTML */
- -moz-user-select: none; /* Firefox */
- -ms-user-select: none; /* Internet Explorer/Edge */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
 /* landscape for tablet and smarpthone */
