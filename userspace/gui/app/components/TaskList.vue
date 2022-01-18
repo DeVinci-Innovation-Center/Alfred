@@ -70,7 +70,7 @@ export default class TaskList extends Vue {
     EventBus.$emit('change-equipment', key)
   }
 
-  taskClick(i) {
+  taskClick(i: number) {
     console.log(`clicked on task #${i}`)
     // STILL DESIGN TO DO FOR DYNAMIC TASKS
     // EventBus.$emit('')
