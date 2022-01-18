@@ -3,6 +3,8 @@ services:
   frontend:
     image: alfred-frontend:dev
     build: ./userspace/gui
+    environment:
+      - HOST_IP=${HOST_IP:-0.0.0.0}
     ports:
       - 80:3000
     networks:

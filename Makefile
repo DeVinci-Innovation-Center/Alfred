@@ -1,9 +1,3 @@
-# open-frontend:
-# 	firefox http://$(shell hostname -I | awk '{print $$1}'):80
-
-# open-backend:
-# 	firefox http://$(shell hostname -I | awk '{print $$1}'):8000/docs
-
 expose-x:
 	sudo xhost +local:root
 
@@ -18,7 +12,10 @@ clean-volumes:
 	rm -rf ./kernel/database-files/redis-data/**
 	rm -rf ./kernel/database-files/mongodb-data/**
 
+run: export HOST_IP=${shell ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p'}
 run: create-volumes expose-x
+	env | grep KDE_FULL_SESSION
+
 	docker-compose up --build -d
 
 stop:
