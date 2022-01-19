@@ -2,9 +2,10 @@ services:
 
   frontend:
     image: alfred-frontend:dev
-    build: ./userspace/gui
-    environment:
-      - HOST_IP=${ALFRED_HOST_IP:-0.0.0.0}
+    build:
+      context: ./userspace/gui
+      args:
+        NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
     ports:
       - 80:3000
     networks:

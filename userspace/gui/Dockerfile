@@ -9,6 +9,9 @@ RUN npm install
 
 COPY app /app/
 
+ARG NUXT_ENV_HOST_IP=0.0.0.0
+ENV NUXT_ENV_HOST_IP=$NUXT_ENV_HOST_IP
+
 RUN npm run build && \
     npm run generate
 
