@@ -135,7 +135,7 @@ export default class RenderCanvas extends Vue {
     const head = scene.getTransformNodeByName('Link6')
 
     scene.animationGroups.forEach((anim) => {
-      console.log(anim)
+      // console.log(anim)
     })
 
     scene.registerBeforeRender(() => {

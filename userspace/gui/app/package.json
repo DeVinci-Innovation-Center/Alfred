@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
+    "dev": "SET NUXT_ENV_HOST_IP=$npm_config_hostip & nuxt",
+    "build": "SET NUXT_ENV_HOST_IP=$npm_config_hostip & nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",

@@ -71,7 +71,6 @@ export default class EquipmentBar extends Vue {
 
   @Watch('scrolledEquip')
   updateScrollEquipped() {
-    console.log(this.equipped?.name)
     // get DOM elements
     const holder = this.$refs.equipmentHolder as HTMLElement
     const key = `${this.scrolledEquip!.name}-icon`

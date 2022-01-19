@@ -1,6 +1,6 @@
 export default {
   env: {
-    socketTarget: process.env.HOST_IP
+    socketTarget: process.env.NUXT_ENV_HOST_IP
   },
   server: {
     host: "0.0.0.0"
