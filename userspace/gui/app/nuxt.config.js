@@ -1,6 +1,6 @@
 export default {
   env: {
-    socketTarget: 'http://0.0.0.0:8000'
+    socketTarget: process.env.HOST_IP
   },
   server: {
     host: "0.0.0.0"

@@ -156,7 +156,7 @@ export default class Index extends Vue {
   status = 'offline'
 
   created() {
-    // this.io = io(this.socketTarget)
+    console.log(this.socketTarget)
   }
 
   async mounted() {
