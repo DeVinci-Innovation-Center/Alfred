@@ -13,9 +13,9 @@ Check out the demo video [here](https://www.youtube.com/watch?v=6KcHh4nWJFI)! Up
 
 ## Requirements
 
-- Docker
-
-- docker-compose
+- Docker ([get docker](https://docs.docker.com/get-docker/))
+- docker-compose ([get docker-compose](https://docs.docker.com/compose/install/))
+- GNU Make
 
 ## Usage
 

@@ -8,6 +8,9 @@ create-volumes:
 		./kernel/database-files/mongodb-data/data/db/ \
 		./kernel/database-files/mongodb-data/data/log/
 
+	chmod -R 777 ./kernel/database-files/mongodb-data
+	chmod -R 777 ./kernel/database-files/redis-data
+
 clean-volumes:
 	rm -rf ./kernel/database-files/redis-data/**
 	rm -rf ./kernel/database-files/mongodb-data/**
