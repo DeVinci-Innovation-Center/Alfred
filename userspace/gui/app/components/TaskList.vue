@@ -14,6 +14,7 @@
       <li
         v-for="(task, i) in scrolledEquip.tasks"
         :key="`task-${i}`"
+        :title="task.description"
         @click="
           () => {
             taskClick(i)
@@ -71,9 +72,7 @@ export default class TaskList extends Vue {
   }
 
   taskClick(i: number) {
-    console.log(`clicked on task #${i}`)
-    // STILL DESIGN TO DO FOR DYNAMIC TASKS
-    // EventBus.$emit('')
+    EventBus.$emit('doTask', this.equipped.tasks[i])
   }
 }
 </script>

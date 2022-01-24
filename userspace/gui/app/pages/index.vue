@@ -137,8 +137,8 @@ export default class Index extends Vue {
   io!: Socket
   currentPose: ArmPose = {
     joint_1: 0,
-    joint_2: 0,
-    joint_3: 0,
+    joint_2: -1,
+    joint_3: -.6,
     joint_4: 0,
     joint_5: 0,
     joint_6: 0,
@@ -153,7 +153,7 @@ export default class Index extends Vue {
   clickedStop = false
   infoPanelIsOpen = false
   isDragging = false
-  status = 'offline'
+  status = 'online'
 
   created() {
     console.log('this.socketTarget : ', this.socketTarget)
@@ -183,10 +183,10 @@ export default class Index extends Vue {
     setInterval(() => {
       if (!this.clickedStop) {
         this.currentPose = {
-          joint_1: (this.currentPose.joint_1 + 0.025) % (Math.PI * 2),
+          joint_1: (this.currentPose.joint_1 + 0.01) % (Math.PI * 2),
           joint_2: this.currentPose.joint_2,
           joint_3: this.currentPose.joint_3,
-          joint_4: this.currentPose.joint_4,
+          joint_4: (this.currentPose.joint_4 + 0.02) % (Math.PI * 2),
           joint_5: this.currentPose.joint_5,
           joint_6: this.currentPose.joint_6,
           head: { equipment: null }
