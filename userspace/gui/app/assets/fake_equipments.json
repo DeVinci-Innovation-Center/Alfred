@@ -15,7 +15,7 @@
     "description": "third fake item"
   },
   {
-    "name": "Hand",
+    "name": "hand",
     "tasks": [
       {
         "name": "Open",
@@ -24,6 +24,10 @@
       {
         "name": "Close",
         "description": "Closes the hand until it meets an object"
+      },
+      {
+        "name": "BLT scan",
+        "description": "Proceeds to environment sensing through contact points"
       }
     ],
     "description": "A robotic claw that can open and close"

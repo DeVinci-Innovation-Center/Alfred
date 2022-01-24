@@ -8,7 +8,7 @@ body,
 }
 
 body {
-  background: linear-gradient(0deg, rgb(15, 30, 40), rgb(23, 45, 60));
+  background: linear-gradient(0deg, rgb(15, 30, 40),rgb(15, 30, 40),rgb(15, 30, 40), rgb(23, 45, 60));
   color: white;
   font-family: 'Roboto', sans-serif;
   font-weight: 100;

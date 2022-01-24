@@ -28,7 +28,7 @@ export default class JointGauges extends Vue {
   @Prop({ type: Object, required: true }) readonly currentPose!: ArmPose
   @Prop({ type: Boolean, required: true }) readonly clickedStop!: boolean
   @Prop({ type: Boolean, required: true }) readonly watching!: boolean
-  myChart!: echarts.ECharts
+  jointsChart!: echarts.ECharts
   gaugeData = [
     [
       {
@@ -95,13 +95,13 @@ export default class JointGauges extends Vue {
   mounted() {
     const container = this.$refs.gaugesHolder as HTMLElement
     // initialize the echarts instance
-    this.myChart = echarts.init(container, undefined, {
+    this.jointsChart = echarts.init(container, undefined, {
       width: container.clientWidth,
       height: Math.min(container.clientWidth / 5, container.clientHeight)
     })
 
     // Draw the chart
-    this.myChart.setOption({
+    this.jointsChart.setOption({
       tooltip: { show: false },
       silent: true,
       series: this.initGaugeSeries()
@@ -109,7 +109,7 @@ export default class JointGauges extends Vue {
 
     // resize gauges when needed
     const resizeGauges = () => {
-      this.myChart.resize({
+      this.jointsChart.resize({
         width: container.clientWidth,
         height: Math.min(container.clientWidth / 5, container.clientHeight)
       })
@@ -209,7 +209,7 @@ export default class JointGauges extends Vue {
           }
         })
       }
-      this.myChart.setOption({ series })
+      this.jointsChart.setOption({ series })
     }
   }
 

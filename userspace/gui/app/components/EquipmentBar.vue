@@ -62,7 +62,8 @@ export default class EquipmentBar extends Vue {
   allowScroll = true
 
   mounted() {
-    this.scrollEquipment(0)
+    const middleIndex = Math.ceil(this.equipments.length/2)-1
+    setTimeout(()=>{this.scrollEquipment(middleIndex)}, 250)
   }
 
   scrollEquipment(i: number) {

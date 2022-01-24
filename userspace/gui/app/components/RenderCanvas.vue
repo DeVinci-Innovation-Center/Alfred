@@ -8,11 +8,13 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 import 'babylonjs-loaders'
+import { gsap, Linear } from 'gsap'
 // types
 import { ArmPose } from '@/types/ArmPose'
-import { Equipment } from '@/types/Equipment'
+import { Equipment, Task } from '@/types/Equipment'
 // miscellaneous
 import BabylonController from '@/utils/BabylonController'
+import { EventBus } from '@/utils/EventBus'
 
 @Component
 export default class RenderCanvas extends Vue {
@@ -32,11 +34,11 @@ export default class RenderCanvas extends Vue {
     }
   }
 
-  openingHand = 0.5
+  openingHand = 0
   BC!: BabylonController
   hand!: BABYLON.TransformNode
 
-  created() {}
+
 
   async mounted() {
     const canvas = this.$refs.renderCanvas as HTMLCanvasElement
@@ -57,6 +59,34 @@ export default class RenderCanvas extends Vue {
 
     this.BC.engine.runRenderLoop(() => {
       this.BC.scene.render()
+    })
+
+    /** listen to hand opening **/
+    this.initTaskListener()
+  }
+
+  initTaskListener(){
+    EventBus.$on('doTask', (task: Task) => {
+      switch (task.name.toLowerCase()) {
+        case 'open':
+          gsap.to(this, {
+            duration: 2,
+            openingHand: 1,
+            ease: Linear.easeNone
+          })
+          break
+        case 'close':
+          gsap.to(this, {
+            duration: 2,
+            openingHand: 0,
+            ease: Linear.easeNone
+          })
+          break
+        case 'blt scan':
+          break
+        default:
+          break
+      }
     })
   }
 
@@ -134,9 +164,9 @@ export default class RenderCanvas extends Vue {
     const link5 = scene.getTransformNodeByName('Link5')
     const head = scene.getTransformNodeByName('Link6')
 
-    scene.animationGroups.forEach((anim) => {
+    // scene.animationGroups.forEach((anim) => {
       // console.log(anim)
-    })
+    // })
 
     scene.registerBeforeRender(() => {
       if (this.watching) {
@@ -178,8 +208,8 @@ export default class RenderCanvas extends Vue {
       }
       scene.animationGroups.forEach((anim) => {
         anim.play()
-        anim.goToFrame((this.openingHand / 85) * anim.to)
-        anim.pause()
+        anim.goToFrame((this.openingHand) * anim.to)
+        anim.pause() 
       })
     })
   }
