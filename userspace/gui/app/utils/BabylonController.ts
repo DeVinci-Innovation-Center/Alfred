@@ -2,7 +2,7 @@ import * as BABYLON from 'babylonjs'
 import { Scene } from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 
-import { Position2 } from '@/types/miscellaneous'
+import { Position2 } from '../types/miscellaneous'
 
 const RAD2DEG = 180 / Math.PI
 const DEG2RAD = Math.PI / 180

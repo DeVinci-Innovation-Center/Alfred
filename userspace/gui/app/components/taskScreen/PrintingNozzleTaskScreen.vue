@@ -6,9 +6,9 @@
 
 <script lang="ts">
 // import libs
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import { Component, Vue} from 'vue-property-decorator'
 // import types
-import { Equipment } from '@/types/Equipment'
+import { Equipment } from '../../types/Equipment'
 
 @Component
 export default class PrintingNozzleTaskScreen extends Vue {

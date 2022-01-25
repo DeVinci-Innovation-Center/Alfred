@@ -104,20 +104,20 @@ import { Component, Vue } from 'vue-property-decorator'
 import { io, Socket } from 'socket.io-client'
 import { gsap } from 'gsap'
 // import components
-import RenderCanvas from '@/components/RenderCanvas.vue'
-import InfoPanel from '@/components/InfoPanel.vue'
-import JointGauges from '@/components/JointGauges.vue'
-import EquipmentBar from '@/components/EquipmentBar.vue'
-import TaskList from '@/components/TaskList.vue'
-import TaskPanel from '@/components/TaskPanel.vue'
-import EmergencyStopBtn from '@/components/EmergencyStopBtn.vue'
-import ArmOutline from '@/components/ArmOutline.vue'
-import Terminal from '@/components/Terminal.vue'
+import RenderCanvas from '../components/RenderCanvas.vue'
+import InfoPanel from '../components/InfoPanel.vue'
+import JointGauges from '../components/JointGauges.vue'
+import EquipmentBar from '../components/EquipmentBar.vue'
+import TaskList from '../components/TaskList.vue'
+import TaskPanel from '../components/TaskPanel.vue'
+import EmergencyStopBtn from '../components/EmergencyStopBtn.vue'
+import ArmOutline from '../components/ArmOutline.vue'
+import Terminal from '../components/Terminal.vue'
 // import types
-import { ArmPose } from '@/types/ArmPose'
-import { Equipment, Task } from '@/types/Equipment'
+import { ArmPose } from '../types/ArmPose'
+import { Equipment, Task } from '../types/Equipment'
 // import misc
-import { EventBus } from '@/utils/EventBus'
+import { EventBus } from '../utils/EventBus'
 
 @Component({
   components: {
@@ -321,6 +321,7 @@ export default class Index extends Vue {
   position: relative;
   display: flex;
   flex-grow: 1;
+  /* width: 100%; */
   /* width: 100%; */
   flex-direction: column;
   justify-content: space-between;

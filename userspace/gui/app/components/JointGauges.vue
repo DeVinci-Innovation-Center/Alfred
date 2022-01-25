@@ -20,9 +20,9 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import * as echarts from 'echarts'
 // import types
-import { ArmPose } from '@/types/ArmPose'
+import { ArmPose } from '../types/ArmPose'
 // import misc
-import { EventBus } from '@/utils/EventBus'
+import { EventBus } from '../utils/EventBus'
 @Component
 export default class JointGauges extends Vue {
   @Prop({ type: Object, required: true }) readonly currentPose!: ArmPose

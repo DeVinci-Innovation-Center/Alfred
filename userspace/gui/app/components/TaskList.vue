@@ -43,9 +43,9 @@
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import '@fortawesome/fontawesome-free'
 // import types
-import { Equipment } from '@/types/Equipment'
+import { Equipment } from '../types/Equipment'
 // import misc
-import { EventBus } from '@/utils/EventBus'
+import { EventBus } from '../utils/EventBus'
 
 @Component
 export default class TaskList extends Vue {
@@ -72,7 +72,7 @@ export default class TaskList extends Vue {
   }
 
   taskClick(i: number) {
-    EventBus.$emit('doTask', this.equipped.tasks[i])
+    EventBus.$emit('doTask', this.equipped!.tasks[i])
   }
 }
 </script>
