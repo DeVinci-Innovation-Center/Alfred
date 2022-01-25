@@ -1,26 +1,13 @@
 # ALFRED : General Purpose Middleware for Personal Robotic Arm Assistants
 
-# TODOS:
-
-Bannière
-Vidéo
-Pas de is to =>
-Pas de chiffres
-Compiler les titres en phrases
-SotA cobotics/robotics
-compresser verticalement le schéma
-commencer par for example pour les exemples
-raccourcir les phrases
-
-Photo du bras dans le state of the art
-intro = abstract en plus détaillé
-marquer un peu plus
-pas de titre state of the art, mais plutot partie de l'intro
-homegène titres/schéma
-
-intro middleware architecture (comment le système a été pensé)
-
-revoir syntaxe: pas de that, it enables, the goal is, ...
+> TODOS:
+>
+> > Bannière\
+> > Vidéo\
+> > SotA cobotics/robotics\
+>
+> > intro = abstract en plus détaillé\
+> > marquer un peu plus\
 
 # About
 
@@ -36,21 +23,21 @@ ALFRED uses containers to deploy a complete middleware, from complex robot contr
 
 ## Content
 
-@[begin](2,begin)
+@[space](3)
+
+@[split](2,begin)
 
 ![](https://dvic.devinci.fr/api/v3/img/full/ysvpsl7k18npur8u15ptmvz2nyfmzd.jpg)
 
 @[split](2,break)
 
-<!-- TODO: introduction ~= abstract w/ more details -->
+Basic automation requires a robot to only repeat a set of movements indefinitely, but with the needs of Industry 4.0, robotic systems need to be more and more complex. Safety, adaptability and connectivity are now required for automation in the industry. Safety comes in the form of smart collision detection, with sensitive robots that know their environments and react to unseen obstacles or operators. Adaptability requires robots to have intelligent decision making systems and powerful sensing abilities. Robots need to communicate with each other to share information, and to be able to be controlled remotely for easier access.
 
-ALFRED is an Artificial Intelligence-based middleware for robotic arms. The system uses a modular architecture, with a high degree of abstraction inspired by modern Operating Systems. ALFRED can be deployed on robotic arms with minimal adjustments. It is built for pushing Human-Robot interaction forward, with multiple modalities of interaction and high performance, in business or research applications.
+ALFRED brings safety, adaptability and connectivity to any commercial robotic arm. ALFRED is a middleware, enhanced by Artificial Intelligence, focused on modularity, extensibility and abstraction. Inspired by modern Operating Systems, it brings together devices, interfaces and the robotic arm to create a system ready to be deployed in real situations. ALFRED is a way for manufacturers and researchers to develop applications for a robotic arm with minimal knowledge about robotic control. It integrates in its environment with its multiple interaction modalities, such as manual control with hands, voice control, and a web interface.
 
-ALFRED uses containers to deploy a complete middleware, from complex robot control to high level user applications.
+@[split](2,end)
 
-@[end](2,end)
-
-ALFRED makes use of two fields of Artificial Intelligence: **Computer vision** and **Language processing**.
+To achieve its capabilities, ALFRED makes use of two fields of Artificial Intelligence: **Computer vision** and **Language processing**.
 
 **Computer vision** is the analysis of the environment using image data, such as a video feed from a camera. The environment around a system can be analyzed with different context analysis techiques, object detection and pose estimation for people and animals. The **Context analysis** comprises of scanning the environment to extract a map of the robot's surroundings. Visual SLAM is used to create a map representing the environment from a camera feed. The medium in a point cloud, which is a series of coordinates representing matter in space. OBR_SLAM3 [^5] is an example of VSLAM algorithm, and is powerful, robust and accurate even compared to the best systems.
 **Semantic mapping** is a subset of context analysis which describes the concept of associating metadata to points in a point cloud. Traditional point clouds are only composed of coordinates where matter is present. With semantic mapping, it becomes possible to assign data to a group of points in space, e.g., saying a specific part of the map represents a bottle, or a couch. One of the main **object detection** algorithm is the YOLO family, the most recent member being YOLOv5 [^1]. YOLOv5 is a fast and easy to train model. The YOLO family does what is called boxing: it determines a box around the objects it detects on the image.
@@ -63,9 +50,9 @@ Interpreting text is done with **Natural Language Processing (NLP)**, a field of
 
 ALFRED is designed with modularity in mind, and follows design principles of modern operating systems. The system is separated into two parts:
 
-- **Userspace**, which is made of **applications**, **interfaces** and a **Network Connector**. **Applications** are blocks which are added by the user, and use the system's API to control the arm. Applications are where robot commands are sent, environment data read, and information generated. **Interfaces** are the way to interact with the arm by launching applications, showing data, and getting user input. The **Network Connector** allows remote applications or other systems to interact with ALFRED.
+-**Userspace**, which is made of **applications**, **interfaces** and a **Network Connector**. **Applications** are blocks which are added by the user, and use the system's API to control the arm. Applications are where robot commands are sent, environment data read, and information generated. **Interfaces** are the way to interact with the arm by launching applications, showing data, and getting user input. The **Network Connector** allows remote applications or other systems to interact with ALFRED.
 
-- The **Kernel**: the kernel is the core of the system. It contains components necessary for the system to function. The components in the kernel are not accessible to the user. There are four parts in the kernel: the database, the drivers, robotic arm control and environment analysis. The **database** is used to persist data, and make it accessible to outside of the system, e.g. with robot position or logs. The **drivers** are the interface between the devices linked to ALFRED and the software. **Robotic arm control** controls the robot itself, does physics calculations and collision detection. **Environment analysis** is the eyes of the system, where the system learns about its environment.
+-The **Kernel**: the kernel is the core of the system. It contains components necessary for the system to function. The components in the kernel are not accessible to the user. There are four parts in the kernel: the database, the drivers, robotic arm control and environment analysis. The **database** is used to persist data, and make it accessible to outside of the system, e.g. with robot position or logs. The **drivers** are the interface between the devices linked to ALFRED and the software. **Robotic arm control** controls the robot itself, does physics calculations and collision detection. **Environment analysis** is the eyes of the system, where the system learns about its environment.
 
 ![](https://dvic.devinci.fr/api/v3/img/full/0rzdd3pvcymy2e1o9fluj93mj7d14a.png)
 
