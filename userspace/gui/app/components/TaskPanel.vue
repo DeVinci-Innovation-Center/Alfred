@@ -6,12 +6,12 @@
 
 <script lang="ts">
 // import libs
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 // import componentes
-import HandTaskScreen from '@/components/taskScreen/HandTaskScreen.vue'
-import PrintingNozzleTaskScreen from '@/components/taskScreen/PrintingNozzleTaskScreen.vue'
+import HandTaskScreen from '../components/taskScreen/HandTaskScreen.vue'
+import PrintingNozzleTaskScreen from '../components/taskScreen/PrintingNozzleTaskScreen.vue'
 // import types
-import { Equipment } from '@/types/Equipment'
+import { Equipment } from '../types/Equipment'
 
 @Component({
   components: {

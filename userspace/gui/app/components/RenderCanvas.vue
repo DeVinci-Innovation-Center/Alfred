@@ -10,11 +10,11 @@ import * as GUI from 'babylonjs-gui'
 import 'babylonjs-loaders'
 import { gsap, Linear } from 'gsap'
 // types
-import { ArmPose } from '@/types/ArmPose'
-import { Equipment, Task } from '@/types/Equipment'
+import { ArmPose } from '../types/ArmPose'
+import { Equipment, Task } from '../types/Equipment'
 // miscellaneous
-import BabylonController from '@/utils/BabylonController'
-import { EventBus } from '@/utils/EventBus'
+import BabylonController from '../utils/BabylonController'
+import { EventBus } from '../utils/EventBus'
 
 @Component
 export default class RenderCanvas extends Vue {

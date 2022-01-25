@@ -30,14 +30,14 @@
 
 <script lang="ts">
 // import libs
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import { gsap, Linear } from 'gsap'
 import * as echarts from 'echarts'
 import 'echarts-gl'
 // import types
-import { Equipment, Task } from '@/types/Equipment'
+import { Equipment, Task } from '../../types/Equipment'
 // import misc
-import { EventBus } from '@/utils/EventBus'
+import { EventBus } from '../../utils/EventBus'
 
 @Component
 export default class HandTaskScreen extends Vue {
