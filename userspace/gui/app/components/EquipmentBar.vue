@@ -48,9 +48,9 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { gsap } from 'gsap'
 // import types
-import { Equipment } from '@/types/Equipment'
+import { Equipment } from '../types/Equipment'
 // import misc
-import { EventBus } from '@/utils/EventBus'
+import { EventBus } from '../utils/EventBus'
 
 @Component
 export default class EquipmentBar extends Vue {

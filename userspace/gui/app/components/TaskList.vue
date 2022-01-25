@@ -72,7 +72,7 @@ export default class TaskList extends Vue {
   }
 
   taskClick(i: number) {
-    EventBus.$emit('doTask', this.equipped.tasks[i])
+    EventBus.$emit('doTask', this.equipped!.tasks[i])
   }
 }
 </script>

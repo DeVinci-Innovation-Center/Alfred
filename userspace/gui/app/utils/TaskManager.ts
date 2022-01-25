@@ -1,5 +1,5 @@
 import { TransformNode } from 'babylonjs'
-import { Equipment } from '@/types/Equipment'
+import { Equipment } from '../types/Equipment'
 
 export default class TaskManager {
   equipment?: Equipment

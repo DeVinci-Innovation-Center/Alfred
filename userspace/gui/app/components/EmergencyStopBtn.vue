@@ -30,10 +30,10 @@
 
 <script lang="ts">
 // import libs
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import * as echarts from 'echarts'
 // import misc
-import { EventBus } from '@/utils/EventBus'
+import { EventBus } from '../utils/EventBus'
 
 @Component
 export default class EmergencyStopBtn extends Vue {
