@@ -23,7 +23,7 @@ ALFRED uses containers to deploy a complete middleware, from complex robot contr
 
 ## Content
 
-@[space](3)
+@[space](5)
 
 @[split](2,begin)
 
@@ -55,6 +55,7 @@ ALFRED is designed with modularity in mind, and follows design principles of mod
 -The **Kernel**: the kernel is the core of the system. It contains components necessary for the system to function. The components in the kernel are not accessible to the user. There are four parts in the kernel: the database, the drivers, robotic arm control and environment analysis. The **database** is used to persist data, and make it accessible to outside of the system, e.g. with robot position or logs. The **drivers** are the interface between the devices linked to ALFRED and the software. **Robotic arm control** controls the robot itself, does physics calculations and collision detection. **Environment analysis** is the eyes of the system, where the system learns about its environment.
 
 ![](https://dvic.devinci.fr/api/v3/img/full/0rzdd3pvcymy2e1o9fluj93mj7d14a.png)
+***ALFRED's software architecture***
 
 ## Environment Analysis
 
@@ -68,16 +69,23 @@ VSLAM data, associated with object data from object recognition, is used to cons
 
 ## Robotic Arm Control
 
+@[split](2,begin)
+
 ALFRED uses **PyBullet** [^6] and **Robotics Toolbox** [^7] for trajectory planning. PyBullet serves as a simulation for physics, calculating inverse kinematics[^**] and visualizing the robot in the virtual space. Robotics Toolbox is used to calculate the trajectories in cartesian space[^*].
 
 The system uses the environment data obtained in [Environment Analysis](#environment-analysis) and the tools in [Trajectory Planning](#trajectory-planning) to prevent the robotic arm from colliding with objects in its environment.
-
-![](https://dvic.devinci.fr/api/v3/img/full/gg4e7zhvto1r61uh3qaz3w0mm0k7zm.png)
 
 The robot receives commands via (Redis). The commands are created in userspace: the robot has no concept of userspace applications, only where and how it should move. Commands include cartesian movement, simultaneous joint movement, and single joint movement, with parameters for speed, acceleration, ...
 
 For every command received, the robot analyzes the desired movement. It plans the path it will take, using path plannign algorithm, and taking into account environment data.
 In return, the robot gives feedback to the system: is the command possible ? did it have to modify it to prevent a collision ? or did everything go as planned ? If the destination is impossible to reach (ex: out of bounds), the controller logs the error and doesn't execute the movement. If the destination cannot be reached because of an obstacle, it logs the error, and moves to the closest point to the planned destination. If nothing is wrong with the movement, the controller executes the command.
+
+@[split](2,break)
+
+![](https://dvic.devinci.fr/api/v3/img/full/gg4e7zhvto1r61uh3qaz3w0mm0k7zm.png)
+***Visualization of the simulated robot arm***
+
+@[split](2,end)
 
 [^*]: Cartesian/joint space: different representations for a given position in space. Cartesian space takes a point as its origin and descirbe a coordinate with x, y and z values for the 3 dimensions of space. Joint space represents a position in angles of the robot's joints.
 
@@ -100,23 +108,13 @@ An example application is Hand Control, where the user can move the arm dependin
 The **web interface** allows the users to control the arm from a computer or a mobile phone. The web interface brings together voice control and hand control, and adds other control features.
 
 ![](https://dvic.devinci.fr/api/v3/img/full/3tc4noooed3zcily3kmgx746kjwdue.png)
+***ALFRED's GUI***
 
 For **voice control**, a button allows to start recording voice and "talk" to the assistant, and you can see its response as well.
 
 For **hand control**, the interface uses the user's webcam to get the video feed for hand recognition.
 
 Other features include visualization of the robot arm in 3D, graphs for joint positions, launching [applications](#applications), debugging with a console...
-
-## Applications
-
-=> Autres pages (Cross reality, ) => tabs
-
-## Future works
-
-- AR: virtual environment mimicking the real world
-- Automatic tool changing station
-
-# Bibliography
 
 [^1]: YOLOv5: https://github.com/ultralytics/yolov5
 
