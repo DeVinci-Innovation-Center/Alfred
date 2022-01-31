@@ -3,23 +3,22 @@ FROM nvidia/cudagl:${CUDA_VERSION}
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-        # required for python
-        python3.8 python3-pip python3-dev git gcc
+    python3.8 python3-pip python3-dev git gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# create a non-root user
-RUN useradd -m --no-log-init --system --uid 1000 appuser -g sudo \
-    && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER appuser
-ENV PATH=/home/appuser/.local/bin:${PATH}
+RUN mkdir -p /alfred/controller
 
-RUN mkdir /home/appuser/app
-WORKDIR /home/appuser/app
+WORKDIR /alfred/controller
 
-RUN python3 -m pip install --upgrade pip
-RUN pip3 install wheel
+RUN python3 -m venv .venv && \
+    .venv/bin/python3 -m ensurepip && \
+    .venv/bin/python3 -m pip install --upgrade pip
+
 COPY requirements.txt requirements.txt
-RUN pip3 install --user -r requirements.txt
-COPY src /home/appuser/app/src
+
+RUN .venv/bin/pip3 install -r requirements.txt
+
+COPY src src
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["python3", "-m", "src"]
+CMD [".venv/bin/python3", "-m", "src.main"]

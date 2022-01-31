@@ -1,7 +1,9 @@
 #! /bin/sh
 
-# .venv/bin/python3 -m example &
-/.venv/bin/python3 -m realsense &
+
+
+# /alfred/drivers/.venv/bin/python3 -m drivers.example &
+/alfred/drivers/.venv/bin/python3 -m realsense &
 
 tail -f /dev/null
 

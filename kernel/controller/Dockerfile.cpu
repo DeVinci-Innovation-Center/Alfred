@@ -2,19 +2,22 @@ FROM python:3.9
 
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
     git gcc \
-    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /app
-WORKDIR /app
+RUN mkdir -p /alfred/controller
+
+WORKDIR /alfred/controller
 
 RUN python3 -m venv .venv && \
-    .venv/bin/pip install --upgrade pip
+    .venv/bin/python3 -m ensurepip && \
+    .venv/bin/python3 -m pip install --upgrade pip
 
 COPY requirements.txt requirements.txt
 
 RUN .venv/bin/pip3 install -r requirements.txt
 
-COPY src /app/src
+COPY src src
 
 # CMD ["tail", "-f", "/dev/null"]
 CMD [".venv/bin/python3", "-m", "src.main"]

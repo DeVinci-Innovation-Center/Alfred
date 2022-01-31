@@ -1,21 +1,17 @@
-FROM python:3.8
+FROM python:3.9
 
-# create a non-root user
-RUN useradd -m --no-log-init --system --uid 1000 appuser -g sudo \
-    && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER appuser
-ENV PATH=/home/appuser/.local/bin:${PATH}
+RUN mkdir -p /alfred/redis_listener
 
-RUN mkdir /home/appuser/app
-WORKDIR /home/appuser/app
+WORKDIR /alfred/redis_listener
 
-RUN python3 -m pip install --upgrade pip
+RUN python3 -m venv .venv && \
+    .venv/bin/python3 -m ensurepip && \
+    .venv/bin/python3 -m pip install --upgrade pip
 
 COPY requirements.txt requirements.txt
 
-RUN pip3 install --user -r requirements.txt
+RUN  .venv/bin/pip3 install -r requirements.txt
 
 COPY src src
 
-# CMD ["tail", "-f", "/dev/null"]
 CMD ["python3", "src/main.py"]

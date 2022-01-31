@@ -1,6 +1,5 @@
 # ALFRED: General Purpose Middleware for Robotic Assistants
 
-
 ![](https://lh3.googleusercontent.com/JEOWY7b3WMAHVkF5KZLIHeB23qiwjvKzhWhWC9J5-x-8ZxOtSWnrIjf0i0tEbXrPixt26_uIJCs-0_4TrWsS=w1920-h592-rw)
 
 Basic automation requires a robot to only repeat a set of movements indefinitely, but with the needs of Industry 4.0, robotic systems need to be more and more complex. Safety, adaptability and connectivity are now required for automation in the industry. Safety comes in the form of smart collision detection, with sensitive robots that know their environments and react to unseen obstacles or operators. Adaptability requires robots to have intelligent decision making systems and powerful sensing abilities. Robots need to communicate with each other to share information, and to be able to be controlled remotely for easier access.

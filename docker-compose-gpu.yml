@@ -22,12 +22,10 @@ services:
 
   backend:
     privileged: true
-    image: alfred-backend:dev
+    image: alfred-backend-gpu:dev
     build:
       context: ./userspace/applications
-      # choose between cpu and gpu according to your machine
-      dockerfile: Dockerfile.cpu
-      # dockerfile: Dockerfile.gpu
+      dockerfile: Dockerfile.gpu
     restart: always
     environment:
       - PYTHONUNBUFFERED=1
@@ -56,24 +54,20 @@ services:
     #   - httpd-config
     # secrets:
     #   - server-certificate
-    # uncomment if your device has gpu capabilities
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #       - driver: nvidia
-    #         count: 1
-    #         capabilities: [gpu]
-
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
 
   controller:
     privileged: true
-    image: alfred-controller:dev
+    image: alfred-controller-gpu:dev
     build:
       context: ./kernel/controller
-      # choose between cpu and gpu according to your machine
-      dockerfile: Dockerfile.cpu
-      # dockerfile: Dockerfile.gpu
+      dockerfile: Dockerfile.gpu
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
@@ -91,15 +85,13 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-    # uncomment if your machine has gpu capabilities
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #       - driver: nvidia
-    #         count: 1
-    #         capabilities: [gpu]
-
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
 
   drivers:
     privileged: true
@@ -124,7 +116,6 @@ services:
     networks:
       - database-tier
     volumes:
-      # - ./kernel/database-files/redis-data:/bitnami/redis/data
       - redis-data:/bitnami/redis/data
 
   mongodb:
@@ -145,10 +136,7 @@ services:
       - database-tier
     volumes:
       - mongodb-data:/data/db
-      # - ./kernel/database-files/mongodb-data/mongod.conf:/etc/mongod.conf
-      # - ./kernel/database-files/mongodb-data/initdb.d/:/docker-entrypoint-initdb.d/
-      # - ./kernel/database-files/mongodb-data/data/db/:/data/db/
-      # - ./kernel/database-files/mongodb-data/data/log/:/var/log/mongodb/
+
   # redis-listener:
   #   image: alfred-redis-listener:dev
   #   build: ./kernel/redis-listener
