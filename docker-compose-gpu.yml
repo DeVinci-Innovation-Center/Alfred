@@ -9,22 +9,22 @@ networks:
 
 services:
 
-  # frontend:
-  #   image: alfred-frontend:dev
-  #   build:
-  #     context: ./userspace/gui
-  #     args:
-  #       NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
-  #   ports:
-  #     - 80:3000
-  #   networks:
-  #     - server-tier
+  frontend:
+    image: alfred-frontend:dev
+    build:
+      context: ./userspace/gui
+      args:
+        NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
+    ports:
+      - 80:3000
+    networks:
+      - server-tier
 
   backend:
     privileged: true
-    image: alfred-backend-gpu:dev
+    image: alfred-api-gpu:dev
     build:
-      context: ./userspace/applications
+      context: ./userspace/api
       dockerfile: Dockerfile.gpu
     restart: always
     environment:
@@ -49,11 +49,6 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./userspace/applications/src:/home/appuser/app/src # for dev
-    # configs:
-    #   - httpd-config
-    # secrets:
-    #   - server-certificate
     deploy:
       resources:
         reservations:

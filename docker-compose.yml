@@ -9,25 +9,23 @@ networks:
 
 services:
 
-  # frontend:
-  #   image: alfred-frontend:dev
-  #   build:
-  #     context: ./userspace/gui
-  #     args:
-  #       NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
-  #   ports:
-  #     - 80:3000
-  #   networks:
-  #     - server-tier
+  frontend:
+    image: alfred-frontend:dev
+    build:
+      context: ./userspace/dashboard
+      args:
+        NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
+    ports:
+      - 80:3000
+    networks:
+      - server-tier
 
   backend:
     privileged: true
-    image: alfred-backend:dev
+    image: alfred-api:dev
     build:
-      context: ./userspace/applications
-      # choose between cpu and gpu according to your machine
+      context: ./userspace/api
       dockerfile: Dockerfile.cpu
-      # dockerfile: Dockerfile.gpu
     restart: always
     environment:
       - PYTHONUNBUFFERED=1
@@ -51,20 +49,6 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./userspace/applications/src:/home/appuser/app/src # for dev
-    # configs:
-    #   - httpd-config
-    # secrets:
-    #   - server-certificate
-    # uncomment if your device has gpu capabilities
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #       - driver: nvidia
-    #         count: 1
-    #         capabilities: [gpu]
-
 
   controller:
     privileged: true
@@ -91,15 +75,6 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-    # uncomment if your machine has gpu capabilities
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #       - driver: nvidia
-    #         count: 1
-    #         capabilities: [gpu]
-
 
   drivers:
     privileged: true
@@ -124,7 +99,6 @@ services:
     networks:
       - database-tier
     volumes:
-      # - ./kernel/database-files/redis-data:/bitnami/redis/data
       - redis-data:/bitnami/redis/data
 
   mongodb:
@@ -145,10 +119,7 @@ services:
       - database-tier
     volumes:
       - mongodb-data:/data/db
-      # - ./kernel/database-files/mongodb-data/mongod.conf:/etc/mongod.conf
-      # - ./kernel/database-files/mongodb-data/initdb.d/:/docker-entrypoint-initdb.d/
-      # - ./kernel/database-files/mongodb-data/data/db/:/data/db/
-      # - ./kernel/database-files/mongodb-data/data/log/:/var/log/mongodb/
+
   # redis-listener:
   #   image: alfred-redis-listener:dev
   #   build: ./kernel/redis-listener
