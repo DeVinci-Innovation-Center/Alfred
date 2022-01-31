@@ -55,9 +55,7 @@ services:
     image: alfred-controller:dev
     build:
       context: ./kernel/controller
-      # choose between cpu and gpu according to your machine
       dockerfile: Dockerfile.cpu
-      # dockerfile: Dockerfile.gpu
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1

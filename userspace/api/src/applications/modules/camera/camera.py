@@ -6,13 +6,15 @@ from src.utils.global_instances import rc
 
 
 def show_camera(camera_feed: str):
+    """Get frames from redis and show them in a window."""
+
     p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
     p.subscribe(camera_feed)
 
     while True:
         message = p.get_message()
         if not message:
-            time.sleep(0.001)  # be nice to the system :)
+            time.sleep(0.001)
             continue
 
         frame = pickle.loads(message["data"])
