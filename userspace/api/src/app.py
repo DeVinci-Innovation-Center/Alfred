@@ -4,7 +4,7 @@ import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src import routers
+from src.applications import routers
 from src.utils.global_instances import sio
 from src import socketio_events
 

@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from src.modules.command import Command
+from libalfred.utils import Command
 from src.utils.global_instances import rc
 
 

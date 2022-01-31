@@ -4,7 +4,7 @@ from typing import Any
 import cv2
 import numpy as np
 import xarm_hand_control.processing.process as xhcpp
-from src.modules.command import Command
+from libalfred.utils import Command
 from src.utils.global_instances import rc
 
 

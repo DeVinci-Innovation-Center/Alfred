@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from src.modules.camera import camera
+from src.applications.modules.camera import camera
 
 # from src.modules.hand_control.hand_control import start_hand_control
-from src.modules import basic_commands
+from src.applications.modules import basic_commands
 from src.utils.apps import (
     App,
     AppRunningException,
