@@ -1,15 +1,24 @@
+volumes:
+  mongodb-data:
+  redis-data:
+
+networks:
+  server-tier:
+  database-tier:
+  controller-tier:
+
 services:
 
-  frontend:
-    image: alfred-frontend:dev
-    build:
-      context: ./userspace/gui
-      args:
-        NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
-    ports:
-      - 80:3000
-    networks:
-      - server-tier
+  # frontend:
+  #   image: alfred-frontend:dev
+  #   build:
+  #     context: ./userspace/gui
+  #     args:
+  #       NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
+  #   ports:
+  #     - 80:3000
+  #   networks:
+  #     - server-tier
 
   backend:
     privileged: true
@@ -115,7 +124,8 @@ services:
     networks:
       - database-tier
     volumes:
-      - ./kernel/database-files/redis-data:/bitnami/redis/data
+      # - ./kernel/database-files/redis-data:/bitnami/redis/data
+      - redis-data:/bitnami/redis/data
 
   mongodb:
     image: mongo:5
@@ -134,10 +144,11 @@ services:
     networks:
       - database-tier
     volumes:
-      - ./kernel/database-files/mongodb-data/mongod.conf:/etc/mongod.conf
-      - ./kernel/database-files/mongodb-data/initdb.d/:/docker-entrypoint-initdb.d/
-      - ./kernel/database-files/mongodb-data/data/db/:/data/db/
-      - ./kernel/database-files/mongodb-data/data/log/:/var/log/mongodb/
+      - mongodb-data:/data/db
+      # - ./kernel/database-files/mongodb-data/mongod.conf:/etc/mongod.conf
+      # - ./kernel/database-files/mongodb-data/initdb.d/:/docker-entrypoint-initdb.d/
+      # - ./kernel/database-files/mongodb-data/data/db/:/data/db/
+      # - ./kernel/database-files/mongodb-data/data/log/:/var/log/mongodb/
   # redis-listener:
   #   image: alfred-redis-listener:dev
   #   build: ./kernel/redis-listener
@@ -188,22 +199,22 @@ services:
 
 
 
-networks:
-  server-tier:
-    # server network
-    ipam:
-      config:
-        - subnet: 172.16.237.0/24
-          gateway: 172.16.237.1
-  database-tier:
-    # communication between databases
-    ipam:
-      config:
-        - subnet: 172.16.238.0/24
-          gateway: 172.16.238.1
-  controller-tier:
-    # network with controller
-    ipam:
-      config:
-        - subnet: 172.16.239.0/24
-          gateway: 172.16.239.1
+# networks:
+#   server-tier:
+#     # server network
+#     ipam:
+#       config:
+#         - subnet: 172.16.237.0/24
+#           gateway: 172.16.237.1
+#   database-tier:
+#     # communication between databases
+#     ipam:
+#       config:
+#         - subnet: 172.16.238.0/24
+#           gateway: 172.16.238.1
+#   controller-tier:
+#     # network with controller
+#     ipam:
+#       config:
+#         - subnet: 172.16.239.0/24
+#           gateway: 172.16.239.1

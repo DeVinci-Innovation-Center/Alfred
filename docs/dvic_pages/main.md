@@ -23,8 +23,6 @@ ALFRED uses containers to deploy a complete middleware, from complex robot contr
 
 ## Content
 
-@[space](5)
-
 @[split](2,begin)
 
 ![](https://dvic.devinci.fr/api/v3/img/full/ysvpsl7k18npur8u15ptmvz2nyfmzd.jpg)
@@ -50,12 +48,18 @@ Interpreting text is done with **Natural Language Processing (NLP)**, a field of
 
 ALFRED is designed with modularity in mind, and follows design principles of modern operating systems. The system is separated into two parts:
 
+@[split](2,begin)
+
 -**Userspace**, which is made of **applications**, **interfaces** and a **Network Connector**. **Applications** are blocks which are added by the user, and use the system's API to control the arm. Applications are where robot commands are sent, environment data read, and information generated. **Interfaces** are the way to interact with the arm by launching applications, showing data, and getting user input. The **Network Connector** allows remote applications or other systems to interact with ALFRED.
 
 -The **Kernel**: the kernel is the core of the system. It contains components necessary for the system to function. The components in the kernel are not accessible to the user. There are four parts in the kernel: the database, the drivers, robotic arm control and environment analysis. The **database** is used to persist data, and make it accessible to outside of the system, e.g. with robot position or logs. The **drivers** are the interface between the devices linked to ALFRED and the software. **Robotic arm control** controls the robot itself, does physics calculations and collision detection. **Environment analysis** is the eyes of the system, where the system learns about its environment.
 
+@[split](2,break)
+
 ![](https://dvic.devinci.fr/api/v3/img/full/0rzdd3pvcymy2e1o9fluj93mj7d14a.png)
 ***ALFRED's software architecture***
+
+@[split](2,end)
 
 ## Environment Analysis
 
@@ -105,16 +109,22 @@ The system can be controlled by voice using **STT** and **RASA**. The user can t
 Control with gestures is achieved by running **hand recognition** on a camera feed with Mediapipe. Mediapipe outputs landmarks, representing the different points on the hand (ex: index tip, wrist, ...). A landmarks classifier determines user gestures, e.g a thumb-up, a fist or a raised index. Gestures trigger events, which allow user to control the arm with their hands.\
 An example application is Hand Control, where the user can move the arm depending on the position of their hand in the camera frame, but also stop or start the arm and grasp items.
 
-The **web interface** allows the users to control the arm from a computer or a mobile phone. The web interface brings together voice control and hand control, and adds other control features.
+@[split](2,begin)
 
 ![](https://dvic.devinci.fr/api/v3/img/full/3tc4noooed3zcily3kmgx746kjwdue.png)
 ***ALFRED's GUI***
+
+@[split](2,break)
+
+The **web interface** allows the users to control the arm from a computer or a mobile phone. The web interface brings together voice control and hand control, and adds other control features.
 
 For **voice control**, a button allows to start recording voice and "talk" to the assistant, and you can see its response as well.
 
 For **hand control**, the interface uses the user's webcam to get the video feed for hand recognition.
 
 Other features include visualization of the robot arm in 3D, graphs for joint positions, launching [applications](#applications), debugging with a console...
+
+@[split](2,end)
 
 [^1]: YOLOv5: https://github.com/ultralytics/yolov5
 
