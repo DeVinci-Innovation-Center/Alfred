@@ -1,25 +1,8 @@
-open-frontend:
-	firefox http://$(shell hostname -I | awk '{print $$1}'):80
-
-open-backend:
-	firefox http://$(shell hostname -I | awk '{print $$1}'):8000/docs
-
 expose-x:
 	sudo xhost +local:root
 
-generate-example-dotenv:
-	sed 's/=.*/=/' .env > .env.example
-
-create-volumes:
-	mkdir -p database/redis-data database/mongodb-data
-	chmod 777 database/mongodb-data
-	chmod 777 database/redis-data
-
-clean-volumes:
-	rm -rf database/redis-data/**
-	rm -rf database/mongodb-data/**
-
-run: create-volumes expose-x
+run: export ALFRED_HOST_IP=${shell ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p'}  # get local IP for websocket address
+run: expose-x
 	docker-compose up --build -d
 
 stop:
@@ -32,13 +15,10 @@ up: run
 
 down: stop
 
-build-all-images: build-backend build-database build-frontend
+run-gpu: export ALFRED_HOST_IP=${shell ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p'}  # get local IP for websocket address
+run-gpu: expose-x
+	docker-compose -f docker-compose-gpu.yml up --build -d
 
-build-backend:
-	cd backend && make build
+up-gpu: run-gpu
 
-build-database:
-	cd database/redis-listener && make build
-
-build-frontend:
-	cd frontend && make build
+down-gpu: stop-gpu

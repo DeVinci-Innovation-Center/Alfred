@@ -1,21 +1,18 @@
-# A.L.F.R.E.D. : an AI-augmented polyvalent robotic assistant
-
+# ALFRED: General Purpose Middleware for Robotic Assistants
 
 ![](https://lh3.googleusercontent.com/JEOWY7b3WMAHVkF5KZLIHeB23qiwjvKzhWhWC9J5-x-8ZxOtSWnrIjf0i0tEbXrPixt26_uIJCs-0_4TrWsS=w1920-h592-rw)
 
-A.L.F.R.E.D. is a cobotics platform. It aims to maximize the interaction between man and machine, and to make it as seamless as possible. Its main purpose is to be used in innovation environments, such as FabLabs or research labs.
+Basic automation requires a robot to only repeat a set of movements indefinitely, but with the needs of Industry 4.0, robotic systems need to be more and more complex. Safety, adaptability and connectivity are now required for automation in the industry. Safety comes in the form of smart collision detection, with sensitive robots that know their environments and react to unseen obstacles or operators. Adaptability requires robots to have intelligent decision making systems and powerful sensing abilities. Robots need to communicate with each other to share information, and to be able to be controlled remotely for easier access.
 
-One of its two components is a uFactory xArm 6, a six Degrees of Freedom (DOF) industrial robotic arm. It allows for complex motion in space to manipulate objetcs in the environment. The other component is the software, which is a full stack application with an added layer of robotics to control the arm.
-
-The goal is to be a centerpiece in innovation spaces, to aid in research by automating repetitive tasks, assist in more complex ones, and protect the Human by replacing it in dangerous activities. Some of its use-cases include soldering, pick-and-place, chemical experiments, or art.
+ALFRED brings safety, adaptability and connectivity to any commercial robotic arm. ALFRED is a middleware, enhanced by Artificial Intelligence, focused on modularity, extensibility and abstraction. Inspired by modern Operating Systems, it brings together devices, interfaces and the robotic arm to create a system ready to be deployed in real situations. ALFRED is a way for manufacturers and researchers to develop applications for a robotic arm with minimal knowledge about robotic control. It integrates in its environment with its multiple interaction modalities, such as manual control with hands, voice control, and a web interface.
 
 Check out the demo video [here](https://www.youtube.com/watch?v=6KcHh4nWJFI)! Updated video to come soon.
 
 ## Requirements
 
-- Docker
-
-- docker-compose
+- Docker ([get docker](https://docs.docker.com/get-docker/))
+- docker-compose ([get docker-compose](https://docs.docker.com/compose/install/))
+- GNU Make
 
 ## Usage
 
@@ -30,12 +27,6 @@ to start the project. Web page is available at http://{host ip}, and backend at 
 ## Demos
 
 - Hand control
-
-## Requirements
-
-- docker
-
-- docker-compose
 
 ## Install steps for NVIDIA
 
@@ -56,3 +47,7 @@ Test install with:
 ```bash
 docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
 ```
+
+## Development
+
+How to dev on the platform ?

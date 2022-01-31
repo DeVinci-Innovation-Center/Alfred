@@ -1,0 +1,152 @@
+volumes:
+  mongodb-data:
+  redis-data:
+
+networks:
+  server-tier:
+  database-tier:
+  controller-tier:
+
+services:
+
+  frontend:
+    image: alfred-frontend:dev
+    build:
+      context: ./userspace/gui
+      args:
+        NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
+    ports:
+      - 80:3000
+    networks:
+      - server-tier
+
+  backend:
+    privileged: true
+    image: alfred-api-gpu:dev
+    build:
+      context: ./userspace/api
+      dockerfile: Dockerfile.gpu
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=root
+      - MONGODB_DATABASE=commands
+    ports:
+      - 8000:8000
+    networks:
+      - server-tier
+      - database-tier
+      - controller-tier
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
+  controller:
+    privileged: true
+    image: alfred-controller-gpu:dev
+    build:
+      context: ./kernel/controller
+      dockerfile: Dockerfile.gpu
+    environment:
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_CHANNEL=command-robot
+
+      - MOVE_ARM=False
+      - ARM_IP=
+    networks:
+      - server-tier
+      - database-tier
+      - controller-tier
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
+  drivers:
+    privileged: true
+    image: alfred-drivers:dev
+    build: ./kernel/drivers
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    networks:
+      - database-tier
+
+  redis:
+    image: docker.io/bitnami/redis:6.2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    # ports:
+    #   - '6379:6379'
+    networks:
+      - database-tier
+    volumes:
+      - redis-data:/bitnami/redis/data
+
+  mongodb:
+    image: mongo:5
+    restart: always
+    ports:
+      - "27017:27017"
+    # env_file:
+    #   - .env
+    environment:
+      #   - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      #   - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      #   - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=commands
+    networks:
+      - database-tier
+    volumes:
+      - mongodb-data:/data/db
+
+  # redis-listener:
+  #   image: alfred-redis-listener:dev
+  #   build: ./kernel/redis-listener
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #   environment:
+  #     - MONGODB_HOST=mongodb
+  #     - MONGODB_PORT=27017
+  #     - MONGODB_USERNAME=root
+  #     - MONGODB_PASSWORD=root
+  #     - MONGODB_DATABASE=commands
+
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - REDIS_PASSWORD=
+  #   networks:
+  #     - database-tier

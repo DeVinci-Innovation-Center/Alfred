@@ -1,0 +1,24 @@
+FROM python:3.9
+
+RUN apt-get update && apt-get install -y -qq --no-install-recommends \
+    # required for opencv
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /alfred/applications
+
+WORKDIR /alfred/applications
+
+RUN python3 -m venv .venv && \
+    .venv/bin/python3 -m ensurepip && \
+    .venv/bin/python3 -m pip install --upgrade pip
+
+COPY requirements.txt requirements.txt
+
+RUN .venv/bin/pip3 install -r requirements.txt
+
+COPY src src
+
+# CMD ["tail", "-f", "/dev/null"]
+CMD [".venv/bin/uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
+# reload flag required because of python multiprocessing for some reason
