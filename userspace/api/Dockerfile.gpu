@@ -1,0 +1,30 @@
+ARG CUDA_VERSION=11.0-base
+FROM nvidia/cudagl:${CUDA_VERSION}
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y -qq --no-install-recommends \
+    sudo \
+    # required for opencv
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
+    # required for python
+    python3.8 python3-pip python3-dev git gcc \
+    # required for webcam
+    v4l-utils ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /alfred/applications
+
+WORKDIR /alfred/applications
+
+RUN python3 -m venv .venv && \
+    .venv/bin/python3 -m ensurepip && \
+    .venv/bin/python3 -m pip install --upgrade pip
+
+COPY requirements.txt requirements.txt
+
+RUN .venv/bin/pip3 install -r requirements.txt
+
+COPY src src
+
+# CMD ["tail", "-f", "/dev/null"]
+CMD [".venv/bin/uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
+# reload flag required because of python multiprocessing for some reason

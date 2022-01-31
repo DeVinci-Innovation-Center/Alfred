@@ -1,0 +1,24 @@
+ARG CUDA_VERSION=11.0-base
+FROM nvidia/cudagl:${CUDA_VERSION}
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+    python3.8 python3-pip python3-dev git gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /alfred/controller
+
+WORKDIR /alfred/controller
+
+RUN python3 -m venv .venv && \
+    .venv/bin/python3 -m ensurepip && \
+    .venv/bin/python3 -m pip install --upgrade pip
+
+COPY requirements.txt requirements.txt
+
+RUN .venv/bin/pip3 install -r requirements.txt
+
+COPY src src
+
+# CMD ["tail", "-f", "/dev/null"]
+CMD [".venv/bin/python3", "-m", "src.main"]
