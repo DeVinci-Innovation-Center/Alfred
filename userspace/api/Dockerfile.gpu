@@ -11,9 +11,9 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y -qq --no-install
     v4l-utils ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /alfred/applications
+RUN mkdir -p /alfred/api
 
-WORKDIR /alfred/applications
+WORKDIR /alfred/api
 
 RUN python3 -m venv .venv && \
     .venv/bin/python3 -m ensurepip && \

@@ -5,9 +5,9 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
     libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /alfred/applications
+RUN mkdir -p /alfred/api
 
-WORKDIR /alfred/applications
+WORKDIR /alfred/appapilications
 
 RUN python3 -m venv .venv && \
     .venv/bin/python3 -m ensurepip && \

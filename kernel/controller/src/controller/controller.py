@@ -1,182 +1,84 @@
-import logging
-import queue
-import threading
 import time
-from functools import singledispatchmethod
-from operator import add
-from typing import List, Optional
+from typing import Optional
 
-import numpy as np
-from libalfred.utils import Command, Position
-from src.config import cfg
-from src.controller.trajectory import compute_trajectory
+import redis
+from libalfred.utils import Command
 from src.real.robot_real import RobotReal
-from src.sim.robot_sim import RobotSim
-
-logger = logging.getLogger("controller.controller")
 
 
 class Controller:
-    """Robot controller class. Holds global variables used when
-    controlling the robot."""
+    """Controller class for ALFRED. Handles treating commands, moving the arm,
+    and using environment data to influence robot paths."""
 
-    dofs: int
-    end_effector_index: int
-    max_speed: int
-    move_real: bool
+    PROP_PUBSUB_CHANNEL = "robot-props"
+    FUNC_PUBSUB_CHANNEL = "robot-funcs"
 
-    robot_sim: RobotSim
+    rc: redis.Redis
     robot_real: Optional[RobotReal]
 
-    use_null_space: bool
-    use_dynamics: bool
-
-    cartesian_pos: Position
-    future_cartesian_pos: Position
-    joint_positions: List[int]
-
-    decomposed_command_queue: queue.Queue
-
-    sim_thread: threading.Thread
-
     def __init__(
-        self,
-        robot_sim: RobotSim,
-        robot_real: Optional[RobotReal] = None,
-        use_null_space: bool = False,
-        use_dynamics: bool = True,
+        self, rc: redis.Redis, robot_real: Optional[RobotReal] = None,
     ):
-        self.dofs = cfg.ROBOT_DOFS
-        self.end_effector_index = cfg.END_EFFECTOR_INDEX
-        self.max_speed = cfg.MAX_SPEED
-        self.move_real = cfg.MOVE_ARM
-
-        self.robot_sim = robot_sim
+        self.rc = rc
         self.robot_real = robot_real
-        self.use_null_space = use_null_space
-        self.use_dynamics = use_dynamics
 
-        self.cartesian_pos = Position()
-        self.future_cartesian_pos = Position()
+    def loop(self, time_step: float = 1 / 60):
+        """Actions that should execute in a loop
+        (by default, 60 times per second)"""
+        while True:
+            if self.robot_real is not None:
+                arm_pos_cartesian = self.robot_real.position
+                arm_pos_angles = self.robot_real.position_aa
 
-        if not self.move_real:
-            self.joint_positions = [0] * self.dofs
+                print(arm_pos_angles, arm_pos_cartesian)
 
-        elif self.move_real and self.robot_real is not None:
-            if self.robot_real.default_is_radian:
-                self.joint_positions = self.robot_real.angles
-            else:
-                self.joint_positions = list(np.deg2rad(self.robot_real.angles))
+            time.sleep(time_step)
 
-        elif self.move_real and self.robot_real is None:
-            raise Exception("move_real is True but robot_real is None")
+    def treat_command(self, command: Command):
+        """Interpret and execute command."""
 
-        self.decomposed_command_queue = queue.Queue()
+        command = self.check_command(command)
 
-        logger.info("Initialized controller.")
-        logger.info("Starting sim thread.")
+        if self.robot_real is not None:
+            try:
+                self.treat_command_real(command)
+            except Exception:  # pylint: disable = broad-except
+                pass
 
-        self.cartesian_pos = self.robot_sim.set_base_pose(self.joint_positions)
-        self.future_cartesian_pos = self.cartesian_pos
+        # if self.show_sim:
+        #     try:
+        #         self.treat_command_sim(command)
+        #     except Exception:  # pylint: disable = broad-except
+        #         pass
 
-        self.start_sim_thread()
+    def check_command(self, command: Command):
+        """Analyze and modify command if needed.
+        Check collisions, path, etc..."""
 
-        logger.info("Sim thread started.")
+        return command
 
-    def start_sim_thread(self):
-        self.sim_thread = threading.Thread(target=self.run)
-        self.sim_thread.daemon = True
-        self.sim_thread.start()
+    def treat_command_real(self, command: Command):
+        """Interpret and execute command for the real robot."""
 
-    @singledispatchmethod
-    def decompose_command(self, command: Command):
-        """Create intermediate points from a Command to generate a path."""
+    def treat_command_sim(self, command: Command):
+        """Interpret and execute command for the simulated robot."""
 
-        logger.debug("Received command: %s", repr(command))
+    def prop_message_handler(self, message):
+        data = message["data"]
 
-        if command.is_relative:
-            non_relative_xyzrpy = list(
-                map(add, self.future_cartesian_pos.xyzrpy, command.xyzrpy)
-            )
-            goal_xyzrpy = Position(*non_relative_xyzrpy)
-        else:
-            goal_xyzrpy = Position(*command.xyzrpy)
+        kw, value = data.split(":")
 
-        logger.debug("Goal xyzpry: %s", repr(goal_xyzrpy))
-
-        if command.is_cartesian:
-            traj_type = "lspb"
-        else:
-            traj_type = "tpoly"
-
-        if command.speed > self.max_speed:
-            steps = 1
-        else:
-            steps = self.max_speed // command.speed
-
-        goal_traj = compute_trajectory(
-            traj_type, self.future_cartesian_pos, goal_xyzrpy, steps
-        )
-
-        points = goal_traj.q
-
-        for point in points:
-            self.decomposed_command_queue.put(point)
-
-        self.future_cartesian_pos = goal_xyzrpy
-
-    @decompose_command.register
-    def _(self, command: str):
-        """Create intermediate points from a string representing a Command to
-        generate a path."""
-
-        new_command = Command.from_string(command)
-        self.decompose_command(new_command)
-
-    def run(self):
-        while 1:
-            self.step()
-            self.robot_sim.step_simulation()
-            time.sleep(self.robot_sim.time_step)
-
-    def run_ik(self, xyzrpy: list):
-        xyz = xyzrpy[:3]
-        rpy = xyzrpy[3:]
-
-        rpy_quaternion = self.robot_sim.get_quaternion_from_euler(rpy)
-
-        target_joint_positions = self.robot_sim.calculate_inverse_kinematics(
-            xyz, rpy_quaternion,
-        )
-
-        return target_joint_positions
-
-    def move(self, target_joint_positions: list):
-        self.robot_sim.move(target_joint_positions, self.use_dynamics)
-
-        if cfg.MOVE_ARM:
-            self.robot_real.set_servo_angle_j(  # type: ignore
-                target_joint_positions, is_radian=True,
-            )
-
-    def reset(self):
-        pass
-
-    def step(self):
-        try:
-            target_position = self.decomposed_command_queue.get(block=False)
-
-            self.decomposed_command_queue.task_done()
-        except queue.Empty:
+        if kw == "ret":
             return
 
-        target_joint_positions = self.run_ik(target_position)
+        if kw == "get":
+            try:
+                to_send = self.robot_real.__getattr__(value)
+            except Exception:
+                print("exception occured")
+                to_send = "i'm sending something"
 
-        self.move(target_joint_positions)
+            self.rc.publish(self.PROP_PUBSUB_CHANNEL, f"ret:{to_send}")
 
-        self.joint_positions = target_joint_positions
-        self.cartesian_pos = self.robot_sim.get_cartesian_pos(compute=True)
-
-        RobotSim.add_user_debug_line(
-            self.cartesian_pos[:3], target_position[:3],
-        )
+        if kw == "set":
+            prop_name, prop_val = value.split("=")
