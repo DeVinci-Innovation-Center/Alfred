@@ -9,8 +9,8 @@ networks:
 
 services:
 
-  frontend:
-    image: alfred-frontend:dev
+  dashboard:
+    image: alfred-dashboard:dev
     build:
       context: ./userspace/dashboard
       args:
@@ -20,7 +20,7 @@ services:
     networks:
       - server-tier
 
-  backend:
+  api:
     privileged: true
     image: alfred-api:dev
     build:

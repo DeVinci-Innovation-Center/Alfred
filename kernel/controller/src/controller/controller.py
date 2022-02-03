@@ -1,9 +1,11 @@
+import json
+import logging
 import time
 from typing import Optional
 
 import redis
 from libalfred.utils import Command
-from src.real.robot_real import RobotReal
+from real.robot_real import RobotReal
 
 
 class Controller:
@@ -21,6 +23,8 @@ class Controller:
     ):
         self.rc = rc
         self.robot_real = robot_real
+
+        self.logger = logging.getLogger("controller.controller")
 
     def loop(self, time_step: float = 1 / 60):
         """Actions that should execute in a loop
@@ -64,21 +68,63 @@ class Controller:
         """Interpret and execute command for the simulated robot."""
 
     def prop_message_handler(self, message):
-        data = message["data"]
+        data = message["data"].decode("utf-8")
 
-        kw, value = data.split(":")
+        self.logger.debug("Got property message: %s", data)
+
+        kw, value = data.split(":", 1)
 
         if kw == "ret":
             return
 
         if kw == "get":
+            prop_name = value
+
             try:
-                to_send = self.robot_real.__getattr__(value)
-            except Exception:
-                print("exception occured")
+                to_send = self.robot_real.__getattr__(prop_name)
+            except AttributeError:
+                self.logger.error(
+                    "User tried to access attribute %s but it doesn't exist.",
+                    prop_name,
+                )
                 to_send = "i'm sending something"
 
-            self.rc.publish(self.PROP_PUBSUB_CHANNEL, f"ret:{to_send}")
+            self.rc.publish(
+                self.PROP_PUBSUB_CHANNEL, f"ret:{prop_name}={to_send}"
+            )
 
-        if kw == "set":
-            prop_name, prop_val = value.split("=")
+            return
+
+        # if kw == "set":
+        #     prop_name, prop_val = value.split("=")
+
+    def func_message_handler(self, message):
+        data = message["data"].decode("utf-8")
+
+        self.logger.debug("Got function message: %s", data)
+
+        kw, value = data.split(":", 1)
+
+        if kw == "ret":
+            return
+
+        if kw == "exec":
+            func_dict = json.loads(value)
+            try:
+                to_call = getattr(self.robot_real, func_dict["name"])
+                ret = to_call(*func_dict["args"], **func_dict["kwargs"])
+            except AttributeError:
+                self.logger.error(
+                    (
+                        "User tried to call function %s with args %s and "
+                        "kwargs %s but it doesn't exist."
+                    ),
+                    func_dict["name"],
+                    func_dict["args"],
+                    func_dict["kwargs"],
+                )
+                ret = "AttributeError"
+
+            self.rc.publish(self.FUNC_PUBSUB_CHANNEL, f"ret:{ret}")
+
+            return
