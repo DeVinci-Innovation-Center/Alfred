@@ -2,10 +2,26 @@ volumes:
   mongodb-data:
   redis-data:
 
+# ipam required to work with machines running openvpn
 networks:
+  # server network
   server-tier:
+    ipam:
+      config:
+        - subnet: 172.16.237.0/24
+          gateway: 172.16.237.1
+  # communication between databases
   database-tier:
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24
+          gateway: 172.16.238.1
+  # network with controller
   controller-tier:
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24
+          gateway: 172.16.239.1
 
 services:
 
@@ -66,8 +82,8 @@ services:
       - REDIS_PASSWORD=
       - REDIS_CHANNEL=command-robot
 
-      - MOVE_ARM=False
-      - ARM_IP=
+      - MOVE_ARM=True
+      - ARM_IP=172.21.72.200
     networks:
       - server-tier
       - database-tier
@@ -118,7 +134,6 @@ services:
       - database-tier
     volumes:
       - mongodb-data:/data/db
-
   # redis-listener:
   #   image: alfred-redis-listener:dev
   #   build: ./kernel/redis-listener

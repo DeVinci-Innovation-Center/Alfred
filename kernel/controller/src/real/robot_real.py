@@ -22,6 +22,8 @@ class RobotReal(XArmAPI):
                 time.sleep(3)
 
         self.motion_enable(enable=True)
-        self.set_mode(mode=1)
+        self.set_mode(0)
         self.set_state(state=0)
+        # self.set_world_offset([0] * self.axis)
+
         time.sleep(1)

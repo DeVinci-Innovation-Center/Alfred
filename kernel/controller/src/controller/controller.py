@@ -81,13 +81,13 @@ class Controller:
             prop_name = value
 
             try:
-                to_send = self.robot_real.__getattr__(prop_name)
+                to_send = getattr(self.robot_real, prop_name)
             except AttributeError:
                 self.logger.error(
                     "User tried to access attribute %s but it doesn't exist.",
                     prop_name,
                 )
-                to_send = "i'm sending something"
+                to_send = "AttributeError"
 
             self.rc.publish(
                 self.PROP_PUBSUB_CHANNEL, f"ret:{prop_name}={to_send}"
@@ -112,7 +112,13 @@ class Controller:
             func_dict = json.loads(value)
             try:
                 to_call = getattr(self.robot_real, func_dict["name"])
-                ret = to_call(*func_dict["args"], **func_dict["kwargs"])
+                to_call_args = func_dict["args"]
+                to_call_kwargs = func_dict["kwargs"]
+                print(f"{to_call=}")
+                print(f"{to_call_args=}")
+                print(f"{to_call_kwargs=}")
+                ret = to_call(*to_call_args, **to_call_kwargs)
+                # ret = to_call(**to_call_kwargs)
             except AttributeError:
                 self.logger.error(
                     (
