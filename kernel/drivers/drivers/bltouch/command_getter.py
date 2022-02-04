@@ -31,9 +31,8 @@ class CommandGetter:
         if message:
             # do something with the message
             print(message)
-
-        command = message["data"]
-        return command
+            command = message["data"]
+            return command
 
     def execute_command(self, command: Any):
         """Send command to device."""
@@ -45,6 +44,6 @@ class CommandGetter:
         """Get and produce data indefinitely."""
         while True:
             command = self.get_command()
-            if command:
+            if command:            
                 self.execute_command(command)
             time.sleep(0.001)  # be nice to the system :)
