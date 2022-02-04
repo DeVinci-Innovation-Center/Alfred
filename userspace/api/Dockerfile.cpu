@@ -5,9 +5,9 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
     libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /alfred/applications
+RUN mkdir -p /alfred/api
 
-WORKDIR /alfred/applications
+WORKDIR /alfred/api
 
 RUN python3 -m venv .venv && \
     .venv/bin/python3 -m ensurepip && \
@@ -16,6 +16,10 @@ RUN python3 -m venv .venv && \
 COPY requirements.txt requirements.txt
 
 RUN .venv/bin/pip3 install -r requirements.txt
+
+# install libalfred without cache
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 
 COPY src src
 
