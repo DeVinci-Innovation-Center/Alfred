@@ -1,4 +1,3 @@
-from distutils.command.config import config
 from redis import Redis
 
 from threading import Thread

@@ -1,5 +1,6 @@
 """Get commands from Redis, treat them, and send them to the device."""
 
+import json
 import time
 from typing import Any
 
@@ -27,16 +28,18 @@ class CommandGetter:
     def get_command(self) -> Any:
         """Get command from Redis."""
 
-        message = self.pubsub.get_message()
+        message = self.pubsub.get_message(ignore_subscribe_messages=True)
         if message:
             # do something with the message
             print(message)
-            command = message["data"]
+            command = message["data"].decode("utf-8")
             return command
 
     def execute_command(self, command: Any):
         """Send command to device."""
-        if command=="activate":
+        command_dict: dict = json.loads(command)
+
+        if command_dict.get("function") == "activate-bltouch":
             self.blt.send_command()
 
 
@@ -44,6 +47,6 @@ class CommandGetter:
         """Get and produce data indefinitely."""
         while True:
             command = self.get_command()
-            if command:            
+            if command:
                 self.execute_command(command)
             time.sleep(0.001)  # be nice to the system :)
