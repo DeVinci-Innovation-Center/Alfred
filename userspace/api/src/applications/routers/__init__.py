@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, status
-from src.applications.routers import bltouch
-from src.applications.routers import camera
+from src.applications.routers import bltouch, camera, grasping
 from src.utils.apps import NoAppRunningException, ctx_manager
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 router.include_router(camera.router)
 router.include_router(bltouch.router)
+router.include_router(grasping.router)
 
 
 

@@ -98,11 +98,12 @@ services:
     depends_on:
       - redis
     environment:
+      - PYTHONUNBUFFERED=1
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - BLTOUCH_BAUDRATE=9600
-      - BLTOUCH_SERIAL_PORT=/dev/ttyACM1
+      - BLTOUCH_SERIAL_PORT=/dev/ttyACM0
     networks:
       - database-tier
 
