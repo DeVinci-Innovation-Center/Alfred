@@ -84,6 +84,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
+      - BLTOUCH_BAUDRATE=9600
+      - BLTOUCH_SERIAL_PORT=/dev/ttyACM1
     networks:
       - database-tier
 
