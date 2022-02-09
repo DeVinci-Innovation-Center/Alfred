@@ -51,3 +51,7 @@ docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
 ## Development
 
 How to dev on the platform ?
+
+### CPU and GPU compatibility
+
+Make sure to keep CPU and GPU docker-compose and Docker files in sync by comparing them to each other every so often. In VSCode, select the two files, right click and select `Compare Selected` in the drop down menu.

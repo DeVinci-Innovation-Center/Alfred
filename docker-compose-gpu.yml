@@ -2,17 +2,33 @@ volumes:
   mongodb-data:
   redis-data:
 
+# ipam required to work with machines running openvpn
 networks:
+  # server network
   server-tier:
+    ipam:
+      config:
+        - subnet: 172.16.237.0/24
+          gateway: 172.16.237.1
+  # communication between databases
   database-tier:
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24
+          gateway: 172.16.238.1
+  # network with controller
   controller-tier:
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24
+          gateway: 172.16.239.1
 
 services:
 
-  frontend:
-    image: alfred-frontend:dev
+  dashboard:
+    image: alfred-dashboard:dev
     build:
-      context: ./userspace/gui
+      context: ./userspace/dashboard
       args:
         NUXT_ENV_HOST_IP: ${ALFRED_HOST_IP:-0.0.0.0}
     ports:
@@ -20,7 +36,7 @@ services:
     networks:
       - server-tier
 
-  backend:
+  api:
     privileged: true
     image: alfred-api-gpu:dev
     build:
@@ -53,9 +69,7 @@ services:
       resources:
         reservations:
           devices:
-          - driver: nvidia
-            count: 1
-            capabilities: [gpu]
+          - capabilities: [gpu]
 
   controller:
     privileged: true
@@ -66,14 +80,15 @@ services:
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
+      # - PYTHONUNBUFFERED=1
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_CHANNEL=command-robot
 
-      - MOVE_ARM=False
-      - ARM_IP=
+      - MOVE_ARM=True
+      - ARM_IP=172.21.72.200
     networks:
       - server-tier
       - database-tier
@@ -84,9 +99,7 @@ services:
       resources:
         reservations:
           devices:
-          - driver: nvidia
-            count: 1
-            capabilities: [gpu]
+            - capabilities: [gpu]
 
   drivers:
     privileged: true
@@ -95,9 +108,12 @@ services:
     depends_on:
       - redis
     environment:
+      - PYTHONUNBUFFERED=1
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
+      - BLTOUCH_BAUDRATE=9600
+      - BLTOUCH_SERIAL_PORT=/dev/ttyACM0
     networks:
       - database-tier
 

@@ -1,8 +1,11 @@
 FROM python:3.9
 
-RUN apt-get update && apt-get install -y -qq --no-install-recommends \
-    # required for opencv
-    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+    sudo \
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
+    python3.9-venv python3.9-dev git gcc \
+    v4l-utils ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /alfred/api

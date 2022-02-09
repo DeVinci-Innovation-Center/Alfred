@@ -19,6 +19,7 @@ scipy>=1.4.1
 tqdm>=4.41.0
 torch==1.10.2+cpu
 torchvision==0.11.3+cpu
+onnxruntime
 
 # Logging -------------------------------------
 tensorboard>=2.4.1

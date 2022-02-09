@@ -1,14 +1,18 @@
+from pathlib import Path
 from dataclasses import dataclass
 from functools import singledispatchmethod
 
-from ..yolov5.models.common import DetectMultiBackend
+import torch
 
+from ..yolov5.models.common import DetectMultiBackend
+from ..yolov5.utils.general import check_suffix
 
 class CustomDetectMultiBackend(DetectMultiBackend):
     """DetectMultiBackend with weights path reference."""
 
-    def __init__(self, weights='yolov5s.pt', device=None, dnn=True):
+    def __init__(self, weights='yolov5s.pt', device="cuda", dnn=True):
         super().__init__(weights, device, dnn)
+
         self.weights = weights
 
 

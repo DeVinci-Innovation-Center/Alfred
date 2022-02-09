@@ -15,17 +15,19 @@ from .yolov5.utils.general import LOGGER
 
 FILE = Path(__file__).resolve()
 # WEIGHTS_PATH = (FILE / "../trained_weights/custom.pt").resolve()
-WEIGHTS_PATH = (FILE / "../trained_weights/yolov5l6.pt").resolve()
-VIDEO_SOURCE = 6
+WEIGHTS_PATH = (FILE / "../trained_weights/yolov5l-runtime.pt").resolve()
+# WEIGHTS_PATH = (FILE / "../trained_weights/yolov5l.onnx").resolve()
+VIDEO_SOURCE = 4
 
 LOGGER.setLevel("ERROR")
 
 
-def main():
+def main(device_name: str = "cuda"):
     api = libalfred.AlfredAPI()
 
     # Load model
-    model = CustomDetectMultiBackend(WEIGHTS_PATH, device="cpu", dnn=False)
+    model = CustomDetectMultiBackend(WEIGHTS_PATH, device=device_name)
+    model.to(torch.device(device_name))
     stride, names, pt, jit, onnx = (
         model.stride,
         model.names,

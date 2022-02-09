@@ -1,13 +1,11 @@
-ARG CUDA_VERSION=11.0-base
+ARG CUDA_VERSION=11.3.0-base
 FROM nvidia/cudagl:${CUDA_VERSION}
 
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y -qq --no-install-recommends \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
     sudo \
-    # required for opencv
     libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
-    # required for python
-    python3.8 python3-pip python3-dev git gcc \
-    # required for webcam
+    python3.9-venv python3.9-dev git gcc \
     v4l-utils ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,11 +13,12 @@ RUN mkdir -p /alfred/api
 
 WORKDIR /alfred/api
 
-RUN python3 -m venv .venv && \
-    .venv/bin/python3 -m ensurepip && \
-    .venv/bin/python3 -m pip install --upgrade pip
+# must specify 3.9 because system python is 3.8
+RUN python3.9 -m venv .venv && \
+    .venv/bin/python3.9 -m ensurepip && \
+    .venv/bin/python3.9 -m pip install --upgrade pip
 
-COPY requirements.txt requirements.txt
+COPY requirements-gpu.txt requirements.txt
 
 RUN .venv/bin/pip3 install -r requirements.txt
 
@@ -30,5 +29,5 @@ RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 COPY src src
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD [".venv/bin/uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
+CMD [".venv/bin/python3.9", "-m", "uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
 # reload flag required because of python multiprocessing for some reason

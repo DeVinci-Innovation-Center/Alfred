@@ -1,18 +1,20 @@
-ARG CUDA_VERSION=11.0-base
+ARG CUDA_VERSION=11.3.0-base
 FROM nvidia/cudagl:${CUDA_VERSION}
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-    python3.8 python3-pip python3-dev git gcc \
+    python3.9-dev python3.9-venv git gcc \
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /alfred/controller
 
 WORKDIR /alfred/controller
 
-RUN python3 -m venv .venv && \
-    .venv/bin/python3 -m ensurepip && \
-    .venv/bin/python3 -m pip install --upgrade pip
+# must specify 3.9 because system python is 3.8
+RUN python3.9 -m venv .venv && \
+    .venv/bin/python3.9 -m ensurepip && \
+    .venv/bin/python3.9 -m pip install --upgrade pip
 
 COPY requirements.txt requirements.txt
 
@@ -25,4 +27,4 @@ RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 COPY src src
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD [".venv/bin/python3", "src/main.py"]
+CMD [".venv/bin/python3.9", "src/main.py"]

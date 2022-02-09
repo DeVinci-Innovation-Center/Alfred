@@ -1,8 +1,9 @@
 FROM python:3.9
 
-RUN apt-get update && apt-get install -y -qq --no-install-recommends \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
     git gcc \
-    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /alfred/controller

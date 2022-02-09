@@ -75,7 +75,7 @@ services:
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
-      - PYTHONUNBUFFERED=1
+      # - PYTHONUNBUFFERED=1
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -137,6 +137,7 @@ services:
       - database-tier
     volumes:
       - mongodb-data:/data/db
+
   # redis-listener:
   #   image: alfred-redis-listener:dev
   #   build: ./kernel/redis-listener

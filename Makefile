@@ -7,6 +7,7 @@ run: expose-x
 
 stop:
 	docker-compose down
+	docker-compose -f docker-compose-gpu.yml down
 
 show-logs:
 	docker-compose logs -f
@@ -20,5 +21,3 @@ run-gpu: expose-x
 	docker-compose -f docker-compose-gpu.yml up --build -d
 
 up-gpu: run-gpu
-
-down-gpu: stop-gpu
