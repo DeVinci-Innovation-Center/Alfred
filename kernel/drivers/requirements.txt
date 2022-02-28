@@ -1,4 +1,7 @@
-redis
-opencv-python-headless==4.5.5.62
-pyrealsense2==2.50.0.3812
-pyserial==3.4
+redis~=4.1.2
+python-decouple~=3.6
+opencv-python-headless~=4.5.5.62
+pyrealsense2~=2.50.0.3812
+pyserial~=3.4
+azure-cognitiveservices-speech~=1.20.0
+sounddevice~=0.4.4

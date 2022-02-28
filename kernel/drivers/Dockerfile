@@ -1,7 +1,10 @@
 FROM python:3.9
 
-RUN apt-get update && apt-get install \
+RUN apt-get update && apt-get install -y \
+    # bltouch
     libusb-1.0-0 \
+    # microphone
+    ffmpeg alsa-oss alsa-utils alsa-tools mpg123 libasound-dev pulseaudio socat \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /alfred/drivers
