@@ -2,23 +2,21 @@ from threading import Thread
 
 from redis import Redis
 
-from microphone import azure_speech, command_getter
-from microphone import config as cfg
-from microphone import data_producer, microphone_callback
+from mps import command_getter
+from mps import config as cfg
+from mps import data_producer
+from mps import mic_driver as microphone
 
 
 def main():
-    print(cfg.MICROPHONE_ID)
     redis_instance = Redis(cfg.REDIS_HOST, cfg.REDIS_PORT, cfg.REDIS_PASSWORD)
-
-    audio_stream = microphone_callback.SounddeviceCallback(cfg.MICROPHONE_ID)
-    azure_sp = azure_speech.AzureSpeech(callback=audio_stream)
+    mic_driver = microphone.MicDriver()
 
     getter = command_getter.CommandGetter(
-        redis_instance, "device-command-microphone", audio_stream, azure_sp
+        redis_instance, "device-command-microphone", mic_driver
     )
     producer = data_producer.DataProducer(
-        redis_instance, "device-data-microphone", audio_stream, azure_sp
+        redis_instance, "device-data-microphone", mic_driver
     )
 
     getter_thread = Thread(target=getter.loop)

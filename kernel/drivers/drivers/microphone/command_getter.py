@@ -6,9 +6,6 @@ from typing import Any
 from redis import Redis
 from redis.client import PubSub
 
-from microphone.azure_speech import AzureSpeech
-from microphone.microphone_callback import SounddeviceCallback
-
 
 class CommandGetter:
     """Gets commands over Redis."""
@@ -21,14 +18,12 @@ class CommandGetter:
         self,
         redis_instance: Redis,
         channel: str,
-        audio_stream: SounddeviceCallback,
-        azure_instance: AzureSpeech,
+        *args,
+        **kwargs
     ):
         self.redis_instance = redis_instance
         self.pubsub = self.redis_instance.pubsub()
         self.channel = channel
-        self.audio_stream = audio_stream
-        self.azure_instance = azure_instance
 
         self.pubsub.subscribe(self.channel)
 

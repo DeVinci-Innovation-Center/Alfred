@@ -55,3 +55,13 @@ How to dev on the platform ?
 ### CPU and GPU compatibility
 
 Make sure to keep CPU and GPU docker-compose and Docker files in sync by comparing them to each other every so often. In VSCode, select the two files, right click and select `Compare Selected` in the drop down menu.
+
+## Audio driver
+
+Some problems may appear when using audio in ALFRED containers. As far as my understanding goes, docker containers should use the host's drivers, but it acts as another client, so when it tries to use a device that is already used by the system, it won't work. To see which devices are in use, try:
+
+```sh
+fuser -fv /dev/snd/*
+```
+
+If nothing appears, good, but if the audio devices responsible for playback (ex: `/dev/snd/pcmC0D0p`) and/or capture (ex: `/dev/snd/pcmC0D0c`) appear, you will have to restart or disable your audio drivers until they are free for the container to use.

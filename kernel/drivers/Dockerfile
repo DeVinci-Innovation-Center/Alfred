@@ -1,10 +1,10 @@
 FROM python:3.9
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     # bltouch
     libusb-1.0-0 \
     # microphone
-    ffmpeg alsa-oss alsa-utils alsa-tools mpg123 libasound-dev pulseaudio socat \
+    libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /alfred/drivers

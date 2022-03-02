@@ -1,67 +1,43 @@
+import threading
 import time
-from typing import List, Optional
+from typing import Optional
 
 import azure.cognitiveservices.speech as speechsdk
-from azure.cognitiveservices.speech import speech_py_impl as impl
-from azure.cognitiveservices.speech.languageconfig import SourceLanguageConfig
+import numpy as np
+import sounddevice as sd
 
+from mps import azure_speech
 from mps import config as cfg
 
+_lock = threading.Lock()
 
-class OwnAutoDetectSourceLanguageConfig(
-    speechsdk.languageconfig.AutoDetectSourceLanguageConfig
-):
-    """
-    Superclass of AutoDetectSourceLanguageConfig to disable VSCode's
-    Pylance `Code is unreachable` error.
 
-    Represents auto detection source language configuration, allowing open
-    range, specifying the potential source languages and corresponding
-    customized endpoint
+class MicDriver:
+    mic_stream: sd.InputStream
+    azure_stream: speechsdk.audio.PushAudioInputStream
+    speech_recognizer: speechsdk.SpeechRecognizer
 
-    The configuration can be initialized in different ways:
-
-    - from open range: pass nothing, for source language auto detection in
-    synthesis.
-    - from languages: pass a list of potential source languages, for source
-    language auto detection in recognition.
-    - from sourceLanguageConfigs: pass a list of source language
-    configurations, for source language auto detection in recognition.
-
-    :param languages: The list of potential source languages. The language is
-    specified in BCP-47 format
-    :param sourceLanguageConfigs: The list of source language configurations
-    """
-
-    def __init__(
-        self,
-        languages: List[str] = None,
-        sourceLanguageConfigs: List[SourceLanguageConfig] = None,
-    ) -> None:
-        if languages is not None and sourceLanguageConfigs is not None:
-            raise ValueError(
-                """languages and sourceLanguageConfigs cannot be both specified
-                to create AutoDetectSourceLanguageConfig"""
-            )
-        self._impl = self._get_impl(
-            impl.AutoDetectSourceLanguageConfig,
-            languages,
-            sourceLanguageConfigs,
+    def __init__(self):
+        self.mic_stream = sd.InputStream(
+            device=cfg.MICROPHONE_ID,
+            dtype="int16",
+            channels=1,
+            samplerate=16_000,
+            blocksize=1,
         )
 
-
-class AzureSpeech:
-    def __init__(self, stream):
-
         stream_format = speechsdk.audio.AudioStreamFormat()
+        self.azure_stream = speechsdk.audio.PushAudioInputStream(stream_format)
 
         speech_config = speechsdk.SpeechConfig(
             subscription=cfg.AZURE_KEY, region=cfg.AZURE_REGION
         )
 
-        audio_config = speechsdk.audio.AudioConfig(stream=stream)
+        audio_config = speechsdk.audio.AudioConfig(stream=self.azure_stream)
 
-        auto_lang = OwnAutoDetectSourceLanguageConfig(languages=cfg.AZURE_LANG)
+        auto_lang = azure_speech.OwnAutoDetectSourceLanguageConfig(
+            languages=cfg.AZURE_LANG
+        )
 
         self.speech_recognizer = speechsdk.SpeechRecognizer(
             speech_config,
@@ -87,19 +63,68 @@ class AzureSpeech:
         self.result_ready = False
         self.result = ""
 
+        self.frame_ready = False
+        self.frame = np.zeros((1,))
+
+        self.recog_thread = threading.Thread(
+            target=self.start_recog_continuous
+        )
+        self.capture_thread = threading.Thread(
+            target=self.capture_mic_continuous
+        )
+
+    def save_frame(self, frame: np.ndarray):
+        with _lock:
+            self.frame = frame.copy()
+            self.frame_ready = True
+
+    def read_frame(self, check_ready=False) -> Optional[np.ndarray]:
+        """Returns last audio frame. If check_ready is True, returns None if
+        the last frame was already read."""
+        with _lock:
+            if check_ready and not self.frame_ready:
+                return None
+
+            self.frame_ready = False
+            return self.frame
+
     def save_result(self, result: str):
-        self.result = result
-        self.result_ready = True
+        with _lock:
+            self.result = result
+            self.result_ready = True
 
     def read_result(self, check_ready=False) -> Optional[str]:
         """Returns last recognition result. If check_ready is True, returns None if
         the last results was already read."""
+        with _lock:
+            if check_ready and not self.result_ready:
+                return None
 
-        if check_ready and not self.result_ready:
-            return None
+            self.result_ready = False
+            return self.result
 
-        self.result_ready = False
-        return self.result
+    def capture_mic_continuous(self):
+        n_bytes = 3200
+        samplesize = self.mic_stream.samplesize
+
+        self.mic_stream.start()
+
+        try:
+            while True:
+                frame: np.ndarray = self.mic_stream.read(
+                    n_bytes // samplesize
+                )[0]
+                frame = frame.flatten()
+                self.save_frame(frame)
+                new_buffer = frame.data.cast("B")
+
+                self.azure_stream.write(new_buffer)
+                time.sleep(0.01)
+        finally:
+            # stop recognition and clean up
+            self.mic_stream.close()
+            self.azure_stream.close()
+            self.speech_recognizer.stop_continuous_recognition()
 
     def start_recog_continuous(self):
         self.speech_recognizer.start_continuous_recognition()
@@ -139,8 +164,10 @@ class AzureSpeech:
                 )
 
     def recognized_callback(self, event):
-        print("RECOGNIZED {}".format(event.result.text))
-        self.save_result(event.result.text)
+        recognized = event.result.text
+        if recognized != "":
+            print(f"RECOGNIZED: {recognized}")
+            self.save_result(recognized)
 
     def stop_callback(self):
         self.speech_recognizer.stop_continuous_recognition()
