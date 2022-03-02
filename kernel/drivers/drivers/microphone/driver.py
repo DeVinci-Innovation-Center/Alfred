@@ -2,10 +2,10 @@ from threading import Thread
 
 from redis import Redis
 
-from mps import command_getter
-from mps import config as cfg
-from mps import data_producer
-from mps import mic_driver as microphone
+from microphone import command_getter
+from microphone import config as cfg
+from microphone import data_producer
+from microphone import mic_driver as microphone
 
 
 def main():

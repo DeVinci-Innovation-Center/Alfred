@@ -6,7 +6,7 @@ from typing import Any
 
 from redis import Redis
 
-from mps.mic_driver import MicDriver
+from microphone.mic_driver import MicDriver
 
 
 class DataProducer:

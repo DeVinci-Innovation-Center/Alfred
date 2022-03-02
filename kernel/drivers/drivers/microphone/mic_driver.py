@@ -6,8 +6,8 @@ import azure.cognitiveservices.speech as speechsdk
 import numpy as np
 import sounddevice as sd
 
-from mps import azure_speech
-from mps import config as cfg
+from microphone import azure_speech
+from microphone import config as cfg
 
 _lock = threading.Lock()
 

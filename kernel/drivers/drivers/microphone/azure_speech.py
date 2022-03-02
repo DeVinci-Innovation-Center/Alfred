@@ -5,7 +5,7 @@ import azure.cognitiveservices.speech as speechsdk
 from azure.cognitiveservices.speech import speech_py_impl as impl
 from azure.cognitiveservices.speech.languageconfig import SourceLanguageConfig
 
-from mps import config as cfg
+from microphone import config as cfg
 
 
 class OwnAutoDetectSourceLanguageConfig(
