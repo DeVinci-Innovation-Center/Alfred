@@ -14,6 +14,9 @@ intents:
   - mood_unhappy
   - bot_challenge
 
+actions:
+  - action_reset_to_grab
+
 responses:
   utter_not_called:
     - text: "Call me with 'Alfred' to give me intstructions."
@@ -59,7 +62,6 @@ entities:
       - give
       - release
       - place
-  - unknown_object
 
 slots:
   called:
@@ -71,10 +73,14 @@ slots:
         value: true
         intent: call
       - type: from_intent
+        value: true
+        intent: call+grab_object
+      - type: from_intent
         value: false
         intent: uncall
   to_grab:
     type: text
+    influence_conversation: true
     mappings:
     - type: from_entity
       entity: known_object

@@ -1,25 +1,6 @@
 version: "3.0"
 
 nlu:
-- lookup: known_object
-  examples: |
-    - bottle
-    - mouse
-    - cup
-    - ball
-    - soldering iron
-    - helmet
-    - pen
-    - marker
-    - pencil
-    - keyboard
-    - screen
-
-- lookup: unknown_object
-  examples: |
-    - cow
-    - cable
-    - cube
 
 - intent: call
   examples: |
@@ -52,11 +33,9 @@ nlu:
     - grab the [helmet]{"entity": "known_object", "role": "grab"}
     - please grab the [pen]{"entity": "known_object", "role": "grab"}
     - can you grab the [marker]{"entity": "known_object", "role": "grab"}
-    - grab the [cow]{"entity": "unknown_object", "role": "grab"} please
-    - grab the [cube]{"entity": "unknown_object", "role": "grab"}
-    - please grab the [cable]{"entity": "unknown_object", "role": "grab"}
-    - can you grab the [cow]{"entity": "unknown_object", "role": "grab"}
-    - grab the [cube]{"entity": "unknown_object", "role": "grab"} please
+    - grab a cow
+    - grab a car
+    - grab a [mouse]{"entity": "known_object", "role": "grab"}
 
 - intent: call+grab_object
   examples: |
@@ -72,12 +51,8 @@ nlu:
     - hey alfred, please grab the [pen]{"entity": "known_object", "role": "grab"}
     - hey alfred, can you grab the [marker]{"entity": "known_object", "role": "grab"}
     - alfred, grab the [pencil]{"entity": "known_object", "role": "grab"} please
-    - hey alfred, grab the [cow]{"entity": "unknown_object", "role": "grab"} please
-    - hey alfred, grab the [cube]{"entity": "unknown_object", "role": "grab"}
-    - alfred please grab the [cable]{"entity": "unknown_object", "role": "grab"}
-    - alfred, can you grab the [cow]{"entity": "unknown_object", "role": "grab"}
-    - alfred, grab the [cube]{"entity": "unknown_object", "role": "grab"} please
-
+    - alfred grab a cow
+    - alfred grab a car please
 
 - intent: greet
   examples: |
@@ -167,3 +142,17 @@ nlu:
     - are you a human?
     - am I talking to a bot?
     - am I talking to a human?
+
+- lookup: known_object
+  examples: |
+    - bottle
+    - mouse
+    - cup
+    - ball
+    - soldering iron
+    - helmet
+    - pen
+    - marker
+    - pencil
+    - keyboard
+    - screen
