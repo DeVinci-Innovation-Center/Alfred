@@ -1,0 +1,85 @@
+version: "3.0"
+
+stories:
+
+- story: call alfred
+  steps:
+  - intent: call
+  - slot_was_set:
+    - called: true
+  - action: utter_ready
+  - checkpoint: check_called
+
+- story: not called
+  steps:
+  - intent: grab_object
+  - action: utter_not_called
+
+- story: grab bottle
+  steps:
+  - checkpoint: check_called
+  - intent: grab_object
+  - slot_was_set:
+    - to_grab: bottle
+  - action: utter_comply_grab
+  - checkpoint: check_called
+
+- story: grab unknown object
+  steps:
+  - checkpoint: check_called
+  - intent: grab_object
+    entities:
+      - unknown_object: "cow"
+  - action: utter_unknown_object
+  - checkpoint: check_called
+
+- story: call and grab bottle
+  steps:
+  - intent: call+grab_object
+  - slot_was_set:
+    - to_grab: bottle
+  - action: utter_comply_grab
+  - checkpoint: check_called
+
+- story: call and grab unknown object
+  steps:
+  - intent: call+grab_object
+    entities:
+      - unknown_object: "cow"
+  - action: utter_unknown_object
+  - checkpoint: check_called
+
+- story: stop intstruction
+  steps:
+  - checkpoint: check_called
+  - intent: uncall
+  - slot_was_set:
+    - called: false
+  - action: utter_uncalled
+
+- story: happy path
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_great
+  - action: utter_happy
+
+- story: sad path 1
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: affirm
+  - action: utter_happy
+
+- story: sad path 2
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: deny
+  - action: utter_goodbye

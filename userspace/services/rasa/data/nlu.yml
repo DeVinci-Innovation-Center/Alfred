@@ -1,0 +1,169 @@
+version: "3.0"
+
+nlu:
+- lookup: known_object
+  examples: |
+    - bottle
+    - mouse
+    - cup
+    - ball
+    - soldering iron
+    - helmet
+    - pen
+    - marker
+    - pencil
+    - keyboard
+    - screen
+
+- lookup: unknown_object
+  examples: |
+    - cow
+    - cable
+    - cube
+
+- intent: call
+  examples: |
+    - Alfred
+    - alfred
+    - ALFRED
+    - Hey alfred
+    - Hello Alfred
+
+- intent: uncall
+  examples: |
+    - Thank you
+    - Thank you Alfred
+    - I'm done
+    - Alright thanks
+    - Alright thank you
+    - That's it
+    - That's it thanks
+
+- intent: grab_object
+  examples: |
+    - grab the [bottle]{"entity": "known_object", "role": "grab"}
+    - please grab the [bottle]{"entity": "known_object", "role": "grab"}
+    - can you grab the [bottle]{"entity": "known_object", "role": "grab"}
+    - grab the [bottle]{"entity": "known_object", "role": "grab"} please
+    - grab the [mouse]{"entity": "known_object", "role": "grab"}
+    - please grab the [cup]{"entity": "known_object", "role": "grab"}
+    - can you grab the [ball]{"entity": "known_object", "role": "grab"}
+    - grab the [soldering iron]{"entity": "known_object", "role": "grab"} please
+    - grab the [helmet]{"entity": "known_object", "role": "grab"}
+    - please grab the [pen]{"entity": "known_object", "role": "grab"}
+    - can you grab the [marker]{"entity": "known_object", "role": "grab"}
+    - grab the [cow]{"entity": "unknown_object", "role": "grab"} please
+    - grab the [cube]{"entity": "unknown_object", "role": "grab"}
+    - please grab the [cable]{"entity": "unknown_object", "role": "grab"}
+    - can you grab the [cow]{"entity": "unknown_object", "role": "grab"}
+    - grab the [cube]{"entity": "unknown_object", "role": "grab"} please
+
+- intent: call+grab_object
+  examples: |
+    - hey alfred, grab the [bottle]{"entity": "known_object", "role": "grab"}
+    - alfred, please grab the [bottle]{"entity": "known_object", "role": "grab"}
+    - alfred, can you grab the [bottle]{"entity": "known_object", "role": "grab"}
+    - hey alfred, grab the [bottle]{"entity": "known_object", "role": "grab"} please
+    - hey alfred, grab the [mouse]{"entity": "known_object", "role": "grab"}
+    - alfred, please grab the [cup]{"entity": "known_object", "role": "grab"}
+    - alfred, can you grab the [ball]{"entity": "known_object", "role": "grab"}
+    - hey alfred, grab the [soldering iron]{"entity": "known_object", "role": "grab"} please
+    - alfred, grab the [helmet]{"entity": "known_object", "role": "grab"}
+    - hey alfred, please grab the [pen]{"entity": "known_object", "role": "grab"}
+    - hey alfred, can you grab the [marker]{"entity": "known_object", "role": "grab"}
+    - alfred, grab the [pencil]{"entity": "known_object", "role": "grab"} please
+    - hey alfred, grab the [cow]{"entity": "unknown_object", "role": "grab"} please
+    - hey alfred, grab the [cube]{"entity": "unknown_object", "role": "grab"}
+    - alfred please grab the [cable]{"entity": "unknown_object", "role": "grab"}
+    - alfred, can you grab the [cow]{"entity": "unknown_object", "role": "grab"}
+    - alfred, grab the [cube]{"entity": "unknown_object", "role": "grab"} please
+
+
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hello there
+    - good morning
+    - good evening
+    - moin
+    - hey there
+    - let's go
+    - hey dude
+    - goodmorning
+    - goodevening
+    - good afternoon
+
+- intent: goodbye
+  examples: |
+    - cu
+    - good by
+    - cee you later
+    - good night
+    - bye
+    - goodbye
+    - have a nice day
+    - see you around
+    - bye bye
+    - see you later
+
+- intent: affirm
+  examples: |
+    - yes
+    - y
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+
+- intent: deny
+  examples: |
+    - no
+    - n
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+
+- intent: mood_great
+  examples: |
+    - perfect
+    - great
+    - amazing
+    - feeling like a king
+    - wonderful
+    - I am feeling very good
+    - I am great
+    - I am amazing
+    - I am going to save the world
+    - super stoked
+    - extremely good
+    - so so perfect
+    - so good
+    - so perfect
+
+- intent: mood_unhappy
+  examples: |
+    - my day was horrible
+    - I am sad
+    - I don't feel very well
+    - I am disappointed
+    - super sad
+    - I'm so sad
+    - sad
+    - very sad
+    - unhappy
+    - not good
+    - not very good
+    - extremly sad
+    - so saad
+    - so sad
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - am I talking to a bot?
+    - am I talking to a human?
