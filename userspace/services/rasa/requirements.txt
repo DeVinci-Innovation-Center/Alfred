@@ -1,0 +1,2 @@
+rasa[full]~=3.0.8
+python-decouple~=3.6
