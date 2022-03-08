@@ -1,4 +1,5 @@
 import json
+import traceback
 
 import redis
 import socketio
@@ -26,10 +27,12 @@ def treat_input_cb(sio: socketio.Server):
     return treat_input_cb_inner
 
 
-def register_sio_routes(sio):
+def register_sio_routes(sio, rc: redis.Redis):
     @sio.on(cfg.RASA_BOT_MSG_EVT)
     def receive_rasa_response(response):
-        print(response)
+        print(f"from rasa: {response}")
+        rc.publish(cfg.RASA_REDIS_OUTPUT_CHANNEL, json.dumps(response))
+
 
     @sio.event
     def connect():
@@ -46,16 +49,27 @@ def register_sio_routes(sio):
 
 
 def main():
-    sio = socketio.Client()
-    register_sio_routes(sio)
-
     # setup redis
     rc = redis.Redis(
         cfg.REDIS_HOST, cfg.REDIS_PORT, password=cfg.REDIS_PASSWORD
     )
     rps = rc.pubsub()
-    rps.subscribe(**{cfg.RASA_REDIS_INPUT_CHANNEL: treat_input_cb(sio)})
 
+    # connected = False
+    # print("trying to connect to rasa sio server")
+    # while not connected:
+    #     try:
+    #     except Exception:
+    #         traceback.print_exc()
+    #         print("connection failed, retrying")
+    #     connected = sio.connected
+    sio = socketio.Client()
+
+    print("connected")
+
+    register_sio_routes(sio, rc)
+
+    rps.subscribe(**{cfg.RASA_REDIS_INPUT_CHANNEL: treat_input_cb(sio)})
     # listen to messages in thread
     rps_thread = rps.run_in_thread(sleep_time=0.001)
 

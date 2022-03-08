@@ -66,6 +66,24 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
 
+  services:
+    image: alfred-services:dev
+    build:
+      context: ./userspace/services
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+
+      - RASA_REDIS_INPUT_CHANNEL=device-data-microphone-speech
+      - RASA_REDIS_OUTPUT_CHANNEL=services-rasa-responses
+      - RASA_SIO_SERVER_ADDR=http://localhost:5005
+    networks:
+      - database-tier
+
   controller:
     privileged: true
     image: alfred-controller:dev
@@ -126,6 +144,7 @@ services:
 
   mongodb:
     image: mongo:5
+    command: --quiet
     restart: always
     ports:
       - "27017:27017"
