@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from src.applications.routers import aruco
 from src.applications.routers import bltouch
 from src.applications.routers import camera
 from src.utils.apps import NoAppRunningException, ctx_manager
@@ -6,7 +7,7 @@ from src.utils.apps import NoAppRunningException, ctx_manager
 router = APIRouter(prefix="/applications", tags=["Applications"])
 router.include_router(camera.router)
 router.include_router(bltouch.router)
-
+router.include_router(aruco.router)
 
 
 @router.get("/")
