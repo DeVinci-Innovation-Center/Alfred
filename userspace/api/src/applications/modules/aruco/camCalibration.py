@@ -1,7 +1,10 @@
 import cv2
 import glob
+import imageio
 import numpy as np
+import pickle
 import shutil
+import time
 
 from src.applications.modules.aruco import aruco
 from src.utils.global_instances import rc
@@ -85,3 +88,51 @@ def get_calibration_coef(dirpath: str = DIRPATH, taking_picture: bool = False) -
         print("Error: %s : %s" % (dirpath, e.strerror))
 
     return mtx, dist
+
+def take_picture(camera_feed: str = CAM, name: str = "image")->None:
+    """Get frames from redis and show them in a window.
+
+    :param camera_feed: publisher name, defaults to CAM
+    :type camera_feed: str, optional
+    :param name: filename, defaults to "image"
+    :type name: str, optional
+    """
+    p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
+    p.subscribe(camera_feed)
+    message = None
+
+    while not message:
+        message = p.get_message()
+        time.sleep(0.001)
+    frame = pickle.loads(message["data"])
+    color_image = frame[..., ::-1]
+    imageio.imwrite(name+".png", color_image)
+    if DEBUG:
+        img = cv2.imread(name+'.png', 0)
+        # show image
+        cv2.imshow('image', img)
+        cv2.waitKey(0)
+
+
+def take_pictures(camera_feed: str = CAM, dirpath: str = DIRPATH, nbr_pic: int = 1) -> None:
+    """Take n pictures with the realsense
+
+    :param dirpath: path of the taken pictures
+    :type dirpath: str
+    :param nbr_pic: numbre of pictures, defaults to 1
+    :type nbr_pic: int, optional
+    """
+    p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
+    p.subscribe(camera_feed)
+    message = None
+
+    # start streaming
+    for i in range(nbr_pic):
+        input(f"Enter to take the {i+1}_pic")
+        time.sleep(0.5)  # wait 0.5 seconds to take a picture
+        message = p.get_message()
+        time.sleep(0.001)
+        frame = pickle.loads(message["data"])
+        color_image = frame[..., ::-1]
+        imageio.imwrite(dirpath+f"/image{i+1}.png", color_image)
+
