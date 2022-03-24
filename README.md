@@ -65,3 +65,9 @@ fuser -fv /dev/snd/*
 ```
 
 If nothing appears, good, but if the audio devices responsible for playback (ex: `/dev/snd/pcmC0D0p`) and/or capture (ex: `/dev/snd/pcmC0D0c`) appear, you will have to restart or disable your audio drivers until they are free for the container to use.
+
+To restart Pipewire:
+
+```bash
+systemctl --user restart pipewire.service
+```

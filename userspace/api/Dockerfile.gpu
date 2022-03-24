@@ -1,5 +1,6 @@
+ARG UPDATE_LIBALFRED
 ARG CUDA_VERSION=11.3.0-base
-FROM nvidia/cudagl:${CUDA_VERSION}
+FROM nvidia/cudagl:${CUDA_VERSION} as base
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
@@ -22,8 +23,13 @@ COPY requirements-gpu.txt requirements.txt
 
 RUN .venv/bin/pip3 install -r requirements.txt
 
-# install libalfred without cache
+FROM base as branch-update-libalfred-true
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+
+FROM base as branch-update-libalfred-false
+
+FROM branch-update-libalfred-${UPDATE_LIBALFRED} AS final
+
 RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 
 COPY src src
