@@ -53,3 +53,4 @@ class ShowThread(threading.Thread):
     def stop(self)->None:
         """Stop the thread"""
         self._stop.set()
+        cv2.destroyAllWindows()
