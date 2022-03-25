@@ -42,8 +42,6 @@ services:
     build:
       context: ./userspace/api
       dockerfile: Dockerfile.gpu
-      args:
-        UPDATE_LIBALFRED: ${UPDATE_LIBALFRED:-false}
     restart: always
     environment:
       - PYTHONUNBUFFERED=1
@@ -97,8 +95,6 @@ services:
     build:
       context: ./kernel/controller
       dockerfile: Dockerfile.gpu
-      args:
-        UPDATE_LIBALFRED: ${UPDATE_LIBALFRED:-false}
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1

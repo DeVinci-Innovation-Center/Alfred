@@ -1,4 +1,3 @@
-ARG UPDATE_LIBALFRED
 ARG CUDA_VERSION=11.3.0-base
 FROM nvidia/cudagl:${CUDA_VERSION} as base
 
@@ -21,13 +20,8 @@ COPY requirements.txt requirements.txt
 
 RUN .venv/bin/pip3 install -r requirements.txt
 
-FROM base as branch-update-libalfred-true
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
-
-FROM base as branch-update-libalfred-false
-
-FROM branch-update-libalfred-${UPDATE_LIBALFRED} AS final
-
+# get branch info to reset cache when libalfred is updated
+ADD https://api.github.com/repos/dimitrivinet/libalfred/git/refs/heads/main libalfred_version.json
 RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 
 COPY src src
