@@ -22,8 +22,8 @@ up-gpu: run-gpu
 # ------------ STOPPING ------------
 
 stop:
-	docker-compose down
-	docker-compose -f docker-compose-gpu.yml down
+	- docker-compose down
+	- docker-compose -f docker-compose-gpu.yml down
 
 down: stop
 
