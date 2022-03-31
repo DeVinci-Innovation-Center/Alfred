@@ -10,6 +10,7 @@ _lock = threading.Lock()
 
 class ShowThread(threading.Thread):
     """Thread to show the camera stream"""
+
     def __init__(self, is_aruco: bool = False, mtx: Any = None, dist: Any = None, rvec: Any = None, tvec: Any = None, cornes: np.array = None, ids: np.array = None) -> None:
         super().__init__()
         self.frame = None
@@ -28,11 +29,15 @@ class ShowThread(threading.Thread):
         while True:
             if self._stop.is_set():
                 break
-            if self.is_aruco & (np.all(self.ids is not None)):
-                aruco.drawDetectedMarkers(self.frame, self.corners, self.ids)
-                aruco.drawAxis(self.frame, self.mtx, self.dist,
-                               self.rvec, self.tvec, length=0.01)
             if self.frame is not None:
+                if self.is_aruco & (np.all(self.ids is not None)):
+                    aruco.drawDetectedMarkers(
+                        self.frame, self.corners, self.ids)
+                    try:
+                        aruco.drawAxis(self.frame, self.mtx, self.dist,
+                                       self.rvec, self.tvec, length=0.01)
+                    except Exception as e:
+                        print(e)
                 cv2.imshow("FRAME", self.frame)
 
                 cv2.waitKey(1)
@@ -40,9 +45,9 @@ class ShowThread(threading.Thread):
                     self._stop.set()
                     cv2.destroyAllWindows()
 
-    def update(self, new_frame: np.array, new_rvec: Any = None, new_tvec: Any = None, new_cornes: np.array = None, new_ids: np.array = None)->None:
+    def update(self, new_frame: np.array, new_rvec: Any = None, new_tvec: Any = None, new_cornes: np.array = None, new_ids: np.array = None) -> None:
         """Update the frame to show"""
-        with _lock: # block the running thread during the update
+        with _lock:  # block the running thread during the update
             self.frame = new_frame
             if self.is_aruco:
                 self.rvec = new_rvec
@@ -50,7 +55,7 @@ class ShowThread(threading.Thread):
                 self.corners = new_cornes
                 self.ids = new_ids
 
-    def stop(self)->None:
+    def stop(self) -> None:
         """Stop the thread"""
         self._stop.set()
         cv2.destroyAllWindows()

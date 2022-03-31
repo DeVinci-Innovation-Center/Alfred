@@ -62,7 +62,8 @@ class ScannerThread(threading.Thread):
             if self.flag.is_set():
                 time.sleep(0.1)
                 continue
-
+            self.arm.set_servo_angle(
+                servo_id=5, angle=self.start_pose_degrees[4], is_radian=False, wait=True)
             if self._stop.is_set():
                 self.return_sequence()
                 break
@@ -73,7 +74,7 @@ class ScannerThread(threading.Thread):
             )
             time.sleep(time_to_move(self.num_points))
 
-    def start_sequence(self):
+    def start_sequence(self) -> None:
         """Gets xArm into init_position."""
 
         self.flag.set()
@@ -83,7 +84,7 @@ class ScannerThread(threading.Thread):
         print("Got into position!")
         self.flag.clear()
 
-    def return_sequence(self):
+    def return_sequence(self) -> None:
         """Gets xArm back into init_position after stop flag was set."""
         self.flag.set()
         print("Executing return sequence!")
@@ -92,10 +93,12 @@ class ScannerThread(threading.Thread):
         print("Finished return sequence")
         self.flag.clear()
 
-    def set(self, validate=True):
+    def set(self) -> None:
+        """Set the flag"""
         self.flag.set()
 
-    def unset(self):
+    def unset(self) -> None:
+        """Unset the flag"""
         self.flag.clear()
 
     def stop(self):

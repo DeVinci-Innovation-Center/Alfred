@@ -3,18 +3,20 @@ import cv2.aruco as aruco
 import numpy as np
 import threading
 import time
+import json
 
 
 from typing import Any, Dict, List, Tuple
 
 from libalfred import AlfredAPI
-from libalfred.wrapper.utils.camera_stream import StreamCamThread
+from libalfred.utils.camera_stream import StreamCamThread
 
 from .detection import DetectFlag
 from .scanner import ScannerThread
 from .show_cam import ShowThread
 from src.utils.global_instances import rc
 from src.applications.modules.aruco import calibration_cam
+from src.applications.modules.gripper import gripper
 
 # termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -22,6 +24,8 @@ criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 DEBUG = True
 DIRPATH = "/alfred/api/src/applications/modules/aruco/images"
 CAM = "device-data-realsense"
+
+start_pose_degrees = [0.0, -42.3, -71.5, 0.0, 91.0, 0.0]
 
 
 def get_xy_diff(corner: np.array, x_center: float = 320., y_center: float = 240., tolerance_diff: float = 10.) -> Tuple[float, float]:
@@ -32,7 +36,7 @@ def get_xy_diff(corner: np.array, x_center: float = 320., y_center: float = 240.
     :return: angles for x,y to move
     :rtype: Tuple[float,float]
     """
-    angle = 1.
+    angle = 2.
     x, y = corner[0][0]
     x_angle, y_angle = 0, 0
     x_center, y_center = 320, 240
@@ -93,7 +97,8 @@ def aruco_detect(frame: np.array, aruco_dict, parameters, mtx: Any, dist: Any, a
                     aruco_detect.update(corners[i])
                     aruco_detect.set()
     else:
-        aruco_detect.unset()
+        if aruco_detect is not None:
+            aruco_detect.unset()
     return rvec, tvec, corners, ids
 
 
@@ -133,7 +138,7 @@ def stream_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250) -> None:
     stream_thread.stop()
 
 
-def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, id_aruco: int = 3, min_angle: float = -130., max_angle: float = 100.) -> None:
+def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, id_aruco: int = 3, min_angle: float = -100., max_angle: float = 100.) -> None:
     """Track a specific ArUco and center the camera"""
     # Init aruco tracking
     aruco_dict = aruco.Dictionary_get(aruco_dict_type)
@@ -145,18 +150,21 @@ def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, id_aruco: int = 3, 
     stream_thread = StreamCamThread()
     stream_thread.start()
 
-    # Init show thread
-    show_cam_thread = ShowThread(is_aruco=True, mtx=mtx, dist=dist)
-    show_cam_thread.start()
-
     # Init scanner thread
     arm = AlfredAPI()
+    arm.set_servo_angle(
+        angle=start_pose_degrees, is_radian=False, wait=True)
     scanner_thread = ScannerThread(
         arm, min_angle, max_angle, daemon=True)
     scanner_thread.start()
 
+    # Init show thread
+    show_cam_thread = ShowThread(is_aruco=True, mtx=mtx, dist=dist)
+    show_cam_thread.start()
+
     # Track specific aruco marker
     count = 0
+    flag_is_centered = False
     while True:
         frame = stream_thread.get_frame()
         if frame is None:
@@ -177,13 +185,97 @@ def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, id_aruco: int = 3, 
                 if count > 10:
                     center_camera(arm, xy_diff)
                     count = 0
-        else:
+            else:  # if centered
+                flag_is_centered = True
+                show_cam_thread.stop()
+                cv2.destroyAllWindows()
+                get_angle = arm.get_servo_angle(servo_id=1, is_radian=False)
+                # rget_servo_angle returns a string, ex. "(0,-47.7)" -> not a tuple!
+                angle = float(get_angle[3:-2])
+                # from 3 to -2 because it is a string, we extract only the angle and convert it in a float
+                move_to_arm(arm, angle)
+                break
+        elif not flag_is_centered:
+            # show_cam_thread.start()
             scanner_thread.unset()
         time.sleep(0.03)
 
+    gripper.grip(arm)
+    move_object_forward(arm)
+
+    scanner_thread.set()
     scanner_thread.stop()
     show_cam_thread.stop()
     stream_thread.stop()
-    # while scanner_thread.flag.is_set():
-    #     continue
+
+    # return to initial position
+    arm.set_servo_angle(
+        angle=start_pose_degrees, is_radian=False, wait=True)
     arm.stop()
+
+
+def move_object_to_hand(arm: AlfredAPI, z: float = 200.):
+    """Move the grasped object to the desk
+
+    :param arm: xArm
+    :type arm: AlfredAPI
+    :param z: move upwards, defaults to 200.
+    :type z: float, optional
+    """
+    pos_angle = [-75.4, 22.5, -52, -4.5, -58.2, -0.2]  # position of the desk
+    arm.set_position(z=z, relative=True, wait=False)
+    arm.set_servo_angle(
+        angle=pos_angle, is_radian=False, wait=True)
+    time.sleep(0.5)
+    arm.set_gripper_position(750, speed=500, wait=True)
+    time.sleep(1)
+
+
+def move_object_forward(arm: AlfredAPI, z: float = 100.):
+    """Move the grasped object forward
+
+    :param arm: xArm
+    :type arm: AlfredAPI
+    :param z: move "z-axis tool coordinates" forward, defaults to 100
+    :type z: float, optional
+    """
+    arm.set_position(z=z, relative=True, wait=False)
+    arm.set_position_aa(axis_angle_pose=[
+                        0, 0, z, 0, 0, 0], is_tool_coord=True, relative=True, wait=True)
+    arm.set_position(z=-z+2, relative=True, wait=True)
+    arm.set_gripper_position(750, speed=500, wait=True)
+    arm.set_position(z=z+40, relative=True, wait=False)
+
+
+def move_to_arm(arm: AlfredAPI = None, angle: float = .0) -> None:
+    """Move the arm to the right position depending on the given angle
+
+    :param arm: xArm, defaults to None
+    :type arm: AlfredAPI, optional
+    :param angle: _description_, defaults to .0
+    :type angle: float, optional
+    """
+    j1 = [47.1, 21.9, -4.4, -47.1]
+    j_pos1 = [28.8, -31.7, -4.6, -82.1, -2]
+    j_pos2 = [51.4, -45, -4.3, -94, -2.9]
+    # get the index of the closest float of j1 depending on angle
+    index = min(enumerate(j1), key=lambda x: abs(x[1]-angle))[0]
+    # add j1[index] angle to j_pos1 and j_pos2
+    pos1, pos2 = get_pos(j1, j_pos1, j_pos2, index)
+    arm.set_servo_angle(angle=pos1, is_radian=False, wait=False)
+    arm.set_servo_angle(angle=pos2, is_radian=False, wait=False)
+    # Move forward -> to the object
+    z = 100
+    arm.set_position_aa(axis_angle_pose=[
+                        0, 0, z, 0, 0, 0], is_tool_coord=True, relative=True, wait=True)
+
+
+def get_pos(j1: Any, j_pos1: Any, j_pos2: Any, index: int = 0) -> Any:
+    """Add j1[index] angle to j_pos1 and j_pos2
+        :return complet pos1 and pos2"""
+    pos1 = j_pos1.copy()
+    pos1.insert(0, j1[index])
+
+    pos2 = j_pos2.copy()
+    pos2.insert(0, j1[index])
+    return pos1, pos2
