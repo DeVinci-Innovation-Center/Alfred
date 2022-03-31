@@ -66,6 +66,24 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
 
+  services:
+    image: alfred-services:dev
+    build:
+      context: ./userspace/services
+    restart: always
+    environment:
+      # - PYTHONUNBUFFERED=1
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+
+      - RASA_REDIS_INPUT_CHANNEL=device-data-microphone-speech
+      - RASA_REDIS_OUTPUT_CHANNEL=services-rasa-responses
+      - RASA_SIO_SERVER_ADDR=http://localhost:5005
+    networks:
+      - database-tier
+
   controller:
     privileged: true
     image: alfred-controller:dev
@@ -75,14 +93,14 @@ services:
     environment:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
-      - PYTHONUNBUFFERED=1
+      # - PYTHONUNBUFFERED=1
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_CHANNEL=command-robot
 
-      - MOVE_ARM=True
+      - MOVE_ARM=False
       - ARM_IP=172.21.72.200
     networks:
       - server-tier
@@ -98,11 +116,17 @@ services:
     depends_on:
       - redis
     environment:
+      - PYTHONUNBUFFERED=1
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
+
       - BLTOUCH_BAUDRATE=9600
-      - BLTOUCH_SERIAL_PORT=/dev/ttyACM1
+      - BLTOUCH_SERIAL_PORT=/dev/ttyACM0
+
+      - AZURE_KEY=c649166d6bb04adfb9407ba859bc8f65
+      - AZURE_REGION=westeurope
+      - AZURE_LANG=fr-FR,en-US
     networks:
       - database-tier
 
@@ -120,6 +144,7 @@ services:
 
   mongodb:
     image: mongo:5
+    command: --quiet
     restart: always
     ports:
       - "27017:27017"
@@ -136,6 +161,7 @@ services:
       - database-tier
     volumes:
       - mongodb-data:/data/db
+
   # redis-listener:
   #   image: alfred-redis-listener:dev
   #   build: ./kernel/redis-listener

@@ -1,13 +1,10 @@
 """Get commands from Redis, treat them, and send them to the device."""
 
-import json
 import time
 from typing import Any
 
 from redis import Redis
 from redis.client import PubSub
-
-from bltouch import sensor
 
 
 class CommandGetter:
@@ -17,34 +14,35 @@ class CommandGetter:
     pubsub: PubSub
     channel: str
 
-    def __init__(self, redis_instance: Redis, channel: str, sensor:sensor.BLTouch):
+    def __init__(
+        self,
+        redis_instance: Redis,
+        channel: str,
+        *args,
+        **kwargs
+    ):
         self.redis_instance = redis_instance
         self.pubsub = self.redis_instance.pubsub()
         self.channel = channel
-        self.blt=sensor
 
         self.pubsub.subscribe(self.channel)
 
     def get_command(self) -> Any:
         """Get command from Redis."""
 
-        message = self.pubsub.get_message(ignore_subscribe_messages=True)
+        message = self.pubsub.get_message()
         if message:
             # do something with the message
             print(message)
-            command = message["data"].decode("utf-8")
-            return command
+
+        return message
 
     def execute_command(self, command: Any):
         """Send command to device."""
-        command_dict: dict = json.loads(command)
-
-        if command_dict.get("function") == "activate-bltouch":
-            self.blt.send_command()
-
 
     def loop(self):
         """Get and produce data indefinitely."""
+
         while True:
             command = self.get_command()
             if command:

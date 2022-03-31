@@ -1,0 +1,91 @@
+version: "3.0"
+
+intents:
+  - call
+  - uncall
+  - grab_object
+  - call+grab_object
+
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+
+actions:
+  - action_reset_to_grab
+
+responses:
+  utter_not_called:
+    - text: "Call me with 'Alfred' to give me intstructions."
+
+  utter_ready:
+    - text: "Yes, what can I do for you ?"
+
+  utter_uncalled:
+    - text: "Alright. Call me with 'Alfred' to start a new set of instructions."
+
+  utter_comply:
+    - text: "Ok."
+
+  utter_comply_grab:
+    - text: "Grabbing {to_grab}."
+
+  utter_unknown_object:
+    - text: "Sorry, I don't know this object."
+
+  utter_greet:
+    - text: "Hey! How are you?"
+
+  utter_cheer_up:
+    - text: "Here is something to cheer you up:"
+      image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_did_that_help:
+    - text: "Did that help you?"
+
+  utter_happy:
+    - text: "Great, carry on!"
+
+  utter_goodbye:
+    - text: "Bye"
+
+  utter_iamabot:
+    - text: "I am a bot, powered by Rasa."
+
+entities:
+  - known_object:
+      roles:
+      - grab
+      - give
+      - release
+      - place
+
+slots:
+  called:
+    type: bool
+    initial_value: false
+    influence_conversation: true
+    mappings:
+      - type: from_intent
+        value: true
+        intent: call
+      - type: from_intent
+        value: true
+        intent: call+grab_object
+      - type: from_intent
+        value: false
+        intent: uncall
+  to_grab:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: known_object
+      role: grab
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

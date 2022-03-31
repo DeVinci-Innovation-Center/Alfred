@@ -1,0 +1,111 @@
+version: "3.0"
+
+stories:
+
+- story: call alfred
+  steps:
+  - intent: call
+  - slot_was_set:
+    - called: true
+  - action: utter_ready
+  # - checkpoint: check_called
+
+- story: uncall alfred
+  steps:
+  - slot_was_set:
+    - called: true
+  - intent: uncall
+  - slot_was_set:
+    - called: false
+  - action: utter_uncalled
+
+- story: grab uncalled
+  steps:
+  - slot_was_set:
+    - called: false
+  - intent: grab_object
+    entities:
+    - known_object: mouse
+  - slot_was_set:
+    - to_grab: mouse
+  - action: utter_not_called
+  - action: action_reset_to_grab
+
+- story: uncall uncalled
+  steps:
+  - slot_was_set:
+    - called: false
+  - intent: uncall
+  - slot_was_set:
+    - called: false
+  - action: utter_not_called
+
+- story: grab bottle
+  steps:
+  # - checkpoint: check_called
+  - slot_was_set:
+    - called: true
+  - intent: grab_object
+    entities:
+    - known_object: bottle
+  - slot_was_set:
+    - to_grab: bottle
+  - action: utter_comply_grab
+  - action: action_reset_to_grab
+
+- story: call and grab bottle
+  steps:
+  - intent: call+grab_object
+    entities:
+    - known_object: bottle
+  - slot_was_set:
+    - to_grab: bottle
+    - called: true
+  - action: utter_comply_grab
+  - action: action_reset_to_grab
+
+- story: grab unknown object
+  steps:
+  # - checkpoint: check_called
+  - slot_was_set:
+    - called: true
+  - intent: grab_object
+  - slot_was_set:
+    - to_grab: null
+  - action: utter_unknown_object
+
+- story: call and grab unknown object
+  steps:
+  - intent: call+grab_object
+  - slot_was_set:
+    - to_grab: null
+    - called: true
+  - action: utter_unknown_object
+  # - checkpoint: check_called
+
+- story: happy path
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_great
+  - action: utter_happy
+
+- story: sad path 1
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: affirm
+  - action: utter_happy
+
+- story: sad path 2
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: deny
+  - action: utter_goodbye

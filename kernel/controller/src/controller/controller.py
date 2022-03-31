@@ -2,6 +2,7 @@ import json
 import logging
 import time
 from typing import Optional
+import traceback
 
 import redis
 from libalfred.utils import Command
@@ -88,6 +89,8 @@ class Controller:
                     prop_name,
                 )
                 to_send = "AttributeError"
+                error = traceback.format_exc()
+                print(error)
 
             self.rc.publish(
                 self.PROP_PUBSUB_CHANNEL, f"ret:{prop_name}={to_send}"
@@ -111,9 +114,10 @@ class Controller:
         if kw == "exec":
             func_dict = json.loads(value)
             try:
-                to_call = getattr(self.robot_real, func_dict["name"])
+                to_call_name = func_dict["name"]
                 to_call_args = func_dict["args"]
                 to_call_kwargs = func_dict["kwargs"]
+                to_call = getattr(self.robot_real, to_call_name)
                 print(f"{to_call=}")
                 print(f"{to_call_args=}")
                 print(f"{to_call_kwargs=}")
@@ -130,6 +134,8 @@ class Controller:
                     func_dict["kwargs"],
                 )
                 ret = "AttributeError"
+                error = traceback.format_exc()
+                print(error)
 
             self.rc.publish(self.FUNC_PUBSUB_CHANNEL, f"ret:{ret}")
 

@@ -1,8 +1,11 @@
 FROM python:3.9
 
-RUN apt-get update && apt-get install -y -qq --no-install-recommends \
-    # required for opencv
-    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+    sudo \
+    libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 libsm6 \
+    python3.9-venv python3.9-dev git gcc \
+    v4l-utils ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /alfred/api
@@ -17,8 +20,8 @@ COPY requirements.txt requirements.txt
 
 RUN .venv/bin/pip3 install -r requirements.txt
 
-# install libalfred without cache
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+# get branch info to reset cache when libalfred is updated
+ADD https://api.github.com/repos/dimitrivinet/libalfred/git/refs/heads/main libalfred_version.json
 RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 
 COPY src src
