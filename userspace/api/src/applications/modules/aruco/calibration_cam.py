@@ -81,15 +81,16 @@ def get_calibration_coef(dirpath: str = DIRPATH, taking_picture: bool = False) -
     if taking_picture:
         aruco.take_pictures(dirpath, 20)
     ret, mtx, dist, rvecs, tvecs = calibrate(dirpath, square_size)
-
-    try:
-        shutil.rmtree(dirpath)
-    except OSError as e:
-        print("Error: %s : %s" % (dirpath, e.strerror))
+    if taking_picture:
+        try:
+            shutil.rmtree(dirpath)
+        except OSError as e:
+            print("Error: %s : %s" % (dirpath, e.strerror))
 
     return mtx, dist
 
-def take_picture(camera_feed: str = CAM, name: str = "image")->None:
+
+def take_picture(camera_feed: str = CAM, name: str = "image") -> None:
     """Get frames from redis and show them in a window.
 
     :param camera_feed: publisher name, defaults to CAM
@@ -107,11 +108,12 @@ def take_picture(camera_feed: str = CAM, name: str = "image")->None:
     frame = pickle.loads(message["data"])
     color_image = frame[..., ::-1]
     imageio.imwrite(name+".png", color_image)
-    if DEBUG:
-        img = cv2.imread(name+'.png', 0)
-        # show image
-        cv2.imshow('image', img)
-        cv2.waitKey(0)
+    img = cv2.imread(name+'.png', 0)
+    # show image
+    cv2.imshow('image', img)
+    cv2.waitKey(0)
+    time.sleep(2)
+    cv2.destroyAllWindows()
 
 
 def take_pictures(camera_feed: str = CAM, dirpath: str = DIRPATH, nbr_pic: int = 1) -> None:
@@ -135,4 +137,3 @@ def take_pictures(camera_feed: str = CAM, dirpath: str = DIRPATH, nbr_pic: int =
         frame = pickle.loads(message["data"])
         color_image = frame[..., ::-1]
         imageio.imwrite(dirpath+f"/image{i+1}.png", color_image)
-
