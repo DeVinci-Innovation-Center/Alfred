@@ -25,7 +25,11 @@ ADD https://api.github.com/repos/dimitrivinet/libalfred/git/refs/heads/main liba
 RUN .venv/bin/pip3 install git+https://github.com/dimitrivinet/libalfred
 
 COPY src src
+COPY test test
+COPY entrypoint.sh /entrypoint.sh
+
+
 
 # CMD ["tail", "-f", "/dev/null"]
-CMD [".venv/bin/uvicorn", "src.app:app", "--reload", "--host=0.0.0.0"]
+ENTRYPOINT ["sh", "/entrypoint.sh"]
 # reload flag required because of python multiprocessing for some reason
