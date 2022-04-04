@@ -47,7 +47,7 @@ class DataProducer:
 
         if speech_data is not None:
             self.redis_instance.publish(
-                channel=f"{self.channel}-speech", message=speech_data
+                channel=f"{self.channel}-speech", message=str(speech_data)
             )
 
     def loop(self):
