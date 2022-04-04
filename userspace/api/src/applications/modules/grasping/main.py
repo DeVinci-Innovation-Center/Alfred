@@ -20,7 +20,7 @@ WEIGHTS_PATH = (FILE / "../trained_weights/yolov5n.pt").resolve()
 LOGGER.setLevel("ERROR")
 
 
-def main():
+def main(to_grab: str = ""):
     device_name = "cuda" if torch.cuda.is_available() else "cpu"
 
     api = libalfred.AlfredAPI()
@@ -39,7 +39,7 @@ def main():
     names = model.names
     print(f"recognizing classes: {', '.join(names)}")
 
-    detect_flag = DetectFlag(names, target_name="cup")
+    detect_flag = DetectFlag(names, target_name=to_grab)
     print(detect_flag)
 
     preds_postprocessor = _preds_postprocessor(

@@ -105,6 +105,10 @@ def _preds_postprocessor(
         if scanner_execute_return_sequence.is_set():
             return
 
+        # skip if no target was set
+        if detect_flag.target_id == -1:
+            return
+
         # add new default detection
         for buffer in _detection_buffers.values():
             buffer.appendleft(-1)

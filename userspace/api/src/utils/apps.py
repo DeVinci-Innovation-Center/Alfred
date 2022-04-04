@@ -103,8 +103,8 @@ class ContextManager:
             return False
 
         self.current_app.join(0)
-        thread_status = self.current_app.is_alive()
-        return thread_status
+        process_status = self.current_app.is_alive()
+        return process_status
 
     def run_app(self, app: App):
         """Spawn a thread running provided app."""

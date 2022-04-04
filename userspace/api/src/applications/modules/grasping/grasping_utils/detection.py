@@ -62,10 +62,20 @@ class DetectFlag:
         else:
             self.set(validate)
 
+    def reset_target(self):
+        """Set flag to follow no target."""
+
+        self.target_id = -1
+        self.target_name = ""
+
     @singledispatchmethod
     def change_target(self, new_target: int):
         """Change flag target by id (position in self.names list).
         Automatically sets target_name."""
+
+        if new_target == -1:
+            self.target_id = -1
+            self.target_name = ""
 
         self.target_id = new_target
         self.target_name = self.names[self.target_id]
@@ -76,6 +86,10 @@ class DetectFlag:
     def _(self, new_target: str):
         """Change flag target by name.
         Automatically sets target_id. (position in self.names list)."""
+
+        if new_target == "":
+            self.target_id = -1
+            self.target_name = ""
 
         self.target_name = new_target
         self.target_id = self.names.index(self.target_name)

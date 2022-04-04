@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from src.applications.routers import bltouch, camera, grasping
 from src.utils.apps import NoAppRunningException, ctx_manager
+from src.utils.state import alfred_state
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 router.include_router(camera.router)
@@ -26,5 +27,7 @@ async def stop_running_app():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
         ) from None
+
+    alfred_state.mode = None
 
     return {"message": "App stopped."}
