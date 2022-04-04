@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 
 import libalfred
-import numpy as np
 import torch
 from libalfred.utils import camera_stream
 
@@ -26,34 +25,30 @@ def main():
 
     api = libalfred.AlfredAPI()
     cam_stream = camera_stream.StreamCamThread(daemon=True)
+
     cam_stream.start()
-    while not cam_stream.frame_ready:
+    while cam_stream.frame_size == (0, 0):
         time.sleep(0.01)
-    frame: np.ndarray = cam_stream.get_frame()
+    frame_size = cam_stream.frame_size
     # print(frame)
 
     # Load model
     model = CustomDetectMultiBackend(WEIGHTS_PATH, device=device_name)
     model.to(torch.device(device_name))
-    stride, names, pt, jit, onnx = (
-        model.stride,
-        model.names,
-        model.pt,
-        model.jit,
-        model.onnx,
-    )
 
+    names = model.names
     print(f"recognizing classes: {', '.join(names)}")
-    detect_flag = DetectFlag("cup")
 
-    img_size = frame.shape
+    detect_flag = DetectFlag(names, target_name="cup")
+    print(detect_flag)
+
     preds_postprocessor = _preds_postprocessor(
-        img_size, names, detect_flag, api
+        frame_size, names, detect_flag, api
     )
 
     inference_thread = threading.Thread(
         target=inference.run,
-        args=(model, cam_stream, img_size),
+        args=(model, cam_stream, frame_size),
         kwargs={
             "pred_postprocessor": preds_postprocessor,
             "line_thickness": 2,

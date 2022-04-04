@@ -1,17 +1,10 @@
-import sys
 from pathlib import Path
-from typing import List
 
 import cv2
 import numpy as np
 import torch
-import torch.backends.cudnn as cudnn
 from libalfred.utils.camera_stream import StreamCamThread
-
-FILE = Path(__file__).resolve()
-YOLOV5_ROOT = FILE.parents[0] / "yolov5"  # YOLOv5 root directory
-if str(YOLOV5_ROOT) not in sys.path:
-    sys.path.append(str(YOLOV5_ROOT))  # add ROOT to PATH
+from torch.backends import cudnn
 
 from .yolov5.models.common import DetectMultiBackend
 from .yolov5.utils.augmentations import letterbox
@@ -31,26 +24,12 @@ from .yolov5.utils.plots import Annotator, colors, save_one_box
 from .yolov5.utils.torch_utils import select_device, time_sync
 
 
-def get_img_size(source) -> List[int]:
-    """Get image size from source."""
-
-    cap = cv2.VideoCapture(source)
-    assert cap.isOpened(), f"get_img_size(): Failed to open {source}"
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    cap.release()
-
-    return [w, h]
-
-
-# pylint: disable=too-many-branches,too-many-statements,dangerous-default-value
+# pylint: disable=too-many-branches,too-many-statements
 def run(
     model: DetectMultiBackend,
     cam_stream: StreamCamThread,  # libalfred cam stream instance
     img_size,  # image shape
     pred_postprocessor=lambda x: x,
-    imgsz=[640, 640],  # inference size (pixels)
     conf_thres=0.25,  # confidence threshold
     iou_thres=0.45,  # NMS IOU threshold
     max_det=1000,  # maximum detections per image
@@ -85,13 +64,7 @@ def run(
 
     # Load model
     device = select_device(device)
-    stride, names, pt, _, _ = (
-        model.stride,
-        model.names,
-        model.pt,
-        model.jit,
-        model.onnx,
-    )
+    stride, names, pt = (model.stride, model.names, model.pt)
 
     imgsz = check_img_size(img_size, s=stride)  # check image size
 
@@ -104,7 +77,6 @@ def run(
         model.model.half() if half else model.model.float()
 
     # Dataloader
-    # source = str(source)  # Stringify source for LoadStreams
     view_img = check_imshow()
     cudnn.benchmark = (
         True  # set True to speed up constant image size inference
@@ -132,11 +104,12 @@ def run(
 
         s = ""  # reset text to print per preditction
         t1 = time_sync()
-        im = torch.from_numpy(im).to(device)
-        im = im.half() if half else im.float()  # uint8 to fp16/32
-        im /= 255  # 0 - 255 to 0.0 - 1.0
-        if len(im.shape) == 3:
-            im = im[None]  # expand for batch dim
+        im_tensor = torch.from_numpy(im).to(device)
+        # uint8 to fp16/32
+        im_tensor = im_tensor.half() if half else im_tensor.float()
+        im_tensor /= 255  # 0 - 255 to 0.0 - 1.0
+        if len(im_tensor.shape) == 3:
+            im_tensor = im_tensor[None]  # expand for batch dim
         t2 = time_sync()
         dt[0] += t2 - t1
 
@@ -146,7 +119,7 @@ def run(
             if visualize
             else False
         )
-        pred = model(im, augment=augment, visualize=visualize)
+        pred = model(im_tensor, augment=augment, visualize=visualize)
         t3 = time_sync()
         dt[1] += t3 - t2
 
@@ -169,7 +142,7 @@ def run(
 
             p = Path(p)  # to Path
             txt_path = str(save_dir / "labels" / p.stem) + f"_{frame}"
-            s += "%gx%g " % im.shape[2:]  # print string
+            s += f"{im.shape[2]}x{im.shape[3]}"
             gn = torch.tensor(im0.shape)[
                 [1, 0, 1, 0]
             ]  # normalization gain whwh
@@ -229,7 +202,7 @@ def run(
                             )
 
             # Print time (inference-only)
-            LOGGER.info(f"{s}Done. ({t3 - t2:.3f}s)")
+            LOGGER.info("%sDone. (%.3fs)", s, t3 - t2)
 
             # Send preds to pred_processor
             pred_postprocessor(pred)
@@ -239,16 +212,19 @@ def run(
             if view_img:
                 cv2.imshow(str(p), im0)
                 key = cv2.waitKey(1)
-                if key in [ord('q'), 27]:  # q or escape to quit
+                if key in [ord("q"), 27]:  # q or escape to quit
                     cv2.destroyAllWindows()
                     return
 
     # Print results
     t = tuple(x / seen * 1e3 for x in dt)  # speeds per image
     LOGGER.info(
-        f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}"
-        % t
+        """Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS"""
+        """per image at shape %s""",
+        *t,
+        (1, 3, *imgsz),
     )
+
     if update:
         strip_optimizer(
             model.weights

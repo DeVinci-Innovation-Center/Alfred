@@ -1,10 +1,10 @@
-from itertools import cycle
+import math
 import threading
 import time
-import math
-from libalfred import AlfredAPI
+from itertools import cycle
 
 import numpy as np
+from libalfred import AlfredAPI
 
 lock = threading.Lock()
 
