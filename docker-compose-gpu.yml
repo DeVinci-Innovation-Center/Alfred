@@ -77,17 +77,21 @@ services:
       context: ./userspace/services
     restart: always
     environment:
-      # - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=1
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
+
+      - ALFRED_ADDRESS=http://api:8000
+      - ALFRED_GRAB_ROUTE=applications/grasping/start-grasping
 
       - RASA_REDIS_INPUT_CHANNEL=device-data-microphone-speech
       - RASA_REDIS_OUTPUT_CHANNEL=services-rasa-responses
       - RASA_SIO_SERVER_ADDR=http://localhost:5005
     networks:
       - database-tier
+      - server-tier
 
   controller:
     privileged: true
@@ -99,6 +103,7 @@ services:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
       # - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=CRITICAL
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
