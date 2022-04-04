@@ -15,6 +15,7 @@ intents:
   - bot_challenge
 
 actions:
+  - action_grab_item
   - action_reset_to_grab
 
 responses:
