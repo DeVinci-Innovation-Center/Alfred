@@ -1,4 +1,4 @@
-# _"Hey Alfred"_ : Wake Word Detection
+# Pose Estimation with ArUco Markers for Robotic Arm
 ## Table of content
 * [ArUco markers detection](#pose-estimation-on-tracked-ArUco-markers-with-a-robotic-arm)
 * [Demo](#demo)
