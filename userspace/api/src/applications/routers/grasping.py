@@ -10,25 +10,13 @@ from src.utils.state import alfred_state
 router = APIRouter(prefix="/grasping", tags=["Applications"])
 
 
-@router.post("/grasp")
-async def grasp(grasping_target: Optional[str] = Form(None)):
-    if alfred_state.mode == "grasping":
-        pass
-    else:
-        requests.post(
-            "/applications/grasping/start-grasping",
-            data={"grasping_target": grasping_target},
-        )
-
-
 @router.post("/start-grasping")
 async def start_grasping(grasping_target: Optional[str] = Form(None)):
     to_grab = "" if grasping_target is None else grasping_target
 
     try:
         app = App(
-            use_sockets=False,
-            socket=backend_sio_server,
+            use_pipe=True,
             target=grasping.main,
             f_args=(to_grab,),
         )
@@ -40,3 +28,13 @@ async def start_grasping(grasping_target: Optional[str] = Form(None)):
         ) from None
 
     return {"message": "Grasping running."}
+
+
+@router.post("/change_target")
+async def change_grasping_target(grasping_target: str = Form(None)):
+    if not alfred_state.mode == "grasping":
+        return HTTPException(
+            status.HTTP_400_BAD_REQUEST, detail="Grasping is not running"
+        )
+
+    ctx_manager.current_app.parent_conn.send(["flag:update", grasping_target])
