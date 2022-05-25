@@ -16,7 +16,7 @@ class GrabItem(Action):
 
         to_grab = tracker.slots["to_grab"]
 
-        req = requests.post(
+        _ = requests.post(
             f"{cfg.ALFRED_ADDRESS}/{cfg.ALFRED_GRAB_ROUTE}",
             data={"to_grab": to_grab},
         )
