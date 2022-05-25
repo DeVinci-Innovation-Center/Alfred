@@ -1,5 +1,7 @@
+import logging
 import threading
 import time
+from multiprocessing.connection import Connection
 from pathlib import Path
 
 import libalfred
@@ -20,7 +22,18 @@ WEIGHTS_PATH = (FILE / "../trained_weights/yolov5n.pt").resolve()
 LOGGER.setLevel("ERROR")
 
 
-def main(to_grab: str = ""):
+def watch_conn(conn: Connection, flag: DetectFlag):
+    """Watch the connection from multiprocessing and change behavior
+    accordingly."""
+
+    while True:
+        msg = conn.recv()
+
+        if msg[0] == "flag:update":
+            flag.change_target(msg[1])
+
+
+def main(conn: Connection = None, to_grab: str = ""):
     device_name = "cuda" if torch.cuda.is_available() else "cpu"
 
     api = libalfred.AlfredAPI()
@@ -56,6 +69,12 @@ def main(to_grab: str = ""):
         daemon=True,
     )
     inference_thread.start()
+
+    if conn is not None:
+        flag_changer_thread = threading.Thread(
+            target=watch_conn, args=(conn, detect_flag,)
+        )
+        flag_changer_thread.start()
 
     inference_thread.join()
 
