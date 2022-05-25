@@ -13,23 +13,37 @@ class App(multiprocessing.Process):
         *args,
         use_sockets: bool = False,
         socket: socketio.Server = None,
+        use_pipe: bool = False,
         f_args: tuple = None,
         f_kwargs: dict = None,
         **kwargs,
     ):
 
         multiprocessing.Process.__init__(self, *args, **kwargs)
+
         self._f_args = f_args if f_args is not None else []
         self._f_kwargs = f_kwargs if f_kwargs is not None else {}
+
         self.use_sockets = use_sockets
         self.socket = socket
+
+        self.use_pipe = use_pipe
+
+        self.parent_conn, self.child_conn = None, None
+        if self.use_pipe:
+            self.parent_conn, self.child_conn = multiprocessing.Pipe()
 
     def run(self):
         try:
             print(f"starting app with target: {self._target}")
 
             try:
-                self._target(*self._f_args, **self._f_kwargs)
+                if self.use_pipe:
+                    self._target(
+                        self.child_conn, *self._f_args, **self._f_kwargs
+                    )
+                else:
+                    self._target(*self._f_args, **self._f_kwargs)
             except Exception:
                 print(traceback.format_exc())
 
