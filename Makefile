@@ -1,5 +1,7 @@
 _ALFRED_HOST_IP:=${shell ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p'} # local IP of the host
 
+all: stop run show-logs
+
 expose-x:
 	sudo xhost +local:root
 
