@@ -1,5 +1,7 @@
 import os
 
+DRIVER_NAME = "realsense"
+
 # Redis
 REDIS_HOST = os.getenv("REDIS_HOST", "")
 try:

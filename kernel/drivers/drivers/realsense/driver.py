@@ -1,5 +1,6 @@
 from threading import Thread
 
+from libalfred.utils import config_logger
 from redis import Redis
 
 from realsense import command_getter
@@ -8,7 +9,8 @@ from realsense import data_producer
 
 
 def main():
-    print(cfg.REDIS_HOST, cfg.REDIS_PORT, cfg.REDIS_PASSWORD)
+    config_logger(f"drivers.{cfg.DRIVER_NAME}")
+
     redis_instance = Redis(cfg.REDIS_HOST, cfg.REDIS_PORT, cfg.REDIS_PASSWORD)
 
     getter = command_getter.CommandGetter(
