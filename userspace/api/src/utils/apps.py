@@ -1,12 +1,19 @@
+"""Handle Applications in the context of ALFRED. Contains the Application
+class, Exceptions and the ContextManager for managing applications in the
+system."""
+
 import multiprocessing
 import traceback
 from typing import Callable
 
 import socketio
 
+from src.utils.global_instances import logger
+
 
 class App(multiprocessing.Process):
-    """App to run as sub-process, which doesn't exit program when it encounters an exception."""
+    """App to run as sub-process, which doesn't exit program when it encounters
+    an exception."""
 
     def __init__(
         self,
@@ -37,7 +44,7 @@ class App(multiprocessing.Process):
 
     def run(self):
         try:
-            print(f"starting app with target: {self._target}")
+            logger.info("starting app with target: %s", repr(self._target))
             self.running = True
 
             try:
@@ -46,17 +53,18 @@ class App(multiprocessing.Process):
                 else:
                     self._target(*self._f_args, **self._f_kwargs)
 
-            except Exception:
-                print(traceback.format_exc())
+            except Exception:  # pylint: disable=broad-except
+                logger.exception("Exception occured within App:", exc_info=1)
 
-            print(f"finished app with target: {self._target}")
+            logger.info("finished app with target: %s", repr(self._target))
 
             if self.use_sockets:
                 self.socket.emit("app_watcher", "done")
 
         except Exception:  # pylint: disable = broad-except
             tb = traceback.format_exc()
-            print(tb)
+            logger.exception("Exception occured outside the App:", exc_info=1)
+
             if self.use_sockets:
                 self.socket.emit("app_watcher", {"exception": tb})
             # raise e  # You can still rise this exception if you need to
@@ -99,7 +107,8 @@ class NoAppRunningException(Exception):
 
 
 class ContextManager:
-    """Manages running apps in backend, to only allow for one app to be running at once."""
+    """Manages running apps in backend, to only allow for one app to be
+    running at once."""
 
     _instance = None
 

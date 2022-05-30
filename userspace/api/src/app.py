@@ -1,13 +1,11 @@
-import logging
+"""Entrypoint for the ALFRED API."""
 
 import socketio
 from fastapi import FastAPI
-from src import routers, socketio_events
-from src.utils.global_instances import sio
 from starlette.middleware.cors import CORSMiddleware
 
-logger = logging.getLogger("uvicorn.error")
-
+from src import routers, socketio_events
+from src.utils.global_instances import sio
 
 app = FastAPI(debug=True)
 app.add_middleware(

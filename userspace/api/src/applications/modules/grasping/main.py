@@ -1,4 +1,5 @@
-import logging
+"""Main file for the grasping application."""
+
 import threading
 import time
 from multiprocessing.connection import Connection
@@ -8,6 +9,7 @@ import torch
 
 import libalfred
 from libalfred.utils import camera_stream
+from src.utils.global_instances import logger
 
 from . import inference
 from .grasping_utils.detection import CustomDetectMultiBackend, DetectFlag
@@ -29,6 +31,7 @@ def watch_conn(conn: Connection, flag: DetectFlag):
 
     while True:
         msg = conn.recv()
+        logger.debug("grasping received message: %s", msg)
 
         if msg[0] == "flag:update":
             flag.change_target(msg[1])
@@ -51,10 +54,10 @@ def main(conn: Connection = None, to_grab: str = ""):
     model.to(torch.device(device_name))
 
     names = model.names
-    print(f"recognizing classes: {', '.join(names)}")
+    logger.debug("recognizing classes: %s", {', '.join(names)})
 
     detect_flag = DetectFlag(names, target_name=to_grab)
-    print(detect_flag)
+    logger.debug("detect flag: %s", detect_flag)
 
     preds_postprocessor = _preds_postprocessor(frame_size, names, detect_flag, api)
 

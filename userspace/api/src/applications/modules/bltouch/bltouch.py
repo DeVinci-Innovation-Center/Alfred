@@ -1,12 +1,9 @@
 import json
 import time
-from typing import List
 
-import numpy as np
 from redis.client import PubSub
-from src.utils.global_instances import rc
 
-import libalfred
+from src.utils.global_instances import rc
 
 
 def send_command(command: str = "activate"):
