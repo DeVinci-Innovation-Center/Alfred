@@ -149,7 +149,7 @@ services:
 
   mongodb:
     image: mongo:5
-    command: --quiet
+    command: --logpath /dev/null
     restart: always
     ports:
       - "27017:27017"
