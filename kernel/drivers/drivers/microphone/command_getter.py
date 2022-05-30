@@ -14,13 +14,7 @@ class CommandGetter:
     pubsub: PubSub
     channel: str
 
-    def __init__(
-        self,
-        redis_instance: Redis,
-        channel: str,
-        *args,
-        **kwargs
-    ):
+    def __init__(self, redis_instance: Redis, channel: str, *args, **kwargs):
         self.redis_instance = redis_instance
         self.pubsub = self.redis_instance.pubsub()
         self.channel = channel

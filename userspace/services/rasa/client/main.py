@@ -5,7 +5,6 @@ import time
 import redis
 import requests
 import socketio
-
 from client import config as cfg
 from client import utils
 
@@ -65,9 +64,7 @@ def main():
     logger.info("RASA server running.")
 
     # setup redis
-    rc = redis.Redis(
-        cfg.REDIS_HOST, cfg.REDIS_PORT, password=cfg.REDIS_PASSWORD
-    )
+    rc = redis.Redis(cfg.REDIS_HOST, cfg.REDIS_PORT, password=cfg.REDIS_PASSWORD)
     rps = rc.pubsub()
 
     sio = socketio.Client()

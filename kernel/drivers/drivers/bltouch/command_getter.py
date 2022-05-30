@@ -17,11 +17,11 @@ class CommandGetter:
     pubsub: PubSub
     channel: str
 
-    def __init__(self, redis_instance: Redis, channel: str, sensor:sensor.BLTouch):
+    def __init__(self, redis_instance: Redis, channel: str, sensor: sensor.BLTouch):
         self.redis_instance = redis_instance
         self.pubsub = self.redis_instance.pubsub()
         self.channel = channel
-        self.blt=sensor
+        self.blt = sensor
 
         self.pubsub.subscribe(self.channel)
 
@@ -41,7 +41,6 @@ class CommandGetter:
 
         if command_dict.get("function") == "activate-bltouch":
             self.blt.send_command()
-
 
     def loop(self):
         """Get and produce data indefinitely."""

@@ -9,7 +9,6 @@ router.include_router(bltouch.router)
 router.include_router(grasping.router)
 
 
-
 @router.get("/")
 async def read_movements():
     """Get all possible applications."""

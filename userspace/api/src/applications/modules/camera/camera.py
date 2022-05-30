@@ -25,8 +25,7 @@ def show_camera(camera_feed: str):
 
         c = cv2.waitKey(1)
         if (
-            c == 27
-            or cv2.getWindowProperty(WIN_NAME, cv2.WND_PROP_VISIBLE) < 1
+            c == 27 or cv2.getWindowProperty(WIN_NAME, cv2.WND_PROP_VISIBLE) < 1
         ):  # if ESCAPE is pressed or window is closed
             cv2.destroyAllWindows()
             break

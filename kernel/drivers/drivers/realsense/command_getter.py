@@ -6,6 +6,8 @@ from typing import Any
 from redis import Redis
 from redis.client import PubSub
 
+from realsense.realsense_manager import RealsenseManager
+
 
 class CommandGetter:
     """Gets commands over Redis."""
@@ -14,11 +16,14 @@ class CommandGetter:
     pubsub: PubSub
     channel: str
 
-    def __init__(self, redis_instance: Redis, channel: str):
+    def __init__(
+        self, redis_instance: Redis, channel: str, rs_manager: RealsenseManager
+    ):
         self.redis_instance = redis_instance
-        self.pubsub = self.redis_instance.pubsub()
         self.channel = channel
+        self.rs_manager = rs_manager
 
+        self.pubsub = self.redis_instance.pubsub()
         self.pubsub.subscribe(self.channel)
 
     def get_command(self) -> Any:

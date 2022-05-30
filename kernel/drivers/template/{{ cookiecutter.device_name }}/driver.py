@@ -1,9 +1,9 @@
-from redis import Redis
-
 from threading import Thread
 
-from {{ cookiecutter.device_name }} import config as cfg
-from {{ cookiecutter.device_name }} import command_getter, data_producer
+from redis import Redis
+from {{cookiecutter.device_name}} import command_getter
+from {{cookiecutter.device_name}} import config as cfg
+from {{cookiecutter.device_name}} import data_producer
 
 
 def main():

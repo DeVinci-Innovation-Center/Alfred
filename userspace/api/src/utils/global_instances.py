@@ -1,6 +1,5 @@
 import pymongo
 import socketio
-
 from src.utils import config as cfg
 from src.utils.redis_client import RedisClient
 

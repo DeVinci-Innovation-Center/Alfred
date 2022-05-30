@@ -6,4 +6,5 @@ from typing import Optional
 class State:
     mode: Optional[str] = None
 
+
 alfred_state = State()

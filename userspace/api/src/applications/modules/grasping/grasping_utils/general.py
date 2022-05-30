@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 import torch
+
 from libalfred import AlfredAPI
 
 from . import geometry as geom
@@ -74,9 +75,7 @@ def center_camera(arm: AlfredAPI, xy_diff):
     # print(f"{ret=}")
 
 
-def _preds_postprocessor(
-    img_size, names, detect_flag: DetectFlag, arm: AlfredAPI
-):
+def _preds_postprocessor(img_size, names, detect_flag: DetectFlag, arm: AlfredAPI):
     detect_id = [0]
     center_camera_count = [100_000]
 

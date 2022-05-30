@@ -15,9 +15,7 @@ class DataProducer:
     redis_instance: Redis
     channel: str
 
-    def __init__(
-        self, redis_instance: Redis, channel: str, mic_driver: MicDriver
-    ):
+    def __init__(self, redis_instance: Redis, channel: str, mic_driver: MicDriver):
         self.redis_instance = redis_instance
         self.channel = channel
         self.mic_driver = mic_driver

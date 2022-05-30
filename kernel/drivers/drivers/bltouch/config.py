@@ -8,6 +8,6 @@ except ValueError:
     REDIS_PORT = 6379
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
-#bltouch sensor
-BLTOUCH_SERIAL_PORT=os.getenv("BLTOUCH_SERIAL_PORT","/dev/ttyACM1")
-BLTOUCH_BAUDRATE=int(os.getenv("BLTOUCH_BAUDRATE",9600))
+# bltouch sensor
+BLTOUCH_SERIAL_PORT = os.getenv("BLTOUCH_SERIAL_PORT", "/dev/ttyACM1")
+BLTOUCH_BAUDRATE = int(os.getenv("BLTOUCH_BAUDRATE", 9600))

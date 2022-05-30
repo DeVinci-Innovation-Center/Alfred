@@ -39,9 +39,7 @@ class App(multiprocessing.Process):
 
             try:
                 if self.use_pipe:
-                    self._target(
-                        self.child_conn, *self._f_args, **self._f_kwargs
-                    )
+                    self._target(self.child_conn, *self._f_args, **self._f_kwargs)
                 else:
                     self._target(*self._f_args, **self._f_kwargs)
             except Exception:

@@ -1,6 +1,5 @@
-from src.utils.global_instances import sio
-
 from fastapi.logger import logger
+from src.utils.global_instances import sio
 
 
 @sio.event

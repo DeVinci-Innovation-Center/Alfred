@@ -4,11 +4,11 @@ import time
 import traceback
 
 import redis
-from libalfred import utils
-
 from config import cfg
 from controller.controller import Controller
 from real.robot_real import RobotReal
+
+from libalfred import utils
 
 PROP_PUBSUB_CHANNEL = "robot-props"
 FUNC_PUBSUB_CHANNEL = "robot-funcs"

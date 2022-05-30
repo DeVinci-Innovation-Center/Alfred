@@ -66,12 +66,8 @@ class MicDriver:
         self.frame_ready = False
         self.frame = np.zeros((1,))
 
-        self.recog_thread = threading.Thread(
-            target=self.start_recog_continuous
-        )
-        self.capture_thread = threading.Thread(
-            target=self.capture_mic_continuous
-        )
+        self.recog_thread = threading.Thread(target=self.start_recog_continuous)
+        self.capture_thread = threading.Thread(target=self.capture_mic_continuous)
 
     def save_frame(self, frame: np.ndarray):
         with _lock:
@@ -111,9 +107,7 @@ class MicDriver:
 
         try:
             while True:
-                frame: np.ndarray = self.mic_stream.read(
-                    n_bytes // samplesize
-                )[0]
+                frame: np.ndarray = self.mic_stream.read(n_bytes // samplesize)[0]
                 frame = frame.flatten()
                 self.save_frame(frame)
                 new_buffer = frame.data.cast("B")
@@ -141,27 +135,12 @@ class MicDriver:
         if result.reason == speechsdk.ResultReason.RecognizedSpeech:
             print("Recognized: {}".format(result.text))
         elif result.reason == speechsdk.ResultReason.NoMatch:
-            print(
-                "No speech could be recognized: {}".format(
-                    result.no_match_details
-                )
-            )
+            print("No speech could be recognized: {}".format(result.no_match_details))
         elif result.reason == speechsdk.ResultReason.Canceled:
             cancellation_details = result.cancellation_details
-            print(
-                "Speech Recognition canceled: {}".format(
-                    cancellation_details.reason
-                )
-            )
-            if (
-                cancellation_details.reason
-                == speechsdk.CancellationReason.Error
-            ):
-                print(
-                    "Error details: {}".format(
-                        cancellation_details.error_details
-                    )
-                )
+            print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print("Error details: {}".format(cancellation_details.error_details))
 
     def recognized_callback(self, event):
         recognized = event.result.text

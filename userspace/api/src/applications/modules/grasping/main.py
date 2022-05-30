@@ -4,8 +4,9 @@ import time
 from multiprocessing.connection import Connection
 from pathlib import Path
 
-import libalfred
 import torch
+
+import libalfred
 from libalfred.utils import camera_stream
 
 from . import inference
@@ -55,9 +56,7 @@ def main(conn: Connection = None, to_grab: str = ""):
     detect_flag = DetectFlag(names, target_name=to_grab)
     print(detect_flag)
 
-    preds_postprocessor = _preds_postprocessor(
-        frame_size, names, detect_flag, api
-    )
+    preds_postprocessor = _preds_postprocessor(frame_size, names, detect_flag, api)
 
     inference_thread = threading.Thread(
         target=inference.run,
@@ -72,7 +71,11 @@ def main(conn: Connection = None, to_grab: str = ""):
 
     if conn is not None:
         flag_changer_thread = threading.Thread(
-            target=watch_conn, args=(conn, detect_flag,)
+            target=watch_conn,
+            args=(
+                conn,
+                detect_flag,
+            ),
         )
         flag_changer_thread.start()
 

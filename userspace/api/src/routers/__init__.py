@@ -1,8 +1,6 @@
 from fastapi import APIRouter
-
 from src.applications import routers as application_routers
-from src.routers import home
-from src.routers import mongo
+from src.routers import home, mongo
 
 router = APIRouter()
 router.include_router(application_routers.router)

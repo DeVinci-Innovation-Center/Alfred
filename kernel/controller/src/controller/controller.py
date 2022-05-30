@@ -6,8 +6,9 @@ from typing import Optional
 
 import redis
 from config import cfg
-from libalfred.utils import Command
 from real.robot_real import RobotReal
+
+from libalfred.utils import Command
 
 
 class Controller:
@@ -21,7 +22,9 @@ class Controller:
     robot_real: Optional[RobotReal]
 
     def __init__(
-        self, rc: redis.Redis, robot_real: Optional[RobotReal] = None,
+        self,
+        rc: redis.Redis,
+        robot_real: Optional[RobotReal] = None,
     ):
         self.rc = rc
         self.robot_real = robot_real
@@ -89,15 +92,13 @@ class Controller:
                 self.logger.error(
                     "User tried to access attribute %s but it doesn't exist.",
                     prop_name,
-                    exc_info=1
+                    exc_info=1,
                 )
                 to_send = "AttributeError"
                 # error = traceback.format_exc()
                 # print(error)
 
-            self.rc.publish(
-                self.PROP_PUBSUB_CHANNEL, f"ret:{prop_name}={to_send}"
-            )
+            self.rc.publish(self.PROP_PUBSUB_CHANNEL, f"ret:{prop_name}={to_send}")
 
             return
 
@@ -135,7 +136,7 @@ class Controller:
                     func_dict["name"],
                     func_dict["args"],
                     func_dict["kwargs"],
-                    exc_info=1
+                    exc_info=1,
                 )
                 ret = "AttributeError"
                 # error = traceback.format_exc()

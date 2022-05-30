@@ -4,12 +4,15 @@ import time
 from itertools import cycle
 
 import numpy as np
+
 from libalfred import AlfredAPI
 
 lock = threading.Lock()
 
 
-time_to_move = lambda x: 0.2 + 10.0 / x - (x - 10) / 7 + 0.5 # base time + time added by num_points + pause between angles
+time_to_move = (
+    lambda x: 0.2 + 10.0 / x - (x - 10) / 7 + 0.5
+)  # base time + time added by num_points + pause between angles
 
 
 # TODO: exploration / tracking coefficients: moves faster when exploration is high, looks for item for longer if high

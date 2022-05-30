@@ -12,7 +12,9 @@ def config_logger(logger_name: str):
 
     # create formatter
     formatter = logging.Formatter(
-        fmt="{asctime} - {name} - {levelname: <8} - {message}", datefmt="%d-%m-%Y %H:%M:%S", style="{"  # noqa: E501
+        fmt="{asctime} - {name} - {levelname: <8} - {message}",
+        datefmt="%d-%m-%Y %H:%M:%S",
+        style="{",  # noqa: E501
     )
 
     # add formatter to ch
