@@ -37,7 +37,7 @@ class DataProducer:
             frames = self.rs_manager.wait_for_frames(1000)
         except RuntimeError as e:
             if "Frame didn't arrive within" in e.args[0]:
-                self.recover_disconnected()
+                self.rs_manager.recover_disconnected()
                 return None
 
             raise e
