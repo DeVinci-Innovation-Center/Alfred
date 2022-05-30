@@ -34,7 +34,7 @@ ignore-patterns=
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-init-hook=
+init-hook="import sys, pathlib; sys.path.append(str(pathlib.Path().resolve())); sys.path.append(pathlib.Path().resolve() / 'userspace/api/'); sys.path.append(pathlib.Path().resolve() / 'userspace/services/rasa/'); sys.path.append(pathlib.Path().resolve() / 'kernel/controller/'); sys.path.append(pathlib.Path().resolve() / 'kernel/drivers/drivers/'); "
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
@@ -96,6 +96,8 @@ disable=raw-checker-failed,
         deprecated-pragma,
         use-symbolic-message-instead,
         too-few-public-methods,
+        too-many-instance-attributes,
+        wrong-import-order,
 
 
 [REPORTS]
