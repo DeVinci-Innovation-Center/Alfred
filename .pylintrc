@@ -3,7 +3,9 @@
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code.
-extension-pkg-allow-list=pyrealsense2
+extension-pkg-allow-list=pyrealsense2,
+                         cv2,
+                         pydantic,
 
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
