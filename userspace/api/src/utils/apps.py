@@ -33,15 +33,19 @@ class App(multiprocessing.Process):
         if self.use_pipe:
             self.parent_conn, self.child_conn = multiprocessing.Pipe()
 
+        self.running = False
+
     def run(self):
         try:
             print(f"starting app with target: {self._target}")
+            self.running = True
 
             try:
                 if self.use_pipe:
                     self._target(self.child_conn, *self._f_args, **self._f_kwargs)
                 else:
                     self._target(*self._f_args, **self._f_kwargs)
+
             except Exception:
                 print(traceback.format_exc())
 
@@ -52,9 +56,13 @@ class App(multiprocessing.Process):
 
         except Exception:  # pylint: disable = broad-except
             tb = traceback.format_exc()
+            print(tb)
             if self.use_sockets:
                 self.socket.emit("app_watcher", {"exception": tb})
             # raise e  # You can still rise this exception if you need to
+
+        finally:
+            self.running = False
 
 
 class AppRunningException(Exception):
@@ -114,9 +122,7 @@ class ContextManager:
         if self.current_app is None:
             return False
 
-        self.current_app.join(0)
-        process_status = self.current_app.is_alive()
-        return process_status
+        return self.current_app.running
 
     def run_app(self, app: App):
         """Spawn a thread running provided app."""
