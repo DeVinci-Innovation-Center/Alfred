@@ -1,9 +1,12 @@
+import logging
 from typing import Any, Dict, List, Text
 
 import requests
 from rasa_sdk import Action, Tracker
 
 from .config import cfg
+
+logger = logging.getLogger("rasa")
 
 
 class GrabItem(Action):
@@ -16,9 +19,9 @@ class GrabItem(Action):
 
         to_grab = tracker.slots["to_grab"]
 
-        _ = requests.post(
-            f"{cfg.ALFRED_ADDRESS}/{cfg.ALFRED_GRAB_ROUTE}",
-            data={"to_grab": to_grab},
-        )
+        data = {"grasping_target": to_grab}
+        logging.debug("HTTP Request: POST %s, data: %s", (cfg.ALFRED_GRAB_ROUTE, data))
+
+        _ = requests.post(f"{cfg.ALFRED_ADDRESS}/{cfg.ALFRED_GRAB_ROUTE}", data=data)
 
         return []
