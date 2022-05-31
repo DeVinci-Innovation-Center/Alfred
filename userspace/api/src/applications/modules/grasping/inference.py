@@ -52,7 +52,7 @@ def run(
     hide_conf=False,  # hide confidences
     half=False,  # use FP16 half-precision inference
 ):
-    """Run inference on source, send pred results to precess().
+    """Run inference on cam stream, yield pred results and annotated image.
     Code taken from yolov5 detect.py."""
 
     # Directories
@@ -184,17 +184,17 @@ def run(
             # Print time (inference-only)
             LOGGER.info("%sDone. (%.3fs)", s, t3 - t2)
 
-            # Send preds to pred_processor
-            pred_postprocessor(pred)
-
             # Stream results
             im0 = annotator.result()
-            if view_img:
-                cv2.imshow(str(p), im0)
-                key = cv2.waitKey(1)
-                if key in [ord("q"), 27]:  # q or escape to quit
-                    cv2.destroyAllWindows()
-                    return
+            # if view_img:
+            #     cv2.imshow(str(p), im0)
+            #     key = cv2.waitKey(1)
+            #     if key in [ord("q"), 27]:  # q or escape to quit
+            #         cv2.destroyAllWindows()
+            #         return
+
+            # Send preds to pred_processor
+            yield pred, im0
 
     # Print results
     t = tuple(x / seen * 1e3 for x in dt)  # speeds per image
