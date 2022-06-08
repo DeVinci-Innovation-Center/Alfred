@@ -65,6 +65,7 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./userspace/api/src:/alfred/api/src:ro  # for dev
     deploy:
       resources:
         reservations:
