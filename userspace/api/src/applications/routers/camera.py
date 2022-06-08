@@ -1,7 +1,9 @@
+"""Router for the Camera module."""
+
 from fastapi import APIRouter, HTTPException, status
+
 from src.applications.modules.camera import camera
 from src.utils.apps import App, AppRunningException, ctx_manager
-from src.utils.global_instances import sio as backend_sio_server
 
 router = APIRouter(prefix="/camera", tags=["Applications"])
 
@@ -12,8 +14,6 @@ async def show_camera():
 
     try:
         app = App(
-            use_sockets=False,
-            socket=backend_sio_server,
             target=camera.show_camera,
             f_args=("device-data-realsense",),
         )
@@ -24,3 +24,21 @@ async def show_camera():
         ) from None
 
     return {"message": "Camera running."}
+
+
+@router.post("/show-depth")
+async def show_depth():
+    """Simple show camera function."""
+
+    try:
+        app = App(
+            target=camera.show_camera,
+            f_args=("device-data-realsense-depth",),
+        )
+        ctx_manager.run_app(app)
+    except AppRunningException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
+        ) from None
+
+    return {"message": "Depth running."}

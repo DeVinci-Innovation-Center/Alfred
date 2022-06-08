@@ -16,7 +16,10 @@ class RealsenseManager:
         self.logger = logging.getLogger(f"drivers.{cfg.DRIVER_NAME}")
 
         self.pipeline = rs.pipeline()
-        self.config_flags = [[rs.stream.color, 640, 480, rs.format.bgr8, 30]]
+        self.config_flags = [
+            [rs.stream.color, 640, 480, rs.format.bgr8, 30],
+            [rs.stream.depth, 640, 480, rs.format.z16, 30],
+        ]
         self.config = rs.config()
         self.configure_rs_config()
 
@@ -28,6 +31,14 @@ class RealsenseManager:
 
         for flag in self.config_flags:
             self.config.enable_stream(*flag)
+
+    def restart_camera(self):
+        """Restart the camera."""
+
+        self.logger.info("Restarting camera.")
+        self.pipeline.stop()
+        self.configure_rs_config()
+        self.connect_loop()
 
     def connect_loop(self, t: float = 1.0):
         """Try to connect indefinitely, with t seconds between tries."""

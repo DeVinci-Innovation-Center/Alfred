@@ -3,7 +3,7 @@
 import logging
 import pickle
 import time
-from typing import Any
+from typing import Optional, Tuple
 
 import numpy as np
 from redis import Redis
@@ -24,13 +24,14 @@ class DataProducer:
         self.logger = logging.getLogger(f"drivers.{cfg.DRIVER_NAME}")
 
         self.redis_instance = redis_instance
-        self.channel = channel
+        self.channel_color = channel
+        self.channel_depth = f"{self.channel_color}-depth"
 
         self.last_update = time.time()
 
         self.rs_manager = rs_manager
 
-    def get_data(self):
+    def get_data(self) -> Optional[Tuple[bytes, bytes]]:
         """Get data from device."""
 
         try:
@@ -43,19 +44,24 @@ class DataProducer:
             raise e
 
         color_frame = frames.get_color_frame()
+        depth_frame = frames.get_depth_frame()
 
-        if not color_frame:
+        if not color_frame or not depth_frame:
             return None
 
         # Convert images to numpy arrays
         color_image = np.asanyarray(color_frame.get_data())
+        depth_image = np.asanyarray(depth_frame.get_data())
 
-        return pickle.dumps(color_image)
+        return pickle.dumps(color_image), pickle.dumps(depth_image)
 
-    def produce_data(self, data: Any):
+    def produce_data(self, data: bytes, *, frame_type: str):
         """Produce data to Redis."""
 
-        self.redis_instance.publish(channel=self.channel, message=data)
+        if frame_type == "color":
+            self.redis_instance.publish(channel=self.channel_color, message=data)
+        elif frame_type == "depth":
+            self.redis_instance.publish(channel=self.channel_depth, message=data)
 
     def loop(self):
         """Get and produce data indefinitely."""
@@ -63,6 +69,7 @@ class DataProducer:
         while True:
             data = self.get_data()
             if data is not None:
-                self.produce_data(data)
+                color, depth = data
 
-        # pipe.stop()
+                self.produce_data(color, frame_type="color")
+                self.produce_data(depth, frame_type="depth")
