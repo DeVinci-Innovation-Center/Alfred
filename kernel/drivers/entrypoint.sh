@@ -25,7 +25,7 @@ function mount_dev()
 
 function start_udev()
 {
-    mount_dev
+    # mount_dev
     if command -v udevd &>/dev/null; then
         unshare --net udevd --daemon &> /dev/null
     else
