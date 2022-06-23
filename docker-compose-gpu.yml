@@ -65,7 +65,7 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./userspace/api/src:/alfred/api/src:ro  # for dev
+      - ./userspace/api/src:/alfred/api/src  # for dev
     deploy:
       resources:
         reservations:
@@ -147,7 +147,7 @@ services:
       - database-tier
 
   redis:
-    image: docker.io/bitnami/redis:6.2
+    image: bitnami/redis:7.0
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
@@ -157,6 +157,7 @@ services:
       - database-tier
     volumes:
       - redis-data:/bitnami/redis/data
+      - ./kernel/db/redis/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf
 
   mongodb:
     image: mongo:5
