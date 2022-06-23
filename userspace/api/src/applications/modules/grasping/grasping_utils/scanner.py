@@ -37,10 +37,11 @@ class ScannerThread(threading.Thread):
         execute_return_sequence: threading.Event,
         min_angle: float,
         max_angle: float,
+        *args,
         num_points: int = 10,
-        daemon: bool = True,
+        **kwargs
     ):
-        super().__init__(daemon=daemon)
+        super().__init__(*args, **kwargs)
 
         self.arm = arm
 
@@ -71,9 +72,10 @@ class ScannerThread(threading.Thread):
 
             point = next(self.loop)
             self.arm.set_servo_angle(
-                servo_id=1, angle=point, is_radian=False, wait=False
+                servo_id=1, angle=point, is_radian=False, wait=True
+                # servo_id=1, angle=point, is_radian=False, wait=False
             )
-            time.sleep(time_to_move(self.num_points))
+            # time.sleep(time_to_move(self.num_points))
 
     def start_sequence(self):
         """Gets xArm into position."""

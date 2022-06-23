@@ -82,7 +82,7 @@ def run(
     # Run inference
     if pt and device.type != "cpu":
         model(
-            torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.model.parameters()))
+            torch.zeros(1, 3, *imgsz[:2]).to(device).type_as(next(model.model.parameters()))
         )  # warmup
     dt, seen = [0.0, 0.0, 0.0], 0
     for path, im0 in cam_stream:

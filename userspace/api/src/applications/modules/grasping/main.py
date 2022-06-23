@@ -21,7 +21,8 @@ from .yolov5.utils.general import LOGGER
 
 FILE = Path(__file__).resolve()
 # WEIGHTS_PATH = (FILE / "../trained_weights/custom.pt").resolve()
-WEIGHTS_PATH = (FILE / "../trained_weights/yolov5n.pt").resolve()
+WEIGHTS_PATH = (FILE / "../trained_weights/yolov5l.pt").resolve()
+# WEIGHTS_PATH = (FILE / "../trained_weights/yolov5n.pt").resolve()
 
 LOGGER.setLevel("ERROR")
 
@@ -86,7 +87,6 @@ def main(conn: Connection = None, to_grab: str = ""):
         if key in [ord("q"), 27]:  # q or escape to quit
             cv2.destroyAllWindows()
             return
-
 
 if __name__ == "__main__":
     main()

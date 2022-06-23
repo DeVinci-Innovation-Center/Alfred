@@ -2,7 +2,11 @@
 class, Exceptions and the ContextManager for managing applications in the
 system."""
 
+from ctypes import c_bool
 import multiprocessing
+import os
+import threading
+import time
 import traceback
 from typing import Callable
 
@@ -25,8 +29,7 @@ class App(multiprocessing.Process):
         f_kwargs: dict = None,
         **kwargs,
     ):
-
-        multiprocessing.Process.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._f_args = f_args if f_args is not None else []
         self._f_kwargs = f_kwargs if f_kwargs is not None else {}
@@ -40,12 +43,20 @@ class App(multiprocessing.Process):
         if self.use_pipe:
             self.parent_conn, self.child_conn = multiprocessing.Pipe()
 
-        self.running = False
+        self._running = multiprocessing.Value(c_bool, False)
+
+    @property
+    def running(self) -> bool:
+        with self._running.get_lock():
+            ret = self._running.value
+
+        return ret
 
     def run(self):
         try:
             logger.info("starting app with target: %s", repr(self._target))
-            self.running = True
+            with self._running.get_lock():
+                self._running.value = True
 
             try:
                 if self.use_pipe:
@@ -56,8 +67,6 @@ class App(multiprocessing.Process):
             except Exception:  # pylint: disable=broad-except
                 logger.exception("Exception occured within App:", exc_info=1)
 
-            logger.info("finished app with target: %s", repr(self._target))
-
             if self.use_sockets:
                 self.socket.emit("app_watcher", "done")
 
@@ -67,10 +76,14 @@ class App(multiprocessing.Process):
 
             if self.use_sockets:
                 self.socket.emit("app_watcher", {"exception": tb})
-            # raise e  # You can still rise this exception if you need to
 
         finally:
-            self.running = False
+            logger.info("finished app with target: %s", repr(self._target))
+            with self._running.get_lock():
+                self._running.value = False
+
+            # kill self to avoid orphaned threads
+            os.kill(self.pid, 9)
 
 
 class AppRunningException(Exception):
