@@ -106,7 +106,7 @@ services:
       - REDIS_PASSWORD=
       - REDIS_CHANNEL=command-robot
 
-      - MOVE_ARM=False
+      - MOVE_ARM=${ALFRED_MOVE_ARM:-False}
       - ARM_IP=172.21.72.200
     networks:
       - server-tier

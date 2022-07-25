@@ -23,8 +23,8 @@ class ScannerThread(threading.Thread):
 
     arm: AlfredAPI
 
-    flag: threading.Event
-    execute_return_sequence: threading.Event
+    scan_flag: threading.Event
+    exec_return_seq_flag: threading.Event
 
     loop: cycle
 
@@ -33,8 +33,6 @@ class ScannerThread(threading.Thread):
     def __init__(
         self,
         arm: AlfredAPI,
-        flag: threading.Event,
-        execute_return_sequence: threading.Event,
         min_angle: float,
         max_angle: float,
         *args,
@@ -45,9 +43,10 @@ class ScannerThread(threading.Thread):
 
         self.arm = arm
 
+        self.scan_flag = threading.Event()
+        self.exec_return_seq_flag = threading.Event()
+
         self.num_points = num_points
-        self.flag = flag  # execution flag; stops execution when True
-        self.execute_return_sequence = execute_return_sequence
 
         min_to_max_pass_points = np.linspace(min_angle, max_angle, num_points)
         self.loop = cycle(
@@ -62,11 +61,11 @@ class ScannerThread(threading.Thread):
         self.start_sequence()
 
         while True:
-            if self.flag.is_set():
+            if self.scan_flag.is_set():
                 time.sleep(0.1)
                 continue
 
-            if self.execute_return_sequence.is_set():
+            if self.exec_return_seq_flag.is_set():
                 self.return_sequence()
                 continue
 
@@ -81,7 +80,7 @@ class ScannerThread(threading.Thread):
         """Gets xArm into position."""
 
         # Execute start sequence
-        self.flag.set()
+        self.scan_flag.set()
         print("Getting into position!")
 
         for i, angle in enumerate(self.start_pose_degrees[:-1]):
@@ -96,7 +95,7 @@ class ScannerThread(threading.Thread):
 
         print("Got into position!")
 
-        self.flag.clear()
+        self.scan_flag.clear()
 
     def return_sequence(self):
         """Gets xArm back into position after stop flag was set."""
@@ -115,5 +114,5 @@ class ScannerThread(threading.Thread):
         )
 
         print("Finished return sequence")
-        self.execute_return_sequence.clear()
-        self.flag.clear()
+        self.exec_return_seq_flag.clear()
+        self.scan_flag.clear()

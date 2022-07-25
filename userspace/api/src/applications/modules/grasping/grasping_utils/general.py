@@ -7,8 +7,9 @@ import torch
 
 from libalfred import AlfredAPI
 
-from . import geometry as geom
+from . import grasping
 from .detection import DetectFlag
+from .homing import HomingThread
 from .scanner import ScannerThread
 
 lock = threading.Lock()
@@ -62,21 +63,8 @@ class DetectionBuffer:
 _detection_buffers: Dict[int, DetectionBuffer] = {}
 
 
-def center_camera(arm: AlfredAPI, xy_diff):
-    """Move arm end effector to center of object."""
-
-    j1 = -(xy_diff[0] / 50.0)
-    j5 = xy_diff[1] / 50.0
-    # print(f"{j5=}")
-
-    _ = arm.set_servo_angle(servo_id=1, angle=j1, relative=True)
-    _ = arm.set_servo_angle(servo_id=5, angle=j5, relative=True)
-    # ret = arm.set_position(x=1, speed=100, mvacc=1000, relative=True)
-    # print(f"{ret=}")
-
-
 def _preds_postprocessor(img_size, names, detect_flag: DetectFlag, arm: AlfredAPI):
-    detect_id = [0]
+    detect_id = [0]  # counts the number of times an object was detected
     center_camera_count = [100_000]
 
     for i, name in enumerate(names):
@@ -85,23 +73,23 @@ def _preds_postprocessor(img_size, names, detect_flag: DetectFlag, arm: AlfredAP
 
     img_center_xy = [img_size[0] / 2.0, img_size[1] / 2.0]
 
-    scanner_flag = threading.Event()
-    # print(scanner_flag, scanner_flag.is_set())
-    scanner_execute_return_sequence = threading.Event()
     scanner_thread = ScannerThread(
         arm,
-        scanner_flag,
-        scanner_execute_return_sequence,
         -130.0,
         100.0,
         daemon=True,
     )
     scanner_thread.start()
 
+    homing_thread = HomingThread(
+        arm, detect_flag=detect_flag, img_size=img_size, daemon=True
+    )
+    homing_thread.start()
+
     def preds_postprocessor_inner(pred: List[torch.Tensor]):
 
         # if the arm is resetting its position, skip
-        if scanner_execute_return_sequence.is_set():
+        if scanner_thread.exec_return_seq_flag.is_set():
             return
 
         # skip if no target was set
@@ -113,7 +101,8 @@ def _preds_postprocessor(img_size, names, detect_flag: DetectFlag, arm: AlfredAP
             buffer.appendleft(-1)
 
         # add detections to each detected class' buffer
-        if any(len(x) != 0 for x in pred):
+        object_detected = any(len(x) != 0 for x in pred)
+        if object_detected:
             for _, det in enumerate(pred):  # per image
                 for *xyxy, _, cls in reversed(det):
                     cls = int(cls)
@@ -122,22 +111,47 @@ def _preds_postprocessor(img_size, names, detect_flag: DetectFlag, arm: AlfredAP
 
         # if target item was not detected yet,
         # check if it is detected now
-        if not detect_flag:
-            detection_buffer = _detection_buffers[detect_flag.target_id]
+        if not detect_flag:  # if it is not detected yet
+            detection_buffer = _detection_buffers[
+                detect_flag.target_id
+            ]  # get target's detection buffer
 
-            if detection_buffer:
+            if detection_buffer:  # if detection buffer indicates object was detected
                 print(
                     f"{detect_id[0]} - FOUND! {detect_flag.target_name}",
                     end="\n----------\n",
                 )
                 detect_id[0] += 1
 
-                detect_flag.set()
-                scanner_flag.set()
+                detect_flag.set()  # mark the object as detected
+                scanner_thread.scan_flag.set()  # stop scanning
+                homing_thread.flag.set()  # start homing
 
             return
 
-        if scanner_flag.is_set():
+        if scanner_thread.scan_flag.is_set():
+            for _, det in enumerate(pred):  # per image
+                for *xyxy, _, cls in reversed(det):
+                    if not cls == detect_flag.target_id:
+                        continue
+
+                    homing_thread.pred_queue.put(pred)
+                    return
+
+        # if flag was set but target was not found
+
+        _detection_buffers[detect_flag.target_id].reset()
+        detect_flag.unset()
+        print("lost object")
+
+        scanner_thread.exec_return_seq_flag.set()
+        scanner_thread.scan_flag.clear()
+        homing_thread.flag.clear()
+
+        """
+        # homing
+        # object was detected
+        if scanner_thread.scan_flag.is_set():
             for _, det in enumerate(pred):  # per image
                 for *xyxy, _, cls in reversed(det):
                     if not cls == detect_flag.target_id:
@@ -148,26 +162,20 @@ def _preds_postprocessor(img_size, names, detect_flag: DetectFlag, arm: AlfredAP
 
                     # print(box_center_xy, " / ", img_center_xy)
                     xy_diff = geom.xy_diff(box_center_xy, img_center_xy)
-                    # xy_softequals = geom.xy_softequals(
-                    #     box_center_xy, img_center_xy, 1.0
-                    # )
-
-                    center_camera_count[0] += 1
-                    if center_camera_count[0] > 14:
-                        print("homing")
-                        # print(xy_diff)
-                        center_camera(arm, xy_diff)
-                        center_camera_count[0] = 0
+                    xy_softequals = geom.xy_softequals(
+                        box_center_xy, img_center_xy, 1.0
+                    )
+                    if xy_softequals:
+                        grasping.grasp()
+                    else:
+                        center_camera_count[0] += 1
+                        if center_camera_count[0] > 14:
+                            print("homing")
+                            # print(xy_diff)
+                            center_camera(arm, xy_diff)
+                            center_camera_count[0] = 0
 
                     return
-
-        # if flag was set but target was not found
-
-        _detection_buffers[detect_flag.target_id].reset()
-        detect_flag.unset()
-        print("lost object")
-
-        scanner_execute_return_sequence.set()
-        scanner_flag.clear()
+        """
 
     return preds_postprocessor_inner
