@@ -187,8 +187,10 @@ def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, id_aruco: int = 3, 
                     count = 0
             else:  # if centered
                 flag_is_centered = True
+                time.sleep(2)
                 show_cam_thread.stop()
                 cv2.destroyAllWindows()
+                break
                 get_angle = arm.get_servo_angle(servo_id=1, is_radian=False)
                 # rget_servo_angle returns a string, ex. "(0,-47.7)" -> not a tuple!
                 angle = float(get_angle[3:-2])
@@ -200,8 +202,10 @@ def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, id_aruco: int = 3, 
             scanner_thread.unset()
         time.sleep(0.03)
 
-    gripper.grip(arm)
-    move_object_forward(arm)
+    # gripper.grip(arm)
+    # move_object_forward(arm)
+
+
 
     scanner_thread.set()
     scanner_thread.stop()
