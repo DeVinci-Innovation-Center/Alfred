@@ -1,13 +1,15 @@
-# pylint: disable=no-member
 """Gets data from a device, treats them, and sends them to Redis."""
 
-import time
-from typing import Any
+import logging
 import pickle
+import time
+from typing import Optional, Tuple
 
-from redis import Redis
 import numpy as np
-import pyrealsense2 as rs
+from redis import Redis
+
+from realsense import config as cfg
+from realsense.realsense_manager import RealsenseManager
 
 
 class DataProducer:
@@ -16,38 +18,50 @@ class DataProducer:
     redis_instance: Redis
     channel: str
 
-    def __init__(self, redis_instance: Redis, channel: str):
+    def __init__(
+        self, redis_instance: Redis, channel: str, rs_manager: RealsenseManager
+    ):
+        self.logger = logging.getLogger(f"drivers.{cfg.DRIVER_NAME}")
+
         self.redis_instance = redis_instance
-        self.channel = channel
+        self.channel_color = channel
+        self.channel_depth = f"{self.channel_color}-depth"
 
         self.last_update = time.time()
 
-        self.pipeline = rs.pipeline()
-        config = rs.config()
+        self.rs_manager = rs_manager
 
-        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-
-        # Start streaming
-        self.pipeline.start(config)
-
-    def get_data(self):
+    def get_data(self) -> Optional[Tuple[bytes, bytes]]:
         """Get data from device."""
 
-        frames = self.pipeline.wait_for_frames()
-        color_frame = frames.get_color_frame()
+        try:
+            frames = self.rs_manager.wait_for_frames(1000)
+        except RuntimeError as e:
+            if "Frame didn't arrive within" in e.args[0]:
+                self.rs_manager.recover_disconnected()
+                return None
 
-        if not color_frame:
+            raise e
+
+        color_frame = frames.get_color_frame()
+        depth_frame = frames.get_depth_frame()
+
+        if not color_frame or not depth_frame:
             return None
 
         # Convert images to numpy arrays
         color_image = np.asanyarray(color_frame.get_data())
+        depth_image = np.asanyarray(depth_frame.get_data())
 
-        return pickle.dumps(color_image)
+        return pickle.dumps(color_image), pickle.dumps(depth_image)
 
-    def produce_data(self, data: Any):
+    def produce_data(self, data: bytes, *, frame_type: str):
         """Produce data to Redis."""
 
-        self.redis_instance.publish(channel=self.channel, message=data)
+        if frame_type == "color":
+            self.redis_instance.publish(channel=self.channel_color, message=data)
+        elif frame_type == "depth":
+            self.redis_instance.publish(channel=self.channel_depth, message=data)
 
     def loop(self):
         """Get and produce data indefinitely."""
@@ -55,6 +69,7 @@ class DataProducer:
         while True:
             data = self.get_data()
             if data is not None:
-                self.produce_data(data)
+                color, depth = data
 
-        # pipe.stop()
+                self.produce_data(color, frame_type="color")
+                self.produce_data(depth, frame_type="depth")

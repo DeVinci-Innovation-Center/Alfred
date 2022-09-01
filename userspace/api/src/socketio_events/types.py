@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 
-
 _possible_statuses: list = ["offline", "online"]
 
 
@@ -24,7 +23,7 @@ class Pose:
             "joint_4": self.joint_pose[3],
             "joint_5": self.joint_pose[4],
             "joint_6": self.joint_pose[5],
-            "head": self.head_data
+            "head": self.head_data,
         }
 
 

@@ -3,7 +3,6 @@ from rasa_sdk.events import SlotSet
 
 
 class ResetToGrab(Action):
-
     def name(self):
         return "action_reset_to_grab"
 

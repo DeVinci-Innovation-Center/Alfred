@@ -10,11 +10,13 @@ def get_xyxy_center_point(xyxy: list) -> list:
 
     return [center_x, center_y]
 
+
 def xy_diff(xy1: list, xy2: list) -> list:
     if not len(xy1) == len(xy2):
         raise ValueError("xy1 and xy2 must be of same length.")
 
     return [xy1[i] - xy2[i] for i in range(len(xy1))]
+
 
 def xy_softequals(xy1: list, xy2: list, abs_tol: Union[float, List[float]]) -> bool:
     """Returns True if xy1 is almost equal to xy2."""

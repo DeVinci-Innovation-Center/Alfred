@@ -65,6 +65,7 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./userspace/api/src:/alfred/api/src  # for dev
     deploy:
       resources:
         reservations:
@@ -77,17 +78,21 @@ services:
       context: ./userspace/services
     restart: always
     environment:
-      # - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=1
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
+
+      - ALFRED_ADDRESS=http://api:8000
+      - ALFRED_GRAB_ROUTE=applications/grasping/start-grasping
 
       - RASA_REDIS_INPUT_CHANNEL=device-data-microphone-speech
       - RASA_REDIS_OUTPUT_CHANNEL=services-rasa-responses
       - RASA_SIO_SERVER_ADDR=http://localhost:5005
     networks:
       - database-tier
+      - server-tier
 
   controller:
     privileged: true
@@ -99,6 +104,7 @@ services:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
       # - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=CRITICAL
 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -141,7 +147,7 @@ services:
       - database-tier
 
   redis:
-    image: docker.io/bitnami/redis:6.2
+    image: bitnami/redis:7.0
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
@@ -151,10 +157,11 @@ services:
       - database-tier
     volumes:
       - redis-data:/bitnami/redis/data
+      - ./kernel/db/redis/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf
 
   mongodb:
     image: mongo:5
-    command: --quiet
+    command: --logpath /dev/null
     restart: always
     ports:
       - "27017:27017"

@@ -51,6 +51,7 @@ stories:
   - slot_was_set:
     - to_grab: bottle
   - action: utter_comply_grab
+  - action: action_grab_item
   - action: action_reset_to_grab
 
 - story: call and grab bottle
@@ -62,6 +63,7 @@ stories:
     - to_grab: bottle
     - called: true
   - action: utter_comply_grab
+  - action: action_grab_item
   - action: action_reset_to_grab
 
 - story: grab unknown object

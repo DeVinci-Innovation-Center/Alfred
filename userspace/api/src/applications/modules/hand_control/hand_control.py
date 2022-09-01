@@ -4,8 +4,9 @@ from typing import Any
 import cv2
 import numpy as np
 import xarm_hand_control.processing.process as xhcpp
-from libalfred.utils import Command
 from src.utils.global_instances import rc
+
+from libalfred.utils import Command
 
 
 def send_command(command: Command):

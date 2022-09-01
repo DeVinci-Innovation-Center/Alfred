@@ -15,9 +15,7 @@ class DataProducer:
     redis_instance: Redis
     channel: str
 
-    def __init__(
-        self, redis_instance: Redis, channel: str, mic_driver: MicDriver
-    ):
+    def __init__(self, redis_instance: Redis, channel: str, mic_driver: MicDriver):
         self.redis_instance = redis_instance
         self.channel = channel
         self.mic_driver = mic_driver
@@ -47,7 +45,7 @@ class DataProducer:
 
         if speech_data is not None:
             self.redis_instance.publish(
-                channel=f"{self.channel}-speech", message=speech_data
+                channel=f"{self.channel}-speech", message=str(speech_data)
             )
 
     def loop(self):

@@ -1,13 +1,12 @@
-import numpy as np
 import signal
 import sys
 import time
-
 from math import *
 from os import wait
 from queue import Queue
-from xarm.wrapper import XArmAPI
 
+import numpy as np
+from xarm.wrapper import XArmAPI
 
 VIDEO_INDEX = 4
 ARM_IP = "172.21.72.200"

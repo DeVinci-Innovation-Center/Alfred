@@ -17,6 +17,8 @@ def check_config_values(config: dict):
 class Config:
     """Class for global config object."""
 
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "info")
+
     REDIS_HOST: str = os.getenv("REDIS_HOST", "")
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", ""))
     REDIS_PASSWORD: Optional[str] = os.getenv("REDIS_PASSWORD", "")

@@ -1,17 +1,11 @@
-import sys
 from pathlib import Path
-from typing import List
 
 import cv2
 import numpy as np
 import torch
-import torch.backends.cudnn as cudnn
-from libalfred.utils.camera_stream import StreamCamThread
+from torch.backends import cudnn
 
-FILE = Path(__file__).resolve()
-YOLOV5_ROOT = FILE.parents[0] / "yolov5"  # YOLOv5 root directory
-if str(YOLOV5_ROOT) not in sys.path:
-    sys.path.append(str(YOLOV5_ROOT))  # add ROOT to PATH
+from libalfred.utils.camera_stream import StreamCamThread
 
 from .yolov5.models.common import DetectMultiBackend
 from .yolov5.utils.augmentations import letterbox
@@ -31,26 +25,12 @@ from .yolov5.utils.plots import Annotator, colors, save_one_box
 from .yolov5.utils.torch_utils import select_device, time_sync
 
 
-def get_img_size(source) -> List[int]:
-    """Get image size from source."""
-
-    cap = cv2.VideoCapture(source)
-    assert cap.isOpened(), f"get_img_size(): Failed to open {source}"
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    cap.release()
-
-    return [w, h]
-
-
-# pylint: disable=too-many-branches,too-many-statements,dangerous-default-value
+# pylint: disable=too-many-branches,too-many-statements
 def run(
     model: DetectMultiBackend,
     cam_stream: StreamCamThread,  # libalfred cam stream instance
     img_size,  # image shape
     pred_postprocessor=lambda x: x,
-    imgsz=[640, 640],  # inference size (pixels)
     conf_thres=0.25,  # confidence threshold
     iou_thres=0.45,  # NMS IOU threshold
     max_det=1000,  # maximum detections per image
@@ -72,26 +52,18 @@ def run(
     hide_conf=False,  # hide confidences
     half=False,  # use FP16 half-precision inference
 ):
-    """Run inference on source, send pred results to precess().
+    """Run inference on cam stream, yield pred results and annotated image.
     Code taken from yolov5 detect.py."""
 
     # Directories
-    save_dir = increment_path(
-        Path(project) / name, exist_ok=exist_ok
-    )  # increment run
+    save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
     (save_dir / "labels" if save_txt else save_dir).mkdir(
         parents=True, exist_ok=True
     )  # make dir
 
     # Load model
     device = select_device(device)
-    stride, names, pt, _, _ = (
-        model.stride,
-        model.names,
-        model.pt,
-        model.jit,
-        model.onnx,
-    )
+    stride, names, pt = (model.stride, model.names, model.pt)
 
     imgsz = check_img_size(img_size, s=stride)  # check image size
 
@@ -104,18 +76,13 @@ def run(
         model.model.half() if half else model.model.float()
 
     # Dataloader
-    # source = str(source)  # Stringify source for LoadStreams
     view_img = check_imshow()
-    cudnn.benchmark = (
-        True  # set True to speed up constant image size inference
-    )
+    cudnn.benchmark = True  # set True to speed up constant image size inference
 
     # Run inference
     if pt and device.type != "cpu":
         model(
-            torch.zeros(1, 3, *imgsz)
-            .to(device)
-            .type_as(next(model.model.parameters()))
+            torch.zeros(1, 3, *imgsz[:2]).to(device).type_as(next(model.model.parameters()))
         )  # warmup
     dt, seen = [0.0, 0.0, 0.0], 0
     for path, im0 in cam_stream:
@@ -132,11 +99,12 @@ def run(
 
         s = ""  # reset text to print per preditction
         t1 = time_sync()
-        im = torch.from_numpy(im).to(device)
-        im = im.half() if half else im.float()  # uint8 to fp16/32
-        im /= 255  # 0 - 255 to 0.0 - 1.0
-        if len(im.shape) == 3:
-            im = im[None]  # expand for batch dim
+        im_tensor = torch.from_numpy(im).to(device)
+        # uint8 to fp16/32
+        im_tensor = im_tensor.half() if half else im_tensor.float()
+        im_tensor /= 255  # 0 - 255 to 0.0 - 1.0
+        if len(im_tensor.shape) == 3:
+            im_tensor = im_tensor[None]  # expand for batch dim
         t2 = time_sync()
         dt[0] += t2 - t1
 
@@ -146,7 +114,7 @@ def run(
             if visualize
             else False
         )
-        pred = model(im, augment=augment, visualize=visualize)
+        pred = model(im_tensor, augment=augment, visualize=visualize)
         t3 = time_sync()
         dt[1] += t3 - t2
 
@@ -169,19 +137,13 @@ def run(
 
             p = Path(p)  # to Path
             txt_path = str(save_dir / "labels" / p.stem) + f"_{frame}"
-            s += "%gx%g " % im.shape[2:]  # print string
-            gn = torch.tensor(im0.shape)[
-                [1, 0, 1, 0]
-            ]  # normalization gain whwh
+            s += f"{im.shape[2]}x{im.shape[3]}"
+            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
-            annotator = Annotator(
-                im0, line_width=line_thickness, example=str(names)
-            )
+            annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
                 # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_coords(
-                    im.shape[2:], det[:, :4], im0.shape
-                ).round()
+                det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0.shape).round()
 
                 # Print results
                 for c in det[:, -1].unique():
@@ -200,9 +162,7 @@ def run(
                         line = (
                             (cls, *xywh, conf) if save_conf else (cls, *xywh)
                         )  # label format
-                        with open(
-                            txt_path + ".txt", "a", encoding="utf-8"
-                        ) as f:
+                        with open(txt_path + ".txt", "a", encoding="utf-8") as f:
                             f.write(("%g " * len(line)).rstrip() % line + "\n")
 
                     if save_crop or view_img:  # Add bbox to image
@@ -210,46 +170,40 @@ def run(
                         label = (
                             None
                             if hide_labels
-                            else (
-                                names[c]
-                                if hide_conf
-                                else f"{names[c]} {conf:.2f}"
-                            )
+                            else (names[c] if hide_conf else f"{names[c]} {conf:.2f}")
                         )
                         annotator.box_label(xyxy, label, color=colors(c, True))
                         if save_crop:
                             save_one_box(
                                 xyxy,
                                 imc,
-                                file=save_dir
-                                / "crops"
-                                / names[c]
-                                / f"{p.stem}.jpg",
+                                file=save_dir / "crops" / names[c] / f"{p.stem}.jpg",
                                 BGR=True,
                             )
 
             # Print time (inference-only)
-            LOGGER.info(f"{s}Done. ({t3 - t2:.3f}s)")
-
-            # Send preds to pred_processor
-            pred_postprocessor(pred)
+            LOGGER.info("%sDone. (%.3fs)", s, t3 - t2)
 
             # Stream results
             im0 = annotator.result()
-            if view_img:
-                cv2.imshow(str(p), im0)
-                key = cv2.waitKey(1)
-                if key in [ord('q'), 27]:  # q or escape to quit
-                    cv2.destroyAllWindows()
-                    return
+            # if view_img:
+            #     cv2.imshow(str(p), im0)
+            #     key = cv2.waitKey(1)
+            #     if key in [ord("q"), 27]:  # q or escape to quit
+            #         cv2.destroyAllWindows()
+            #         return
+
+            # Send preds to pred_processor
+            yield pred, im0
 
     # Print results
     t = tuple(x / seen * 1e3 for x in dt)  # speeds per image
     LOGGER.info(
-        f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}"
-        % t
+        """Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS"""
+        """per image at shape %s""",
+        *t,
+        (1, 3, *imgsz),
     )
+
     if update:
-        strip_optimizer(
-            model.weights
-        )  # update model (to fix SourceChangeWarning)
+        strip_optimizer(model.weights)  # update model (to fix SourceChangeWarning)

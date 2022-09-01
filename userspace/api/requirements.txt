@@ -1,5 +1,6 @@
 -f https://download.pytorch.org/whl/cpu/torch_stable.html
 fastapi==0.70.0
+python-multipart==0.0.5
 uvicorn[standard]==0.15.0
 python-socketio==5.4.0
 opencv-contrib-python==4.5.5.62

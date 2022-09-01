@@ -1,48 +1,89 @@
+"""Handle Applications in the context of ALFRED. Contains the Application
+class, Exceptions and the ContextManager for managing applications in the
+system."""
+
+from ctypes import c_bool
 import multiprocessing
+import os
+import threading
+import time
 import traceback
 from typing import Callable
 
 import socketio
 
+from src.utils.global_instances import logger
+
 
 class App(multiprocessing.Process):
-    """App to run as sub-process, which doesn't exit program when it encounters an exception."""
+    """App to run as sub-process, which doesn't exit program when it encounters
+    an exception."""
 
     def __init__(
         self,
         *args,
         use_sockets: bool = False,
         socket: socketio.Server = None,
+        use_pipe: bool = False,
         f_args: tuple = None,
         f_kwargs: dict = None,
         **kwargs,
     ):
+        super().__init__(*args, **kwargs)
 
-        multiprocessing.Process.__init__(self, *args, **kwargs)
         self._f_args = f_args if f_args is not None else []
         self._f_kwargs = f_kwargs if f_kwargs is not None else {}
+
         self.use_sockets = use_sockets
         self.socket = socket
 
+        self.use_pipe = use_pipe
+
+        self.parent_conn, self.child_conn = None, None
+        if self.use_pipe:
+            self.parent_conn, self.child_conn = multiprocessing.Pipe()
+
+        self._running = multiprocessing.Value(c_bool, False)
+
+    @property
+    def running(self) -> bool:
+        with self._running.get_lock():
+            ret = self._running.value
+
+        return ret
+
     def run(self):
         try:
-            print(f"starting app with target: {self._target}")
+            logger.info("starting app with target: %s", repr(self._target))
+            with self._running.get_lock():
+                self._running.value = True
 
             try:
-                self._target(*self._f_args, **self._f_kwargs)
-            except Exception:
-                print(traceback.format_exc())
+                if self.use_pipe:
+                    self._target(self.child_conn, *self._f_args, **self._f_kwargs)
+                else:
+                    self._target(*self._f_args, **self._f_kwargs)
 
-            print(f"finished app with target: {self._target}")
+            except Exception:  # pylint: disable=broad-except
+                logger.exception("Exception occured within App:", exc_info=1)
 
             if self.use_sockets:
                 self.socket.emit("app_watcher", "done")
 
         except Exception:  # pylint: disable = broad-except
             tb = traceback.format_exc()
+            logger.exception("Exception occured outside the App:", exc_info=1)
+
             if self.use_sockets:
                 self.socket.emit("app_watcher", {"exception": tb})
-            # raise e  # You can still rise this exception if you need to
+
+        finally:
+            logger.info("finished app with target: %s", repr(self._target))
+            with self._running.get_lock():
+                self._running.value = False
+
+            # kill self to avoid orphaned threads
+            os.kill(self.pid, 9)
 
 
 class AppRunningException(Exception):
@@ -79,7 +120,8 @@ class NoAppRunningException(Exception):
 
 
 class ContextManager:
-    """Manages running apps in backend, to only allow for one app to be running at once."""
+    """Manages running apps in backend, to only allow for one app to be
+    running at once."""
 
     _instance = None
 
@@ -102,9 +144,7 @@ class ContextManager:
         if self.current_app is None:
             return False
 
-        self.current_app.join(0)
-        thread_status = self.current_app.is_alive()
-        return thread_status
+        return self.current_app.running
 
     def run_app(self, app: App):
         """Spawn a thread running provided app."""
