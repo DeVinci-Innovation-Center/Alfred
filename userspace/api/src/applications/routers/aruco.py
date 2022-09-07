@@ -33,7 +33,7 @@ async def robot_scan(id_aruco: int):
             use_sockets=False,
             socket=backend_sio_server,
             target=aruco.scanning,
-            f_args=(id_aruco,),
+            f_args=([id_aruco],),
         )
         ctx_manager.run_app(app)
     except AppRunningException as e:

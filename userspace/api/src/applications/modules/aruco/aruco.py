@@ -1,17 +1,15 @@
 import cv2
 import cv2.aruco as aruco
-import numpy as np
-import threading
 import time
 import src.applications.modules.aruco.aruco_utils.track_aruco as track_aruco
 
 
 from libalfred import AlfredAPI
 from libalfred.utils.camera_stream import StreamCamThread
-from .aruco_utils.show_cam import ShowThread
+from libalfred.utils.show_frame_stream import ShowThread
 from src.applications.modules.aruco import calibration_cam
 
-from typing import Any
+from typing import Any,List
 
 
 # termination criteria
@@ -22,8 +20,8 @@ DIRPATH = "/alfred/api/src/applications/modules/aruco/images"
 CAM = "device-data-realsense"
 
 
-def scanning(id: int = 3):
-    track_aruco.track_aruco(id_aruco=id)
+def scanning(ids: List[int] = [3]):
+    track_aruco.track_aruco(ids_aruco=ids)
 
 
 def stream_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250) -> None:
@@ -53,7 +51,7 @@ def stream_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250) -> None:
         if show_cam_thread._stop.is_set():
             break
 
-        rvec, tvec, corners, ids = track_aruco.aruco_detect(
+        rvec, tvec, corners, ids, _ = track_aruco.aruco_detect(
             frame, aruco_dict, parameters, mtx, dist)
 
         show_cam_thread.update(frame, rvec, tvec, corners, ids)
