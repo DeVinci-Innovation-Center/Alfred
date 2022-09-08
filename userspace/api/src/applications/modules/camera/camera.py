@@ -11,6 +11,7 @@ from typing import Any
 
 WIN_NAME = "Camera feed"
 
+
 def is_connected() -> bool:
     """Return flag if camera is connected"""
     p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
@@ -21,13 +22,12 @@ def is_connected() -> bool:
     while True:
         message = p.get_message()
         if not message:
-            if t_0+time_init_cam<time.time():
+            if t_0 + time_init_cam < time.time():
                 break
             time.sleep(0.001)
             continue
         return True
     return False
-
 
 
 def show_camera(camera_feed: str) -> None:

@@ -1,17 +1,19 @@
-from typing import Any, Optional
+from typing import Any, List
 
 
 class DetectFlag:
 
-    def __init__(self,target_dict: Optional[dict]=None) -> None:
-        self.target_dict=target_dict
+    def __init__(self,ids_aruco: List[int]=None) -> None:
+        self.target_dict=None
+        if ids_aruco is not None:
+            self.target_dict=dict.fromkeys(ids_aruco)
         self.flag = False
 
     def __bool__(self):
         return self.flag
 
     def set(self, validate=True):
-        if validate and self.target_dict is not None:
+        if validate and self.target_dict is None:
             raise ValueError(
                 "target_dict must be set before setting flag.")
         self.flag = True

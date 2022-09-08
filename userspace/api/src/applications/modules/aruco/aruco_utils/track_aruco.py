@@ -64,7 +64,7 @@ def track_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250, ids_aruco: List[int
     aruco_dict = aruco.Dictionary_get(aruco_dict_type)
     parameters = aruco.DetectorParameters_create()
     mtx, dist = calibration_cam.get_calibration_coef()
-    detect_aruco = DetectFlag(target_dict=dict.fromkeys(ids_aruco))
+    detect_aruco = DetectFlag(ids_aruco=ids_aruco)
 
     # Init stream thread
     stream_thread = StreamCamThread()
