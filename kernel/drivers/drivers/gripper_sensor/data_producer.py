@@ -20,8 +20,6 @@ class DataProducer:
         self.channel = channel
         self.fsr=sensor
 
-        self.last_update = time.time()
-
     def get_data(self)->str:
         """Get data from device."""
 
