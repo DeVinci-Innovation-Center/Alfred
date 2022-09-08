@@ -24,21 +24,3 @@ async def demo_gripper():
         ) from None
 
     return {"message": "Grip an object."}
-
-@router.post("/stream-with-aruco")
-async def stream_aruco():
-    """Demo of streaming camera with detection of aruco marker."""
-
-    try:
-        app = App(
-            use_sockets=False,
-            socket=backend_sio_server,
-            target=aruco.stream_aruco,
-        )
-        ctx_manager.run_app(app)
-    except AppRunningException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
-        ) from None
-
-    return {"message": "Streaming camera with detection of aruco marker."}
