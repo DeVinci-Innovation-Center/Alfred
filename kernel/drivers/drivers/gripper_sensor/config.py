@@ -6,7 +6,7 @@ try:
     REDIS_PORT = int(os.getenv("REDIS_PORT", ""))
 except ValueError:
     REDIS_PORT = 6379
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")    
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
 #FSR sensor
 FSR_SERIAL_PORT=os.getenv("FSR_SERIAL_PORT","/dev/ttyACM1")

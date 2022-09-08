@@ -21,4 +21,3 @@ class FSR:
     def get_data(self) -> str:
         self.data = self.ser.readline().decode("utf") # if nothing on serial is detected, after "timeout" seconds, it returns: ""
         return self.data
-

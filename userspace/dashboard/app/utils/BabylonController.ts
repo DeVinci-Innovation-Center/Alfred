@@ -16,7 +16,7 @@ export default class BabylonController {
   AM!: BABYLON.AssetsManager
   camera!: BABYLON.ArcRotateCamera
   light!: BABYLON.HemisphericLight
-  
+
   settings = {
     debugLayer: false,
     fov: 1, // field of view

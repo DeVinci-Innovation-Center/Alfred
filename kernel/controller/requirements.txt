@@ -1,8 +1,8 @@
+cvxopt==1.2.7
+git+https://github.com/xArm-Developer/xArm-Python-SDK.git@release-1.8.0
 
 numpy==1.21.2
+redis==3.5.3
 roboticstoolbox-python[vpython,collision]==0.11.0
 sympy==1.8
-cvxopt==1.2.7
-redis==3.5.3
-git+https://github.com/xArm-Developer/xArm-Python-SDK.git@release-1.8.0
 # git+https://github.com/dimitrivinet/libalfred

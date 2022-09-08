@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from src.applications.routers import aruco, bltouch, camera, grasping, demo
+from src.applications.routers import aruco, bltouch, camera, grasping, gripper, demo
 from src.utils.apps import NoAppRunningException, ctx_manager
 from src.utils.state import alfred_state
 
@@ -9,6 +9,7 @@ router.include_router(bltouch.router)
 router.include_router(grasping.router)
 router.include_router(aruco.router)
 router.include_router(demo.router)
+router.include_router(gripper.router)
 
 
 @router.get("/")

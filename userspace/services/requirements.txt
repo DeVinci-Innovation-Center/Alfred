@@ -1,4 +1,4 @@
+python-decouple~=3.6
+python-socketio[client]~=5.5.2
 # rasa
 rasa[full]~=3.0.8
-python-socketio[client]~=5.5.2
-python-decouple~=3.6

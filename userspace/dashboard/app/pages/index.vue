@@ -312,7 +312,7 @@ export default class Index extends Vue {
   }
 }
 
-/* 
+/*
 ----------------
     DASHBOARD
 ----------------
@@ -372,7 +372,7 @@ export default class Index extends Vue {
   right: 0%;
 }
 /* ---------
-    HEADER 
+    HEADER
 -----------*/
 #dashboardHeader {
   margin-top: 20px;
@@ -394,7 +394,7 @@ h1 {
   background: rgba(150, 0, 0, 0.4);
 }
 /* ---------
-    BODY 
+    BODY
 -----------*/
 #dashboardBody {
   display: flex;
@@ -433,6 +433,6 @@ h1 {
 /* #terminalHolder{
   display: flex;
   align-self: flex-end;
-  width: 100vw; 
+  width: 100vw;
 }*/
 </style>

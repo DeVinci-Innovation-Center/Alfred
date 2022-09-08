@@ -209,7 +209,7 @@ export default class RenderCanvas extends Vue {
       scene.animationGroups.forEach((anim) => {
         anim.play()
         anim.goToFrame((this.openingHand) * anim.to)
-        anim.pause() 
+        anim.pause()
       })
     })
   }

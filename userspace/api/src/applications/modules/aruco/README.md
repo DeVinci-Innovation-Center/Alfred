@@ -5,7 +5,7 @@
 
 ## Pose estimation on tracked ArUco markers with a robot arm
 Detecting tools and robot grasping require estimation of 3D object poses. Different techniques for vision-based pose estimation have been proposed. However, not all the advantages of the camera and the
-robotic arm have been used. In this project, we propose a new approach for absolute pose estimation with a robotic arm, thus enabling to better understand the environment through computer vision. The method is based on scanning the surroundings and tracking fiducial markers. The absolute positions of the makers have been calculated via geometry by using a calibrated stereo camera. 
+robotic arm have been used. In this project, we propose a new approach for absolute pose estimation with a robotic arm, thus enabling to better understand the environment through computer vision. The method is based on scanning the surroundings and tracking fiducial markers. The absolute positions of the makers have been calculated via geometry by using a calibrated stereo camera.
 
 More details can be found on the [report](https://github.com/wimausberlin/voice-assistant-system/blob/main/docs/report.pdf).
 

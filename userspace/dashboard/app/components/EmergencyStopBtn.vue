@@ -1,6 +1,6 @@
 <template>
   <!-- TODO add this to the Wrapper
-    :class="`${status === 'offline' ? 'offline' : ''}`"    
+    :class="`${status === 'offline' ? 'offline' : ''}`"
     :title="`${status === 'offline' ? 'Alfred is offline' : '/!\ EMERGENCY STOP /!\'}`"
      -->
   <div
