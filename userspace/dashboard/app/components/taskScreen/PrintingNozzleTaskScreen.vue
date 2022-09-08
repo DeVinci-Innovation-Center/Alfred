@@ -12,7 +12,7 @@ import { Equipment } from '../../types/Equipment'
 
 @Component
 export default class PrintingNozzleTaskScreen extends Vue {
-  
+
 }
 </script>
 

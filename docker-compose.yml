@@ -129,10 +129,13 @@ services:
 
       - BLTOUCH_BAUDRATE=9600
       - BLTOUCH_SERIAL_PORT=/dev/ttyACM0
+      - FSR_BAUDRATE=9600
+      - FSR_SERIAL_PORT=/dev/ttyACM1
 
       - AZURE_KEY=c649166d6bb04adfb9407ba859bc8f65
       - AZURE_REGION=westeurope
       - AZURE_LANG=fr-FR,en-US
+ 
     networks:
       - database-tier
 

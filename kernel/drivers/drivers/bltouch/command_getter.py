@@ -31,15 +31,14 @@ class CommandGetter:
         message = self.pubsub.get_message(ignore_subscribe_messages=True)
         if message:
             # do something with the message
-            print(message)
             command = message["data"].decode("utf-8")
             return command
 
     def execute_command(self, command: Any):
         """Send command to device."""
         command_dict: dict = json.loads(command)
-
         if command_dict.get("function") == "activate-bltouch":
+            print("send_command")
             self.blt.send_command()
 
     def loop(self):

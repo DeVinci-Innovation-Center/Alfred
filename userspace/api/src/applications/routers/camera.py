@@ -11,7 +11,8 @@ router = APIRouter(prefix="/camera", tags=["Applications"])
 @router.post("/show-camera")
 async def show_camera():
     """Simple show camera function."""
-
+    if not camera.is_connected():
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Cam not connected.")
     try:
         app = App(
             target=camera.show_camera,
@@ -42,3 +43,9 @@ async def show_depth():
         ) from None
 
     return {"message": "Depth running."}
+
+@router.post("/is-connected")
+async def cam_connected():
+    msg = "Camera"
+    msg = msg+" connected." if camera.is_connected() else " not connected."
+    return {"message": msg}

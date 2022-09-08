@@ -7,11 +7,30 @@ import time
 import cv2
 
 from src.utils.global_instances import rc
+from typing import Any
 
 WIN_NAME = "Camera feed"
 
 
-def show_camera(camera_feed: str):
+def is_connected() -> bool:
+    """Return flag if camera is connected"""
+    p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
+    p.subscribe("device-data-realsense")
+
+    time_init_cam = 0.2
+    t_0 = time.time()
+    while True:
+        message = p.get_message()
+        if not message:
+            if t_0 + time_init_cam < time.time():
+                break
+            time.sleep(0.001)
+            continue
+        return True
+    return False
+
+
+def show_camera(camera_feed: str) -> None:
     """Get frames from redis and show them in a window."""
 
     p = rc.redis_instance.pubsub(ignore_subscribe_messages=True)
