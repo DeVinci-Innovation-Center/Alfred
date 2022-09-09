@@ -6,7 +6,6 @@ client = TestClient(app)
 
 
 def test_show_camera():
-    response=client.post("/applications/camera/show-camera")
+    response=client.post("/applications/camera/is-connected")
     assert response.status_code == 200
-    assert response.json()=={"message": "Camera running."}
-    client.post("/applications/stop")
+    assert response.json()=={"message": "Camera connected."}
