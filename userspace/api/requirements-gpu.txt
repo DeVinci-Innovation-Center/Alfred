@@ -8,6 +8,7 @@ numpy>=1.18.5
 onnxruntime
 opencv-contrib-python==4.5.5.62
 opencv-python>=4.1.2
+svgpathtools==1.5.1
 # wandb
 
 # Plotting ------------------------------------
