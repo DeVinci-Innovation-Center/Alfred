@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from src.applications.modules.gripper import gripper
-from src.applications.modules.aruco import aruco
+from src.applications.modules.handwriting import writing
 from src.utils.apps import App, AppRunningException, ctx_manager
 from src.utils.global_instances import sio as backend_sio_server
 
@@ -24,3 +24,21 @@ async def demo_gripper():
         ) from None
 
     return {"message": "Grip an object."}
+
+@router.post("/write/{word}")
+async def write(word:str):
+    """Demo writing """
+    try:
+        app = App(
+            use_sockets=False,
+            socket=backend_sio_server,
+            target=writing.write_demo,
+            f_args=([word],),
+        )
+        ctx_manager.run_app(app)
+    except AppRunningException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
+        ) from None
+
+    return {"message": "arm moves."}

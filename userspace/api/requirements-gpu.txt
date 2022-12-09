@@ -8,6 +8,7 @@ numpy>=1.18.5
 onnxruntime
 opencv-contrib-python==4.5.5.62
 opencv-python>=4.1.2
+svgpathtools==1.5.1
 # wandb
 
 # Plotting ------------------------------------
@@ -44,3 +45,4 @@ torch==1.10.2
 torchvision==0.11.3
 tqdm>=4.41.0
 uvicorn[standard]==0.15.0
+websockets==10.4
