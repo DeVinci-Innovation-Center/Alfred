@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
-from src.app import app
+import app as p
 
 
-client = TestClient(app)
+client = TestClient(p.app)
 
 
 def test_show_camera():

@@ -2,17 +2,17 @@
 class, Exceptions and the ContextManager for managing applications in the
 system."""
 
-from ctypes import c_bool
 import multiprocessing
 import os
 import threading
 import time
 import traceback
-from typing import Callable
-
 import socketio
 
-from src.utils.global_instances import logger
+from typing import Callable
+from ctypes import c_bool
+
+from utils.global_instances import logger
 
 
 class App(multiprocessing.Process):

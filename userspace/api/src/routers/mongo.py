@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.utils.global_instances import md
+from utils.global_instances import md
 
 router = APIRouter(prefix="/mongo", tags=["MongoDB"])
 

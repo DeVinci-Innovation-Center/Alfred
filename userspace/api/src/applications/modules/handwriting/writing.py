@@ -42,10 +42,10 @@ def write_from_file(
     arm.set_position(*init_pos, wait=True, speed=100)
 
 
-def write_demo(word: str)->None:
+def write_demo(word: str) -> None:
     arm = AlfredAPI()
     init_pos = np.array([35, 200, 170, 180, -54.1, 77.6])
-    dir = "src/applications/modules/handwriting/svg/"
+    dir = "applications/modules/handwriting/svg/"
     filename = word[0].lower() + ".svg"
     if filename not in os.listdir(dir):
         exit(1)

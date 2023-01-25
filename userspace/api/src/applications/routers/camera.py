@@ -1,9 +1,8 @@
 """Router for the Camera module."""
 
 from fastapi import APIRouter, HTTPException, status
-
-from src.applications.modules.camera import camera
-from src.utils.apps import App, AppRunningException, ctx_manager
+from applications.modules.camera import camera
+from utils.apps import App, AppRunningException, ctx_manager
 
 router = APIRouter(prefix="/camera", tags=["Applications"])
 

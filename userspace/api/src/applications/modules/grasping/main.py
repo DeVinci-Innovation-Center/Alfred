@@ -10,7 +10,7 @@ import torch
 
 import libalfred
 from libalfred.utils import camera_stream
-from src.utils.global_instances import logger
+from utils.global_instances import logger
 
 from . import inference
 from .grasping_utils.detection import CustomDetectMultiBackend, DetectFlag

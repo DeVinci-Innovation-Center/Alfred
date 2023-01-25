@@ -1,10 +1,8 @@
 import json
-import os
-
 import numpy as np
-from src.utils.global_instances import rc
 
 from libalfred.utils import Command
+from utils.global_instances import rc
 
 
 def move_random():

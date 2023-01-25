@@ -1,7 +1,10 @@
+import multiprocessing
+from unittest import expectedFailure
+
 from fastapi import APIRouter, HTTPException, status
-from src.applications.modules.bltouch import bltouch
-from src.utils.apps import App, AppRunningException, ctx_manager
-from src.utils.global_instances import sio as backend_sio_server
+from applications.modules.bltouch import bltouch
+from utils.apps import App, AppRunningException, ctx_manager
+from utils.global_instances import sio as backend_sio_server
 
 router = APIRouter(prefix="/bltouch", tags=["Applications"])
 
@@ -27,18 +30,20 @@ async def bltouch_calibration():
 @router.post("/receive")
 async def bltouch_receive():
     """BLTouch signal received"""
+    val = multiprocessing.Manager().Value("c", "No message received.")
     try:
         app=App(
             use_sockets=False,
             socket=backend_sio_server,
             target=bltouch.receive_data,
+            f_args=(val,)
         )
         ctx_manager.run_app(app)
     except AppRunningException as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
         ) from None
-    return {"message": "Receiving signal."}
+    return {"message": val.value}
 
 
 @router.post("/send")
@@ -58,3 +63,14 @@ async def bltouch_calibration():
         ) from None
 
     return {"message": "Activation running."}
+
+
+@router.post("/table")
+async def bltouch_table():
+    try:
+        bltouch.main()
+    except AppRunningException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
+        ) from None
+    return {"message": "Calibration table."}

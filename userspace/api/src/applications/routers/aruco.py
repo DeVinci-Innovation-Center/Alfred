@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
-from src.applications.modules.aruco import aruco
-from src.utils.apps import App, AppRunningException, ctx_manager
-from src.utils.global_instances import sio as backend_sio_server
+from applications.modules.aruco import aruco
+from utils.apps import App, AppRunningException, ctx_manager
+from utils.global_instances import sio as backend_sio_server
 
 router = APIRouter(prefix="/aruco", tags=["Applications"])
 
