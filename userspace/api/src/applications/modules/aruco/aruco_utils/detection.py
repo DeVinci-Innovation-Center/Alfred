@@ -8,8 +8,14 @@ class DetectFlag:
         if ids_aruco is not None:
             self.target_dict=dict.fromkeys(ids_aruco)
         self.flag = False
+        self.counter=0
 
     def __bool__(self):
+        if self.flag:
+            self.counter+=1
+            if self.counter==50:
+                self.counter=0
+                return self.flag
         return self.flag
 
     def set(self, validate=True):
