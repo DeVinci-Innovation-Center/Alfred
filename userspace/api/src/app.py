@@ -4,8 +4,10 @@ import socketio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src import routers, socketio_events
-from src.utils.global_instances import sio
+import routers, socketio_events
+from utils.global_instances import sio
+
+from socketio_events.emits import background_thread_arm_pose
 
 app = FastAPI(debug=True)
 app.add_middleware(
@@ -16,10 +18,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sio_asgi_app = socketio.ASGIApp(sio, app, socketio_path="/socket.io/")
-
-app.mount("/socket.io/", sio_asgi_app)
-
+sio_asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="socket.io")
+app.mount("/", sio_asgi_app)
 app.include_router(routers.router)
 
 socketio_events.register_routes()
+sio.start_background_task(background_thread_arm_pose)
