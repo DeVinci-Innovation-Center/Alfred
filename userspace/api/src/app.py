@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 sio_asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="socket.io")
-app.mount("/", sio_asgi_app)
+app.mount("/ws", sio_asgi_app)
 app.include_router(routers.router)
 
 socketio_events.register_routes()

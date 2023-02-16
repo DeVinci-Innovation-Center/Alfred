@@ -8,11 +8,16 @@ async def background_thread_arm_pose():
     arm = AlfredAPI()
     while True:
         p = arm.get_servo_angle()
-        pos = ast.literal_eval(p)
-        if pos[0]==0:
-            servo_angle = [round(a,2) for a in pos[1][:-1]]
-            #servo_angle = [2,3.2]
-            await sio.emit("arm_pose",data=servo_angle)
+        if len(p)>2:
+            try:
+                pos = ast.literal_eval(p)
+                if pos[0]==0:
+                    servo_angle = [round(a,2) for a in pos[1][:-1]]
+                    #print(servo_angle[:3])
+                    await sio.emit("arm_pose",data=servo_angle)
+            except:
+                continue
+
         await sio.sleep(0.1)
 
 async def send_arm_pose():
