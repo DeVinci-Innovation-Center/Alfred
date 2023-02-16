@@ -1,8 +1,23 @@
+import ast
+import time
+
+
+from libalfred import AlfredAPI
 from fastapi import APIRouter, HTTPException, status
-from src.applications.modules.gripper import gripper
-from src.applications.modules.handwriting import writing
-from src.utils.apps import App, AppRunningException, ctx_manager
-from src.utils.global_instances import sio as backend_sio_server
+
+from applications.modules.gripper import gripper
+from applications.modules.handwriting import writing, plot
+from utils.apps import App, AppRunningException, ctx_manager
+from utils.global_instances import sio as backend_sio_server
+
+from pydantic import BaseModel
+from typing import List, Union
+
+
+class Drawing(BaseModel):
+    name: str
+    draw_list: Union[List[float], None] = None
+
 
 router = APIRouter(prefix="/demo", tags=["Applications"])
 
@@ -25,15 +40,14 @@ async def demo_gripper():
 
     return {"message": "Grip an object."}
 
+
 @router.post("/write/{word}")
-async def write(word:str):
-    """Demo writing """
+async def write(word: str):
+    """Demo writing"""
     try:
         app = App(
-            use_sockets=False,
-            socket=backend_sio_server,
-            target=writing.write_demo,
-            f_args=([word],),
+            target=writing.write_demo_from_file,
+            f_args=(word,),
         )
         ctx_manager.run_app(app)
     except AppRunningException as e:
@@ -42,3 +56,22 @@ async def write(word:str):
         ) from None
 
     return {"message": "arm moves."}
+
+
+@router.post("/drawing/")
+async def get_draw(draw: Drawing):
+    if draw.name != "" or draw.name is not None:
+        try:
+            app = App(
+                target=writing.write_demo_from_ui,
+                f_args=(draw.draw_list,),
+            )
+            ctx_manager.run_app(app)
+        except AppRunningException as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=e.message
+            ) from None
+
+        return {"msg": "received"}
+    else:
+        return {"msg": "Fail"}

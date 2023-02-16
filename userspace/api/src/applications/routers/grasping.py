@@ -2,10 +2,10 @@ from typing import Optional
 
 import requests
 from fastapi import APIRouter, Form, HTTPException, status
-from src.applications.modules.grasping import main as grasping
-from src.utils.apps import App, AppRunningException, ctx_manager
-from src.utils.global_instances import sio as backend_sio_server
-from src.utils.state import alfred_state
+from applications.modules.grasping import main as grasping
+from utils.apps import App, AppRunningException, ctx_manager
+from utils.global_instances import sio as backend_sio_server
+from utils.state import alfred_state
 
 router = APIRouter(prefix="/grasping", tags=["Applications"])
 

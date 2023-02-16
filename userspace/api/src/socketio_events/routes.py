@@ -1,15 +1,17 @@
 from fastapi.logger import logger
-from src.utils.global_instances import sio
+
+from utils.global_instances import sio
+import socketio_events.emits as emits
 
 
 @sio.event
 def disconnect(sid):
-    logger.info("%s disconnected.", sid)
+    print(f"{sid} disconnected.")
 
 
 @sio.event
-def connect(sid, environ, auth):
-    logger.info("%s connected.", sid)
+async def connect(sid, environ, auth):
+    print(f"{sid} connected.")
 
 
 @sio.on("connect_error")

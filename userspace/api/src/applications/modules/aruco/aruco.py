@@ -1,16 +1,14 @@
+import applications.modules.aruco.aruco_utils.track_aruco as track_aruco
 import cv2
 import cv2.aruco as aruco
 import time
-import src.applications.modules.aruco.aruco_utils.track_aruco as track_aruco
 
+from typing import Any, List
 
+from applications.modules.aruco import calibration_cam
 from libalfred import AlfredAPI
 from libalfred.utils.camera_stream import StreamCamThread
 from libalfred.utils.show_frame_stream import ShowThread
-from src.applications.modules.aruco import calibration_cam
-
-from typing import Any,List
-
 
 # termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -52,7 +50,8 @@ def stream_aruco(aruco_dict_type: aruco = aruco.DICT_6X6_250) -> None:
             break
 
         rvec, tvec, corners, ids, _ = track_aruco.aruco_detect(
-            frame, aruco_dict, parameters, mtx, dist)
+            frame, aruco_dict, parameters, mtx, dist
+        )
 
         show_cam_thread.update(frame, rvec, tvec, corners, ids)
         time.sleep(0.03)

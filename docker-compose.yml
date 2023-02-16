@@ -65,7 +65,7 @@ services:
       - controller-tier
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      # - ./userspace/api/src:/alfred/api/src  # for dev
+      - ./userspace/api/src:/alfred/api/src
 
   services:
     image: alfred-services:dev
@@ -106,7 +106,7 @@ services:
       - REDIS_PASSWORD=
       - REDIS_CHANNEL=command-robot
 
-      - MOVE_ARM=${ALFRED_MOVE_ARM:-False}
+      - MOVE_ARM=${ALFRED_MOVE_ARM:-True}
       - ARM_IP=172.21.72.200
     networks:
       - server-tier
@@ -128,14 +128,14 @@ services:
       - REDIS_PASSWORD=
 
       - BLTOUCH_BAUDRATE=9600
-      - BLTOUCH_SERIAL_PORT=/dev/ttyACM0
+      - BLTOUCH_SERIAL_PORT=/dev/ttyACM1
       - FSR_BAUDRATE=9600
       - FSR_SERIAL_PORT=/dev/ttyACM1
 
       - AZURE_KEY=c649166d6bb04adfb9407ba859bc8f65
       - AZURE_REGION=westeurope
       - AZURE_LANG=fr-FR,en-US
- 
+
     networks:
       - database-tier
 

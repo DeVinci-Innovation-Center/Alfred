@@ -29,7 +29,6 @@ COPY test test
 COPY entrypoint.sh /entrypoint.sh
 
 
-
 # CMD ["tail", "-f", "/dev/null"]
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 # reload flag required because of python multiprocessing for some reason

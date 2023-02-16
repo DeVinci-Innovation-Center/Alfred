@@ -11,7 +11,8 @@ lock = threading.Lock()
 
 
 # base time + time added by num_points + pause between angles
-def time_to_move(x): return 0.2 + 10.0 / x - (x - 10) / 7 + 0.5
+def time_to_move(x):
+    return 0.2 + 10.0 / x - (x - 10) / 7 + 0.5
 
 
 # TODO: exploration / tracking coefficients: moves faster when exploration is high, looks for item for longer if high
@@ -20,6 +21,7 @@ def time_to_move(x): return 0.2 + 10.0 / x - (x - 10) / 7 + 0.5
 
 class ScannerThread(threading.Thread):
     """Thread to scan the environment with xArm"""
+
     arm: AlfredAPI
 
     flag: threading.Event
@@ -47,8 +49,7 @@ class ScannerThread(threading.Thread):
 
         min_to_max_pass_points = np.linspace(min_angle, max_angle, num_points)
         self.loop = cycle(
-            list(min_to_max_pass_points[1:-1]) +
-            list(min_to_max_pass_points[::-1])
+            list(min_to_max_pass_points[1:-1]) + list(min_to_max_pass_points[::-1])
         )
 
         for i in range(math.floor((self.num_points * 2 - 2) * 3 / 4)):
@@ -63,7 +64,8 @@ class ScannerThread(threading.Thread):
                 time.sleep(0.1)
                 continue
             self.arm.set_servo_angle(
-                servo_id=5, angle=self.start_pose_degrees[4], is_radian=False, wait=True)
+                servo_id=5, angle=self.start_pose_degrees[4], is_radian=False, wait=True
+            )
             if self._stop.is_set():
                 self.return_sequence()
                 break
@@ -80,7 +82,8 @@ class ScannerThread(threading.Thread):
         self.flag.set()
         print("Getting into position!")
         self.arm.set_servo_angle(
-            angle=self.start_pose_degrees, is_radian=False, wait=True)
+            angle=self.start_pose_degrees, is_radian=False, wait=True
+        )
         print("Got into position!")
         self.flag.clear()
 
@@ -89,7 +92,8 @@ class ScannerThread(threading.Thread):
         self.flag.set()
         print("Executing return sequence!")
         self.arm.set_servo_angle(
-            angle=self.start_pose_degrees, is_radian=False, wait=True)
+            angle=self.start_pose_degrees, is_radian=False, wait=True
+        )
         print("Finished return sequence")
         self.flag.clear()
 

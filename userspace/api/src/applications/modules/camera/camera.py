@@ -1,13 +1,12 @@
 """Camera module: functions for handling the camera."""
 
-import json
+import cv2
 import pickle
 import time
 
-import cv2
-
-from src.utils.global_instances import rc
 from typing import Any
+
+from utils.global_instances import rc
 
 WIN_NAME = "Camera feed"
 

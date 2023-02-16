@@ -1,25 +1,38 @@
 import numpy as np
 
-from typing import Tuple
+from typing import List, Tuple
 
 from libalfred import AlfredAPI
 
-def get_xy_diff(corner: np.array, x_center: float = 320., y_center: float = 240., tolerance_diff: float = 10.) -> Tuple[float, float]:
+
+def center_of_gravity(corners: List[np.array]) -> Tuple[int, int]:
+    x_list = [corner[0][0][0] for corner in corners]
+    y_list = [corner[0][0][1] for corner in corners]
+    _len = len(corners)
+    return (sum(x_list) / _len, sum(y_list) / _len)
+
+
+def get_xy_diff(
+    corners: List[np.array],
+    x_center: float = 320.0,
+    y_center: float = 240.0,
+    tolerance_diff: float = 10.0,
+) -> Tuple[float, float]:
     """Set the angle for the robot
 
     :param corner: top-left corner of the ArUco marker
-    :type corner: np.array
+    :type corner: List[np.array]
     :return: angles for x,y to move
     :rtype: Tuple[float,float]
     """
-    angle = 2.
-    x, y = corner[0][0]
+    angle = 2.0
+    x, y = center_of_gravity(corners)
     x_angle, y_angle = 0, 0
     x_center, y_center = 320, 240
     tolerance_diff = 10  # tolerance for the centering
 
-    x_is_centered = (-tolerance_diff < x-x_center < +tolerance_diff)
-    y_is_centered = (-tolerance_diff < y - y_center < +tolerance_diff)
+    x_is_centered = -tolerance_diff < x - x_center < +tolerance_diff
+    y_is_centered = -tolerance_diff < y - y_center < +tolerance_diff
     if not (x_is_centered & y_is_centered):
         if not x_is_centered:
             x_angle = angle if x < x_center else -angle
@@ -30,7 +43,9 @@ def get_xy_diff(corner: np.array, x_center: float = 320., y_center: float = 240.
         return None
 
 
-def center_camera(arm: AlfredAPI, xy_diff: np.array = np.array([0, 0]), precision: int = 1):
+def center_camera(
+    arm: AlfredAPI, xy_diff: np.array = np.array([0, 0]), precision: int = 1
+):
     """Center the camera depending on xy_diff
 
     :param arm: xArm

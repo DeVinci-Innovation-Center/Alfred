@@ -1,11 +1,8 @@
 import signal
 import sys
 import time
-from math import *
-from os import wait
-from queue import Queue
 
-import numpy as np
+from math import *
 from xarm.wrapper import XArmAPI
 
 VIDEO_INDEX = 4

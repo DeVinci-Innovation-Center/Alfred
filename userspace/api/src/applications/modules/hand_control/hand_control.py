@@ -1,12 +1,12 @@
-import json
-from typing import Any
-
 import cv2
+import json
 import numpy as np
 import xarm_hand_control.processing.process as xhcpp
-from src.utils.global_instances import rc
+
+from typing import Any
 
 from libalfred.utils import Command
+from utils.global_instances import rc
 
 
 def send_command(command: Command):
